@@ -5,11 +5,12 @@
         <span style="font-size: 1.2rem" v-if="parte != 3"
           >Agora, preencha o formulário solicitando visita ao imóvel
           {{ user && user.imovelRef ? user.imovelRef : "" }} da imobiliária
-          {{ cliente }}</span
+          {{ cliente && cliente.nome ? cliente.nome : "" }}.</span
         >
         <span style="font-size: 1.2rem" v-else-if="parte == 3">
-          Estamos quasa finalizando. Para aumentarmos a segurança da sua visita,
-          precisamos que valide seu documento de identificação (RG ou CNH)
+          Estamos quasa finalizando. <br />Para aumentarmos a segurança da sua
+          visita, precisamos que valide seu documento de identificação (RG ou
+          CNH)
         </span>
       </div>
       <div v-else>
@@ -139,7 +140,7 @@
               class="col-6"
               label="Próximo"
               color="positive"
-              @click="parte += 1"
+              @click="utilizarDocumentos ? (parte += 1) : (parte += 2)"
             />
             <q-btn
               outline
@@ -151,7 +152,7 @@
           </q-btn-group>
         </div>
       </div>
-      <div v-show="parte == 2" class="full-width">
+      <div v-show="parte == 2 && utilizarDocumentos" class="full-width">
         <div class="full-width q-mb-xs">
           <div class="full-width text-left" style="font-size: 1rem">
             <span
@@ -229,30 +230,39 @@
           <q-btn-group push flat unelevated class="full-width row">
             <q-btn
               class="col-6"
-              label="Enviar"
-              type="submit"
+              label="Revisar"
               color="positive"
+              @click="parte += 1"
             />
             <q-btn
-              v-if="parte == 1"
-              outline
-              label="Limpar"
-              type="reset"
-              color="secondary"
-              class="q-ml-sm col-6"
-            />
-            <q-btn
-              v-else
               outline
               label="Voltar"
               color="secondary"
-              class="q-ml-sm col-6"
+              class="col-6"
               @click="parte -= 1"
             />
           </q-btn-group>
         </div>
       </div>
-      <div v-if="parte == 3" class="full-width"></div>
+      <div v-if="parte == 3" class="full-width flex flex-center">
+        <div>
+          <span>Nome: {{ user.name }}</span>
+          <span>Telefone: {{ user.phone }}</span>
+          <span>E-mail: {{ user.email }}</span>
+          <span>CPF: {{ user.cpf }}</span>
+          <span>Data da vistia: {{ parseData }}</span>
+        </div>
+        <q-btn-group push flat unelevated class="full-width row">
+          <q-btn class="col-6" label="Enviar" type="submit" color="positive" />
+          <q-btn
+            outline
+            label="Voltar"
+            color="secondary"
+            class="col-6"
+            @click="utilizarDocumentos ? (parte -= 1) : (parte -= 2)"
+          />
+        </q-btn-group>
+      </div>
     </q-form>
   </q-page>
 </template>
@@ -285,18 +295,24 @@ export default defineComponent({
       cliente: "",
       type: "",
       parte: 1,
-      timeStepMin: 15,
       fotoFrente: [],
       fotoSelfie: [],
       fotoVerso: [],
       events: [],
-      calendarLoading: false,
-      modalCamera: false,
-      noWeekend: false,
-      noSunday: false,
       inForms: false,
       regexp: /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?$/i,
       user: { name: "", phone: "", cpf: "", email: "", terms: true },
+      /* Opções calendario */
+      utilizarDocumentos: true,
+      verificarDocumentos: true,
+      aprovarVisita: false,
+      /* Opções visitas */
+      noWeekend: false,
+      feriado: false,
+      horaInicial: 6,
+      horaFinal: 19,
+      noSunday: false,
+      timeStepMin: 15,
     };
   },
   computed: {
@@ -320,12 +336,11 @@ export default defineComponent({
       return map;
     },
     intervalStart() {
-      let horas = 6;
       let intervalo = 60 / this.timeStepMin;
-      return horas * intervalo;
+      return this.horaInicial * intervalo;
     },
     intervalCount() {
-      let horas = 14;
+      let horas = this.horaFinal - this.horaInicial;
       let intervalo = 60 / this.timeStepMin;
       return horas * intervalo;
     },
@@ -353,6 +368,24 @@ export default defineComponent({
     }
   },
   methods: {
+    parseData() {
+      console.log("parseData ", this.user);
+      if (
+        this.user.visita &&
+        this.user.visita.validadeInicial &&
+        this.user.visita.validadeFinal
+      ) {
+        const inicial = moment(
+          new Date(this.user.visita.validadeInicial)
+        ).format("DD/MM/YY HH:mm");
+        const final = moment(new Date(this.user.visita.validadeFinal)).format(
+          "HH:mm"
+        );
+
+        return inicial + " " + final;
+      }
+      return "";
+    },
     badgeClasses(event, type) {
       const isHeader = type === "header";
       return {
@@ -455,20 +488,13 @@ export default defineComponent({
       });
     },
     calendarNext() {
-      this.calendarLoading = true;
       this.$refs.calendar.next();
-      this.calendarLoading = false;
     },
     calendarToday() {
       this.$refs.calendar.moveToToday();
     },
     calendarPrev() {
-      this.calendarLoading = true;
       this.$refs.calendar.prev();
-      this.calendarLoading = false;
-    },
-    display(ao) {
-      console.log(ao);
     },
     onSubmit() {
       if (!this.fotoFrente) {
@@ -487,6 +513,9 @@ export default defineComponent({
         Notify.create({ message: "Para prosseguir, aceite os termos de uso" });
         return;
       }
+
+      if (this.verificarDocumentos) console.log("verificar");
+      if (this.aprovarVisita) console.log("enviar para aprovar");
     },
     open(link, opt) {
       opt = opt ? opt : "";
@@ -497,10 +526,6 @@ export default defineComponent({
     },
     onValError(ref) {
       this.parte = 1;
-    },
-    takePicture(photo) {
-      this.user[this.type] = photo;
-      this.modalCamera = false;
     },
     verificarCPF(valor) {
       if (valor) {
@@ -542,6 +567,41 @@ export default defineComponent({
           });
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
+            if (this.cliente && this.cliente.preferenciaUsuario) {
+              this.utilizarDocumentos = this.cliente.preferenciaUsuario
+                .utilizarDocumentos
+                ? this.cliente.preferenciaUsuario.utilizarDocumentos
+                : true;
+              this.aprovarVisita = this.cliente.preferenciaUsuario.aprovarVisita
+                ? this.cliente.preferenciaUsuario.aprovarVisita
+                : false;
+              this.verificarDocumentos = this.cliente.preferenciaUsuario
+                .verificarDocumentos
+                ? this.cliente.preferenciaUsuario.verificarDocumentos
+                : true;
+            }
+            if (this.cliente && this.cliente.preferenciaVisita) {
+              this.noWeekend = this.cliente.preferenciaVisita.finalDeSemana
+                ? !this.cliente.preferenciaVisita.finalDeSemana
+                : true;
+              // TODO: implementar lógica do feriado
+              this.feriado = this.cliente.preferenciaVisita.feriado
+                ? this.cliente.preferenciaVisita.feriado
+                : false;
+              this.timeStepMin = this.cliente.preferenciaVisita.intervalo
+                ? this.cliente.preferenciaVisita.intervalo
+                : 15;
+              if (this.cliente.preferenciaVisita.horaInicial) {
+                this.horaInicial = this.cliente.preferenciaVisita.horaInicial
+                  .toString()
+                  .split(":")[0];
+              }
+              if (this.cliente.preferenciaVisita.horaFinal) {
+                this.horaFinal = this.cliente.preferenciaVisita.horaFinal
+                  .toString()
+                  .split(":")[0];
+              }
+            }
             this.events = response.data.horarios;
             this.formatData();
           } else {
