@@ -1,2 +1,3 @@
-export function someGetter (/* state */) {
+export function getParams(state) {
+  return state.params;
 }

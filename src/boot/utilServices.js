@@ -2,6 +2,11 @@ import { mapGetters } from "vuex";
 
 export default ({ app, router, store }) => {
   app.mixin({
+    computed: {
+      ...mapGetters({
+        getParams: "getParams",
+      }),
+    },
     methods: {
       async executeMethod(data, b, excluirAuthorization) {
         let response;
