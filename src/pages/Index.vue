@@ -2,11 +2,16 @@
   <q-page class="flex-center column">
     <div class="text-center q-my-xl" style="width: 70vw">
       <div v-if="inForms">
-        <span style="font-size: 1.2rem" v-if="parte != 3"
-          >Agora, preencha o formulário solicitando visita ao imóvel
+        <span style="font-size: 1.2rem" v-if="parte != 3">
+          Agora, preencha o formulário solicitando visita ao imóvel
           {{ user && user.imovelRef ? user.imovelRef : "" }} da imobiliária
-          {{ cliente && cliente.nome ? cliente.nome : "" }}.</span
-        >
+          {{ cliente && cliente.nome ? cliente.nome : "" }}.<br />
+          {{
+            isRegistredUser
+              ? "Caso tenha algum campo faltando, por favor, preencha-o"
+              : ""
+          }}
+        </span>
         <span style="font-size: 1.2rem" v-else-if="parte == 3">
           Estamos quasa finalizando. <br />Para aumentarmos a segurança da sua
           visita, precisamos que valide seu documento de identificação (RG ou
@@ -87,14 +92,6 @@
       <div v-show="parte == 1" class="full-width">
         <q-input
           class="parte1 full-width"
-          v-model="user.name"
-          label="Seu nome *"
-          hint="Nome e sobrenome"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
-        />
-        <q-input
-          class="parte1 full-width"
           type="tel"
           v-model="user.phone"
           label="Seu Telefone *"
@@ -102,10 +99,22 @@
           lazy-rules
           :mask="phoneMask"
           :debounce="1000"
+          @change="getUser()"
           :rules="[
             (val) =>
               (val !== null && val !== '') || 'Por favor, insira seu telefone.',
+            (val) =>
+              (val && val.length == 15) ||
+              'Por favor, insira seu telefone no formato desejado.',
           ]"
+        />
+        <q-input
+          class="parte1 full-width"
+          v-model="user.name"
+          label="Seu nome *"
+          hint="Nome e sobrenome"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
         />
         <q-input
           class="parte1 full-width"
@@ -131,16 +140,33 @@
           :rules="[
             (val) =>
               (val !== null && val !== '') || 'Por favor, insira seu E-mail.',
-            (val) => regexp.test(val) || 'Insira um e-mail válido',
+            (val) => verificarEmail(val) || 'Insira um e-mail válido',
           ]"
         />
         <div class="full-width q-mt-xl">
+          <q-btn-group push flat class="row full-width justify-center q-mb-sm">
+            <q-btn
+              class="col-8"
+              label="Escolher outro horário"
+              outline
+              color="primary"
+              @click="
+                inForms = false;
+                events.pop();
+              "
+            />
+          </q-btn-group>
+
           <q-btn-group push flat unelevated class="full-width row">
             <q-btn
               class="col-6"
               label="Próximo"
               color="positive"
-              @click="utilizarDocumentos ? (parte += 1) : (parte += 2)"
+              @click="
+                utilizarDocumentos && !user.hasDocs
+                  ? (parte += 1)
+                  : (parte += 2)
+              "
             />
             <q-btn
               outline
@@ -219,13 +245,6 @@
             </div>
           </div>
         </div>
-        <div>
-          <span>
-            Ao clicar em enviar, declaro que li e concordo com os
-            <a href="https://chavi.com.br/termos">termos de uso e priacidade</a
-            >.
-          </span>
-        </div>
         <div class="full-width q-mt-xl">
           <q-btn-group push flat unelevated class="full-width row">
             <q-btn
@@ -245,21 +264,71 @@
         </div>
       </div>
       <div v-if="parte == 3" class="full-width flex flex-center">
-        <div>
-          <span>Nome: {{ user.name }}</span>
-          <span>Telefone: {{ user.phone }}</span>
-          <span>E-mail: {{ user.email }}</span>
-          <span>CPF: {{ user.cpf }}</span>
-          <span>Data da vistia: {{ parseData }}</span>
+        <div class="column" style="font-size: 1.2rem">
+          <div>
+            <span>Nome: </span>
+            <strong>{{ user.name }}</strong>
+          </div>
+          <div>
+            <span>Telefone: </span>
+            <strong>{{ user.phone }}</strong>
+          </div>
+          <div>
+            <span>E-mail: </span>
+            <strong>{{ user.email }}</strong>
+          </div>
+          <div>
+            <span>CPF: </span>
+            <strong>{{ user.cpf }}</strong>
+          </div>
+          <div>
+            <span>Data da vistia: </span>
+            <strong>{{ parseData() }}</strong>
+          </div>
+          <div v-if="!user.hasDocs">
+            <!-- TODO: Utlizar FileReade.readArrayBuffer para conseguir o endereço local da imagem -->
+            <q-img
+              v-if="fotoFrente"
+              :src="fotoFrente"
+              spinner-color="white"
+              style="height: 140px; max-width: 150px"
+            />
+            <q-img
+              v-if="fotoAtras"
+              :src="fotoAtras"
+              spinner-color="white"
+              style="height: 140px; max-width: 150px"
+            />
+            <q-img
+              v-if="fotoSelfie"
+              :src="fotoSelfie"
+              spinner-color="white"
+              style="height: 140px; max-width: 150px"
+            />
+          </div>
         </div>
-        <q-btn-group push flat unelevated class="full-width row">
-          <q-btn class="col-6" label="Enviar" type="submit" color="positive" />
+        <div class="text-h8 q-mt-md">
+          <span>
+            Ao clicar em enviar, declaro que li e concordo com os
+            <a href="https://chavi.com.br/termos">termos de uso e priacidade</a
+            >.
+          </span>
+        </div>
+        <q-btn-group push flat unelevated class="full-width row q-mt-md">
+          <q-btn
+            class="col-6 q-pr-sm"
+            label="Enviar"
+            type="submit"
+            color="positive"
+          />
           <q-btn
             outline
             label="Voltar"
             color="secondary"
-            class="col-6"
-            @click="utilizarDocumentos ? (parte -= 1) : (parte -= 2)"
+            class="col-6 q-pl-sm"
+            @click="
+              utilizarDocumentos && !user.hasDocs ? (parte -= 1) : (parte -= 2)
+            "
           />
         </q-btn-group>
       </div>
@@ -291,17 +360,25 @@ export default defineComponent({
   components: { "q-calendar": QCalendarDay, "navigation-bar": NavigatioBar },
   data() {
     return {
-      selectedDate: "",
-      cliente: "",
-      type: "",
+      inForms: false,
       parte: 1,
+      selectedDate: "",
+      type: "",
+      cliente: {},
+      events: [],
+      /* Info User */
       fotoFrente: [],
       fotoSelfie: [],
       fotoVerso: [],
-      events: [],
-      inForms: false,
-      regexp: /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?$/i,
-      user: { name: "", phone: "", cpf: "", email: "", terms: true },
+      user: {
+        name: "",
+        phone: "",
+        cpf: "",
+        email: "",
+        terms: true,
+        hasDocs: false,
+      },
+      isRegistredUser: false,
       /* Opções calendario */
       utilizarDocumentos: true,
       verificarDocumentos: true,
@@ -369,20 +446,13 @@ export default defineComponent({
   },
   methods: {
     parseData() {
-      console.log("parseData ", this.user);
-      if (
-        this.user.visita &&
-        this.user.visita.validadeInicial &&
-        this.user.visita.validadeFinal
-      ) {
-        const inicial = moment(
-          new Date(this.user.visita.validadeInicial)
-        ).format("DD/MM/YY HH:mm");
-        const final = moment(new Date(this.user.visita.validadeFinal)).format(
-          "HH:mm"
+      if (this.user.validadeInicial && this.user.validadeFinal) {
+        const inicial = moment(new Date(this.user.validadeInicial)).format(
+          "DD/MM/YY HH:mm"
         );
+        const final = moment(new Date(this.user.validadeFinal)).format("HH:mm");
 
-        return inicial + " " + final;
+        return inicial + " - " + final;
       }
       return "";
     },
@@ -422,7 +492,7 @@ export default defineComponent({
       return events;
     },
     onTimeClick({ event, scope }) {
-      const hora = scope.timestamp.hour;
+      let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
 
       const now = moment().format("HH:mm").split(":");
@@ -430,9 +500,13 @@ export default defineComponent({
         scope.timestamp.past ||
         (parseInt(now[0]) == hora && minutos < parseInt(now[1]))
       ) {
-        Notify.create({
-          message: "Por favor, selecione um horário que ainda não passou.",
-          type: "warning",
+        Dialog.create({
+          title:
+            "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+          message:
+            "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário que ainda não passou.</span>",
+          html: true,
+          ok: "Beleza",
         });
         return;
       }
@@ -443,10 +517,10 @@ export default defineComponent({
       const horario =
         hora.toString() +
         ":" +
-        (minutos - 15 == 60 || minutos - 15 == 0
-          ? "00"
-          : minutos - 15
-        ).toString();
+        (minutos - 15 == 0 ? "00" : minutos - 15).toString();
+
+      if (minutos == 60) hora = parseInt(hora) + 1;
+
       const horarioNormal =
         hora.toString() +
         ":" +
@@ -476,10 +550,12 @@ export default defineComponent({
           textColor: "text-white",
         };
         this.events.push(visita);
-        this.user.visita = {
-          validadeInicial: new Date(scope.timestamp.date + " " + horario),
-          validadeFinal: new Date(scope.timestamp.date + " " + horarioNormal),
-        };
+        this.user.validadeInicial = new Date(
+          scope.timestamp.date + " " + horario
+        ).getTime();
+        this.user.validadeFinal = new Date(
+          scope.timestamp.date + " " + horarioNormal
+        ).getTime();
         Loading.show();
         setTimeout(() => {
           this.inForms = true;
@@ -496,16 +572,28 @@ export default defineComponent({
     calendarPrev() {
       this.$refs.calendar.prev();
     },
-    onSubmit() {
-      if (!this.fotoFrente) {
+    async onSubmit() {
+      if (
+        this.fotoFrente &&
+        this.fotoFrente.length &&
+        this.fotoFrente.length == 0
+      ) {
         Notify.create({ message: "Insira a foto da frente do seu documento" });
         return;
       }
-      if (!this.fotoVerso) {
+      if (
+        this.fotoVerso &&
+        this.fotoVerso.length &&
+        this.fotoVerso.length == 0
+      ) {
         Notify.create({ message: "Insira a foto do verso do seu documento" });
         return;
       }
-      if (!this.fotoSelfie) {
+      if (
+        this.fotoSelfie &&
+        this.fotoSelfie.length &&
+        this.fotoSelfie.length == 0
+      ) {
         Notify.create({ message: "Insira uma selfie sua" });
         return;
       }
@@ -514,8 +602,75 @@ export default defineComponent({
         return;
       }
 
-      if (this.verificarDocumentos) console.log("verificar");
-      if (this.aprovarVisita) console.log("enviar para aprovar");
+      Loading.show({ message: "Gerando a visita..." });
+      // Enviar visita
+
+      let request = {
+        url: "Visitas/validarVisita",
+        method: "post",
+        data: this.user,
+      };
+
+      if (!this.user.hasDocs) {
+        this.user.fotoFrente = this.fotoFrente;
+        this.user.fotoAtras = this.fotoVerso;
+        this.user.fotoSelfie = this.fotoSelfie;
+
+        const blobFrente = {
+          blob: new Blob([this.user.fotoFrente]),
+          name: this.user.fotoFrente.name,
+        };
+
+        const blobAtras = {
+          blob: new Blob([this.user.fotoAtras]),
+          name: this.user.fotoAtras.name,
+        };
+        const blobSelfie = {
+          blob: new Blob([this.user.fotoSelfie]),
+          name: this.user.fotoSelfie.name,
+        };
+
+        let d = { ...this.user };
+        let formData = new FormData();
+        Object.keys(d).forEach((key) => formData.append(key, d[key]));
+        formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
+        formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
+        formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
+
+        request.headers = { "Content-Type": "multipart/form-data" };
+        request.data = formData;
+      }
+      //const response = {};
+      const response = await this.executeMethod(request, false);
+      Loading.hide();
+      if (response && response.status == 200) {
+        console.log(response);
+        const message = response.data.text;
+
+        Dialog.create({
+          title:
+            '<span class="text-primary" style="font-size:1.2rem">Finalizada</span>',
+          message: '<span style="font-size:1.0rem"> ' + message + " </span>",
+          ok: "Entendido",
+          html: true,
+          persistent: true,
+        }).onOk(() => {
+          //TODO: retornar para pag. da imobiliária
+          console.log("retornar para pagina da imobiliária");
+        });
+      } else if (response && response.status) {
+        const message = response.data;
+        Dialog.create({
+          title:
+            '<span class="text-primary" style="font-size:1.2rem">Ops, Aconteceu algo inesperado</span>',
+          message:
+            '<span style="font-size:1.0rem"> ' +
+            message +
+            "<br/> Revise os dados e tente novamente. </span>",
+          ok: "Entendido",
+          html: true,
+        });
+      }
     },
     open(link, opt) {
       opt = opt ? opt : "";
@@ -526,6 +681,11 @@ export default defineComponent({
     },
     onValError(ref) {
       this.parte = 1;
+    },
+    verificarEmail(valor) {
+      const regexp = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?/i;
+      const regexp2 = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]/i;
+      return regexp.test(valor) || regexp2.test(valor);
     },
     verificarCPF(valor) {
       if (valor) {
@@ -630,6 +790,32 @@ export default defineComponent({
           });
         }
         this.events = optionsOff;
+      }
+    },
+    async getUser() {
+      if (this.user && this.user.phone && this.user.phone.length == 15) {
+        Loading.show({ message: "Verificando cadastro do usuário" });
+        const response = await this.executeMethod(
+          {
+            url: "Usuarios/estaRegistrado",
+            method: "get",
+            params: {
+              telefone: this.user.phone,
+            },
+          },
+          false
+        );
+        Loading.hide();
+        this.isRegistredUser =
+          response.data && response.data.exists ? response.data.exists : false;
+        if (response.status == 200 || response.status == 304) {
+          this.user.name = response.data.user.nome;
+          this.user.cpf = response.data.user.cpf;
+          this.user.email = response.data.user.email;
+          this.user.hasDocs = response.data.user.hasDocs;
+        } else {
+          this.isRegistredUser = false;
+        }
       }
     },
   },
