@@ -5,6 +5,7 @@ export default ({ app, router, store }) => {
     computed: {
       ...mapGetters({
         getParams: "getParams",
+        getLogin: "getLogin",
       }),
     },
     methods: {

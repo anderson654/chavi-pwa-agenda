@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex-center column">
-    <div class="text-center q-my-xl" style="width: 70vw">
+    <div class="text-center q-my-lg" style="width: 70vw">
       <div v-if="inForms">
         <span style="font-size: 1.4rem" v-if="parte == 1">
           Por segundo, insira seu nome e telefone.<br />
@@ -16,15 +16,22 @@
               : ""
           }}
         </span>
-        <span style="font-size: 1.4rem" v-if="parte == 3">
-          Estamos quasa finalizando. <br />Para aumentarmos a segurança da sua
-          visita, precisamos que valide seu documento de identificação (RG ou
-          CNH)
-        </span>
-        <span style="font-size: 1.4rem" v-if="parte == 4">
-          Pronto! Agora é só revisar os dados e enviar a solicitação de
-          agendamento.
-        </span>
+        <div v-if="parte == 3">
+          <span style="font-size: 1.4rem">Estamos quase finalizando.</span
+          ><br />
+          <span style="font-size: 1.1rem"
+            >Para aumentarmos a segurança da sua visita, precisamos que valide
+            seu documento de identificação (RG ou CNH)</span
+          >
+        </div>
+        <div v-if="parte == 4">
+          <span style="font-size: 1.4rem" class="text-primary">Pronto!</span
+          ><br />
+          <span style="font-size: 1.2rem"
+            >Agora é só revisar os dados e enviar a solicitação de
+            agendamento.</span
+          >
+        </div>
       </div>
       <div v-else>
         <span style="font-size: 1.4rem">
@@ -41,74 +48,81 @@
           @next="calendarNext"
         />
       </div>
-      <div style="width: 100%" class="flex flex-center q-pa-md">
-        <q-calendar
-          ref="calendar"
-          weekday-align="left"
-          view="week"
-          locale="pt-br"
-          style="width: 50%"
-          cell-height="100px"
-          :weekdays="getWeekDisplay"
-          :hoverable="true"
-          :interval-minutes="timeStepMin"
-          :interval-start="intervalStart"
-          :interval-count="intervalCount"
-          :disabled-before="disabledBefore"
-          bordered
-          no-active-date
-          hour24-format
-          v-model="selectedDate"
-          @click-time="onTimeClick"
-        >
-          <template
-            #day-body="{
-              scope: { timestamp, timeStartPos, timeDurationHeight },
-            }"
+      <div class="flex flex-center q-pa-md">
+        <div style="width: 80%">
+          <q-calendar
+            ref="calendar"
+            weekday-align="left"
+            view="day"
+            locale="pt-br"
+            style="width: 100%"
+            cell-height="100px"
+            :weekdays="getWeekDisplay"
+            :hoverable="true"
+            :interval-minutes="timeStepMin"
+            :interval-start="intervalStart"
+            :interval-count="intervalCount"
+            :disabled-before="disabledBefore"
+            bordered
+            no-active-date
+            hour24-format
+            v-model="selectedDate"
+            @click-time="onTimeClick"
           >
-            <template v-if="true">
-              <template
-                v-for="(event, index) in getEvents(timestamp.date)"
-                :key="index"
-              >
-                <div
-                  v-if="event.time !== undefined"
-                  class="my-event"
-                  :class="badgeClasses(event, 'body')"
-                  :style="badgeStyles(event, timeStartPos, timeDurationHeight)"
+            <template
+              #day-body="{
+                scope: { timestamp, timeStartPos, timeDurationHeight },
+              }"
+            >
+              <template v-if="true">
+                <template
+                  v-for="(event, index) in getEvents(timestamp.date)"
+                  :key="index"
                 >
-                  <div class="title q-calendar__ellipsis">
-                    {{ event.title }}
-                    <q-tooltip>{{ event.time }}</q-tooltip>
+                  <div
+                    v-if="event.time !== undefined"
+                    class="my-event"
+                    :class="badgeClasses(event, 'body')"
+                    :style="
+                      badgeStyles(event, timeStartPos, timeDurationHeight)
+                    "
+                  >
+                    <div class="title q-calendar__ellipsis">
+                      {{ event.title }}
+                      <q-tooltip>{{ event.time }}</q-tooltip>
+                    </div>
                   </div>
-                </div>
+                </template>
               </template>
             </template>
-          </template>
-        </q-calendar>
+          </q-calendar>
+        </div>
       </div>
     </div>
     <q-form
       v-if="inForms"
       lang="pt-BR"
+      ref="forms"
       @submit="onSubmit"
       @reset="onReset"
       @validation-error="onValError"
-      class="q-gutter-md"
-      style="width: 60vw; max-width: 400px"
+      style="width: 90vw; max-width: 400px"
     >
       <div v-show="parte == 1" class="full-width">
         <q-input
-          class="parte1 full-width"
+          class="parte1 full-width text-h5"
+          label-color="primary"
+          style="font-size: 1.2rem"
           v-model="user.name"
           label="Seu nome *"
-          hint="Nome e sobrenome"
           lazy-rules
           :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
         />
         <q-input
           class="parte1 full-width"
           type="tel"
+          label-color="primary"
+          style="font-size: 1.2rem"
           v-model="user.phone"
           label="Seu Telefone *"
           hint="(41) 98888-8888"
@@ -120,12 +134,14 @@
               (val !== null && val !== '') || 'Por favor, insira seu telefone.',
             (val) =>
               (val && val.length == 15) ||
-              'Por favor, insira seu telefone no formato desejado.',
+              'Por favor, insira seu telefone no formato (41) 91122-3344.',
           ]"
         />
         <q-input
           class="parte1 full-width"
           type="tel"
+          label-color="primary"
+          style="font-size: 1.2rem"
           v-if="codeSent"
           v-model="user.codigoInput"
           label="Insira o Código aqui"
@@ -154,11 +170,14 @@
           class="parte1 full-width"
           type="tel"
           v-model="user.phone"
+          label-color="primary"
+          style="font-size: 1.2rem"
           label="Seu Telefone *"
           hint="(41) 98888-8888"
           lazy-rules
           :mask="phoneMask"
           readonly
+          clearable
           :debounce="1000"
           :rules="[
             (val) =>
@@ -170,18 +189,24 @@
         />
         <q-input
           class="parte1 full-width"
+          label-color="primary"
+          style="font-size: 1.2rem"
           v-model="user.name"
           label="Seu nome *"
           hint="Nome e sobrenome"
           lazy-rules
+          clearable
           :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
         />
         <q-input
           class="parte1 full-width"
           type="tel"
           v-model="user.cpf"
+          label-color="primary"
+          style="font-size: 1.2rem"
           label="Seu CPF *"
           lazy-rules
+          clearable
           mask="###.###.###-##"
           :debounce="1000"
           :rules="[
@@ -192,10 +217,13 @@
         />
         <q-input
           class="parte1 full-width"
-          type="tel"
+          type="email"
           v-model="user.email"
+          label-color="primary"
+          style="font-size: 1.2rem"
           label="Seu E-mail *"
           lazy-rules
+          clearable
           :debounce="1000"
           :rules="[
             (val) =>
@@ -204,9 +232,10 @@
           ]"
         />
         <div class="full-width q-mt-xl">
-          <q-btn-group push flat class="row full-width justify-center q-mb-sm">
+          <q-btn-group push flat class="row full-width justify-center q-mb-xs">
             <q-btn
-              class="col-8"
+              class="col-10"
+              style="font-size: 0.7rem"
               label="Escolher outro horário"
               outline
               color="primary"
@@ -216,31 +245,26 @@
               "
             />
           </q-btn-group>
-
           <q-btn-group push flat unelevated class="full-width row">
-            <q-btn
-              class="col-6 q-mr-xs"
-              label="Próximo"
-              color="positive"
-              @click="
-                utilizarDocumentos && !user.hasDocs
-                  ? (parte += 1)
-                  : (parte += 2)
-              "
-            />
             <q-btn
               outline
               label="Limpar"
               type="reset"
               color="secondary"
-              class="q-ml-xs col-6"
+              class="q-mr-xs col-6"
+            />
+            <q-btn
+              class="col-6 q-ml-xs"
+              label="Próximo"
+              color="positive"
+              @click="nextStep()"
             />
           </q-btn-group>
         </div>
       </div>
-      <div v-show="parte == 3 && utilizarDocumentos" class="full-width">
-        <div class="full-width q-mb-xs">
-          <div class="full-width text-left" style="font-size: 1rem">
+      <div v-show="parte == 3 && utilizarDocumentos" class="full-width q-mt-lg">
+        <div class="full-width">
+          <div class="full-width text-center" style="font-size: 1.1rem">
             <span
               ><strong>Primeiro</strong>, tire ou selecione uma
               <strong>foto frontal</strong> seu documento de identificação</span
@@ -253,6 +277,7 @@
                 accept="image/*"
                 clearable
                 borderless
+                label-color="primary"
                 label="Anexar Foto Frontal"
               >
                 <template v-slot:prepend>
@@ -261,7 +286,7 @@
               </q-file>
             </div>
           </div>
-          <div class="full-width text-left q-mt-md" style="font-size: 1rem">
+          <div class="full-width q-mt-md text-center" style="font-size: 1.1rem">
             <span
               ><strong>Segundo</strong>, tire ou selecione uma
               <strong>foto do verso</strong> do seu documento de
@@ -275,6 +300,7 @@
                 accept="image/*"
                 clearable
                 borderless
+                label-color="primary"
                 label="Anexar Foto do Verso"
               >
                 <template v-slot:prepend>
@@ -283,7 +309,7 @@
               </q-file>
             </div>
           </div>
-          <div class="full-width text-left q-mt-md" style="font-size: 1rem">
+          <div class="full-width text-center q-mt-md" style="font-size: 1.1rem">
             <span
               ><strong>Terceiro</strong>, tire ou selecione uma
               <strong>selfie</strong> para comparar com seu documento</span
@@ -296,6 +322,7 @@
                 accept="image/*"
                 clearable
                 borderless
+                label-color="primary"
                 label="Anexar Selfie"
               >
                 <template v-slot:prepend>
@@ -305,20 +332,20 @@
             </div>
           </div>
         </div>
-        <div class="full-width q-mt-xl">
+        <div class="full-width q-mt-sm q-mb-md">
           <q-btn-group push flat unelevated class="full-width row">
-            <q-btn
-              class="col-6 q-mr-xs"
-              label="Revisar"
-              color="positive"
-              @click="parte += 1"
-            />
             <q-btn
               outline
               label="Voltar"
               color="secondary"
-              class="col-6 q-ml-xs"
+              class="col-6 q-mr-xs"
               @click="parte -= 1"
+            />
+            <q-btn
+              class="col-6 q-ml-xs"
+              label="Revisar"
+              color="positive"
+              @click="parte += 1"
             />
           </q-btn-group>
         </div>
@@ -335,7 +362,17 @@
           </div>
           <div class="row">
             <div class="col-5">E-mail:</div>
-            <div class="col-7 text-bold">{{ user.email }}</div>
+            <div
+              class="col-7 text-bold"
+              style="
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                hyphens: auto;
+                white-space: normal;
+              "
+            >
+              {{ user.email }}
+            </div>
           </div>
           <div class="row">
             <div class="col-5">CPF:</div>
@@ -345,50 +382,59 @@
             <div class="col-5">Data da vistia:</div>
             <div class="col-7 text-bold">{{ parseData() }}</div>
           </div>
-          <div v-if="!user.hasDocs">
-            <!-- TODO: Utlizar FileReade.readArrayBuffer para conseguir o endereço local da imagem -->
-            <q-img
-              v-if="fotoFrente"
-              :src="fotoFrente"
-              spinner-color="white"
-              style="height: 140px; max-width: 150px"
-            />
-            <q-img
-              v-if="fotoAtras"
-              :src="fotoAtras"
-              spinner-color="white"
-              style="height: 140px; max-width: 150px"
-            />
-            <q-img
-              v-if="fotoSelfie"
-              :src="fotoSelfie"
-              spinner-color="white"
-              style="height: 140px; max-width: 150px"
-            />
+          <div v-if="!user.hasDocs" class="row q-mt-md">
+            <!-- TODO: Utlizar FileReader.readArrayBuffer para conseguir o endereço local da imagem -->
+            <div class="col-5">Foto Frente:</div>
+            <div class="col-7">
+              <q-img
+                v-if="fotoFrente"
+                :src="getFotoFrente"
+                spinner-color="white"
+                style="height: 140px; max-width: 150px"
+              />
+            </div>
+            <div class="col-5 q-my-md">Foto Verso:</div>
+            <div class="col-7 q-my-md">
+              <q-img
+                v-if="fotoVerso"
+                :src="getFotoAtras"
+                spinner-color="white"
+                style="height: 140px; max-width: 150px"
+              />
+            </div>
+            <div class="col-5">Foto Selfie:</div>
+            <div class="col-7">
+              <q-img
+                v-if="fotoSelfie"
+                :src="getFotoSelfie"
+                spinner-color="white"
+                style="height: 140px; max-width: 150px"
+              />
+            </div>
           </div>
         </div>
-        <div class="text-h8 q-mt-md">
+        <div class="text-h8 q-mt-md text-justify">
           <span>
             Ao clicar em enviar, declaro que li e concordo com os
             <a href="https://chavi.com.br/termos">termos de uso e priacidade</a
             >.
           </span>
         </div>
-        <q-btn-group push flat unelevated class="full-width row q-mt-md">
-          <q-btn
-            class="col-6 q-mr-sm"
-            label="Enviar"
-            type="submit"
-            color="positive"
-          />
+        <q-btn-group push flat unelevated class="full-width row q-my-md">
           <q-btn
             outline
             label="Voltar"
             color="secondary"
-            class="col-6 q-ml-sm"
+            class="col-6 q-mr-xs"
             @click="
               utilizarDocumentos && !user.hasDocs ? (parte -= 1) : (parte -= 2)
             "
+          />
+          <q-btn
+            class="col-6 q-ml-xs"
+            label="Enviar"
+            type="submit"
+            color="positive"
           />
         </q-btn-group>
       </div>
@@ -455,6 +501,15 @@ export default defineComponent({
     };
   },
   computed: {
+    getFotoFrente() {
+      return URL.createObjectURL(this.fotoFrente);
+    },
+    getFotoAtras() {
+      return URL.createObjectURL(this.fotoVerso);
+    },
+    getFotoSelfie() {
+      return URL.createObjectURL(this.fotoSelfie);
+    },
     login: {
       get() {
         return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
@@ -498,7 +553,7 @@ export default defineComponent({
       return ts.date;
     },
     phoneMask() {
-      return "(##) 9####-####";
+      return "(##) #####-####";
     },
     getWeekDisplay() {
       let week = [0, 1, 2, 3, 4, 5, 6];
@@ -529,6 +584,34 @@ export default defineComponent({
     }
   },
   methods: {
+    async nextStep() {
+      if (!this.$refs.forms.validate()) return;
+      if (
+        this.user.email != this.login.user.email ||
+        this.user.cpf != this.login.user.cpf ||
+        this.user.name != this.login.user.nome
+      ) {
+        console.log("opa");
+        const response = await this.executeMethod({
+          url: "Usuarios/atualizar",
+          method: "POST",
+          data: {
+            dados: {
+              id: this.login.userId,
+              email: this.user.email,
+              cpf: this.user.cpf,
+              nome: this.user.name,
+            },
+          },
+        });
+        if (response.status == 200) {
+          this.login = response.data;
+        }
+      }
+      this.utilizarDocumentos && !this.user.hasDocs
+        ? (this.parte += 1)
+        : (this.parte += 2);
+    },
     parseData() {
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial)).format(
@@ -590,7 +673,7 @@ export default defineComponent({
           message:
             "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário que ainda não passou.</span>",
           html: true,
-          ok: "Beleza",
+          ok: "Ok",
         });
         return;
       }
@@ -609,9 +692,7 @@ export default defineComponent({
         hora.toString() +
         ":" +
         (minutos == 60 || minutos == 0 ? "00" : minutos).toString();
-      const diaSemana = event.target.attributes.arialabel.nodeValue
-        .toString()
-        .split(",")[0];
+      const diaSemana = this.getDayOfWeek(scope.timestamp.weekday);
       Dialog.create({
         title: "<span class='text-primary text-bold'>Agendamento</span>",
         message:
@@ -689,7 +770,7 @@ export default defineComponent({
 
       Loading.show({ message: "Gerando a visita..." });
       // Enviar visita
-
+      // Validar fotos caso seja tirada pela camera (Limitar Tamanho)
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
@@ -962,6 +1043,26 @@ export default defineComponent({
           message: "Número de Telefone inválido ou Código SMS incorreto.",
           type: "warning",
         });
+      }
+    },
+    getDayOfWeek(dow) {
+      switch (dow) {
+        case 0:
+          return "Domingo";
+        case 1:
+          return "Segunda-Feira";
+        case 2:
+          return "Terça-Feira";
+        case 3:
+          return "Quarta-Feira";
+        case 4:
+          return "Quinta-Feira";
+        case 5:
+          return "Sexta-Feira";
+        case 6:
+          return "Sábado";
+        default:
+          return "";
       }
     },
   },

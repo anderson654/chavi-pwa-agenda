@@ -42,7 +42,7 @@ module.exports = configure(function (ctx) {
     build: {
       env: ctx.dev
         ? {
-            VUE_APP_API_URL: "http://localhost:3000/api",
+            VUE_APP_API_URL: "http://10.151.52.64:3000/api",
             //VUE_APP_API_URL: 'https://e6e402e894b5.ngrok.io/api',
             //VUE_APP_API_URL: "https://betaserver.chavi.com.br/api",
             //VUE_APP_API_URL: "https://api.chavi.com.br/api",
@@ -131,7 +131,10 @@ module.exports = configure(function (ctx) {
     // https://v2.quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
       workboxPluginMode: "GenerateSW", // 'GenerateSW' or 'InjectManifest'
-      workboxOptions: {}, // only for GenerateSW
+      workboxOptions: {
+        skipWaiting: true,
+        clientsClaim: true,
+      }, // only for GenerateSW
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
       // if using workbox in InjectManifest mode
@@ -146,7 +149,7 @@ module.exports = configure(function (ctx) {
         display: "standalone",
         orientation: "portrait",
         background_color: "#ffffff",
-        theme_color: "#027be3",
+        theme_color: "#e86628",
         icons: [
           {
             src: "icons/icon-128x128.png",
