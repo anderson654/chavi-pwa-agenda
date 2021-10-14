@@ -2,7 +2,11 @@
   <q-page class="flex-center column">
     <div class="text-center q-my-xl" style="width: 70vw">
       <div v-if="inForms">
-        <span style="font-size: 1.2rem" v-if="parte != 3">
+        <span style="font-size: 1.4rem" v-if="parte == 1">
+          Por segundo, insira seu nome e telefone.<br />
+          Em seguida, aguarde receber o códgio SMS e insira no campo indicado.
+        </span>
+        <span style="font-size: 1.4rem" v-if="parte == 2">
           Agora, preencha o formulário solicitando visita ao imóvel
           {{ user && user.imovelRef ? user.imovelRef : "" }} da imobiliária
           {{ cliente && cliente.nome ? cliente.nome : "" }}.<br />
@@ -12,14 +16,18 @@
               : ""
           }}
         </span>
-        <span style="font-size: 1.2rem" v-else-if="parte == 3">
+        <span style="font-size: 1.4rem" v-if="parte == 3">
           Estamos quasa finalizando. <br />Para aumentarmos a segurança da sua
           visita, precisamos que valide seu documento de identificação (RG ou
           CNH)
         </span>
+        <span style="font-size: 1.4rem" v-if="parte == 4">
+          Pronto! Agora é só revisar os dados e enviar a solicitação de
+          agendamento.
+        </span>
       </div>
       <div v-else>
-        <span style="font-size: 1.2rem">
+        <span style="font-size: 1.4rem">
           Primeiro, selecione o melhor dia para você visitar o imóvel
           {{ user.imovelRef }}.
         </span>
@@ -92,6 +100,14 @@
       <div v-show="parte == 1" class="full-width">
         <q-input
           class="parte1 full-width"
+          v-model="user.name"
+          label="Seu nome *"
+          hint="Nome e sobrenome"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
+        />
+        <q-input
+          class="parte1 full-width"
           type="tel"
           v-model="user.phone"
           label="Seu Telefone *"
@@ -99,7 +115,51 @@
           lazy-rules
           :mask="phoneMask"
           :debounce="1000"
-          @change="getUser()"
+          :rules="[
+            (val) =>
+              (val !== null && val !== '') || 'Por favor, insira seu telefone.',
+            (val) =>
+              (val && val.length == 15) ||
+              'Por favor, insira seu telefone no formato desejado.',
+          ]"
+        />
+        <q-input
+          class="parte1 full-width"
+          type="tel"
+          v-if="codeSent"
+          v-model="user.codigoInput"
+          label="Insira o Código aqui"
+          lazy-rules
+          mask="######"
+          :debounce="1000"
+          :rules="[
+            (val) =>
+              (val !== null && val !== '') || 'Por favor, insira seu códgio.',
+            (val) =>
+              (val && val.length == 6) ||
+              'Por favor, insira seu código corretamente.',
+          ]"
+        />
+        <q-btn-group push flat unelevated class="full-width row q-mt-md">
+          <q-btn
+            class="col-12"
+            :label="codeSent ? 'Verificar Telefone' : 'Enviar Códgio'"
+            color="positive"
+            @click="!codeSent ? sendPhone() : checkCodigo()"
+          />
+        </q-btn-group>
+      </div>
+      <div v-show="parte == 2" class="full-width">
+        <q-input
+          class="parte1 full-width"
+          type="tel"
+          v-model="user.phone"
+          label="Seu Telefone *"
+          hint="(41) 98888-8888"
+          lazy-rules
+          :mask="phoneMask"
+          readonly
+          :debounce="1000"
           :rules="[
             (val) =>
               (val !== null && val !== '') || 'Por favor, insira seu telefone.',
@@ -159,7 +219,7 @@
 
           <q-btn-group push flat unelevated class="full-width row">
             <q-btn
-              class="col-6"
+              class="col-6 q-mr-xs"
               label="Próximo"
               color="positive"
               @click="
@@ -173,12 +233,12 @@
               label="Limpar"
               type="reset"
               color="secondary"
-              class="q-ml-sm col-6"
+              class="q-ml-xs col-6"
             />
           </q-btn-group>
         </div>
       </div>
-      <div v-show="parte == 2 && utilizarDocumentos" class="full-width">
+      <div v-show="parte == 3 && utilizarDocumentos" class="full-width">
         <div class="full-width q-mb-xs">
           <div class="full-width text-left" style="font-size: 1rem">
             <span
@@ -248,7 +308,7 @@
         <div class="full-width q-mt-xl">
           <q-btn-group push flat unelevated class="full-width row">
             <q-btn
-              class="col-6"
+              class="col-6 q-mr-xs"
               label="Revisar"
               color="positive"
               @click="parte += 1"
@@ -257,33 +317,33 @@
               outline
               label="Voltar"
               color="secondary"
-              class="col-6"
+              class="col-6 q-ml-xs"
               @click="parte -= 1"
             />
           </q-btn-group>
         </div>
       </div>
-      <div v-if="parte == 3" class="full-width flex flex-center">
-        <div class="column" style="font-size: 1.2rem">
-          <div>
-            <span>Nome: </span>
-            <strong>{{ user.name }}</strong>
+      <div v-if="parte == 4" class="full-width flex flex-center">
+        <div class="column full-width" style="font-size: 1.2rem">
+          <div class="row">
+            <div class="col-5">Nome:</div>
+            <div class="col-7 text-bold">{{ user.name }}</div>
           </div>
-          <div>
-            <span>Telefone: </span>
-            <strong>{{ user.phone }}</strong>
+          <div class="row">
+            <div class="col-5">Telefone:</div>
+            <div class="col-7 text-bold">{{ user.phone }}</div>
           </div>
-          <div>
-            <span>E-mail: </span>
-            <strong>{{ user.email }}</strong>
+          <div class="row">
+            <div class="col-5">E-mail:</div>
+            <div class="col-7 text-bold">{{ user.email }}</div>
           </div>
-          <div>
-            <span>CPF: </span>
-            <strong>{{ user.cpf }}</strong>
+          <div class="row">
+            <div class="col-5">CPF:</div>
+            <div class="col-7 text-bold">{{ user.cpf }}</div>
           </div>
-          <div>
-            <span>Data da vistia: </span>
-            <strong>{{ parseData() }}</strong>
+          <div class="row">
+            <div class="col-5">Data da vistia:</div>
+            <div class="col-7 text-bold">{{ parseData() }}</div>
           </div>
           <div v-if="!user.hasDocs">
             <!-- TODO: Utlizar FileReade.readArrayBuffer para conseguir o endereço local da imagem -->
@@ -316,7 +376,7 @@
         </div>
         <q-btn-group push flat unelevated class="full-width row q-mt-md">
           <q-btn
-            class="col-6 q-pr-sm"
+            class="col-6 q-mr-sm"
             label="Enviar"
             type="submit"
             color="positive"
@@ -325,7 +385,7 @@
             outline
             label="Voltar"
             color="secondary"
-            class="col-6 q-pl-sm"
+            class="col-6 q-ml-sm"
             @click="
               utilizarDocumentos && !user.hasDocs ? (parte -= 1) : (parte -= 2)
             "
@@ -361,6 +421,7 @@ export default defineComponent({
   data() {
     return {
       inForms: false,
+      codeSent: false,
       parte: 1,
       selectedDate: "",
       type: "",
@@ -378,6 +439,7 @@ export default defineComponent({
         terms: true,
         hasDocs: false,
       },
+      newUser: true,
       isRegistredUser: false,
       /* Opções calendario */
       utilizarDocumentos: true,
@@ -393,6 +455,15 @@ export default defineComponent({
     };
   },
   computed: {
+    login: {
+      get() {
+        return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
+      },
+      set(value) {
+        const key = "setLogin";
+        this.$store.dispatch("setarDados", { key: key, value: value });
+      },
+    },
     eventsMap() {
       const map = {};
       this.events.forEach((event) => {
@@ -437,6 +508,19 @@ export default defineComponent({
     },
   },
   mounted() {
+    if (this.login && this.login.user) {
+      this.user = {
+        name: this.login.user.nome,
+        phone: this.login.user.telefone,
+        email: this.login.user.email,
+        cpf: this.login.user.cpf,
+        hasDocs:
+          this.login.user.fotoSelfie &&
+          this.login.user.fotoFrente &&
+          this.login.user.fotoAtras,
+        terms: true,
+      };
+    }
     const params = this.getParams;
     if (params && params.entidadeId && params.imovelRef) {
       this.user.entidadeId = params.entidadeId;
@@ -559,6 +643,7 @@ export default defineComponent({
         Loading.show();
         setTimeout(() => {
           this.inForms = true;
+          if (this.login && this.login.id && this.login.user) this.parte = 2;
           Loading.hide();
         }, 1500);
       });
@@ -792,30 +877,91 @@ export default defineComponent({
         this.events = optionsOff;
       }
     },
-    async getUser() {
+    async sendPhone() {
       if (this.user && this.user.phone && this.user.phone.length == 15) {
         Loading.show({ message: "Verificando cadastro do usuário" });
-        const response = await this.executeMethod(
+        let response = await this.executeMethod(
           {
-            url: "Usuarios/estaRegistrado",
-            method: "get",
-            params: {
+            url: "Usuarios/loginTelefone",
+            method: "post",
+            data: { telefone: this.user.phone },
+          },
+          false
+        );
+        if (response.status == 200 || response.status == 201) {
+          Notify.create({
+            message: "Código de Confirmação enviado com Sucesso.",
+            type: "positive",
+          });
+          this.codeSent = true;
+          this.newUser = response.status == 200 ? false : true;
+          if (response.status === 201) {
+            this.user.codigo = response.data;
+          }
+        } else {
+          Notify.create({
+            message: "Erro ao enviar Informações ao Servidor.",
+            type: "negative",
+          });
+        }
+        Loading.hide();
+      }
+    },
+    async checkCodigo() {
+      if (this.newUser) {
+        Loading.show({ delay: 400 });
+        let response = await this.executeMethod(
+          {
+            url: "Usuarios/cadastrar",
+            method: "post",
+            data: {
               telefone: this.user.phone,
+              nomeCompleto: this.user.name.trim(),
+              loginCodigo: this.user.codigo,
             },
           },
           false
         );
         Loading.hide();
-        this.isRegistredUser =
-          response.data && response.data.exists ? response.data.exists : false;
-        if (response.status == 200 || response.status == 304) {
-          this.user.name = response.data.user.nome;
-          this.user.cpf = response.data.user.cpf;
-          this.user.email = response.data.user.email;
-          this.user.hasDocs = response.data.user.hasDocs;
-        } else {
-          this.isRegistredUser = false;
-        }
+        if (response.status != 200) {
+          Notify.create({
+            message:
+              "Não foi possível cadastrar o Usuário. Por favor, tente novamente.",
+            type: "warning",
+          });
+          return;
+        } else if (response.status == 200) this.newUser = false;
+      }
+      Loading.show({ delay: 400 });
+      let response = await this.executeMethod(
+        {
+          url: "Usuarios/novoLogin",
+          method: "post",
+          data: {
+            username: this.user.phone,
+            codigo: this.user.codigoInput,
+          },
+        },
+        false
+      );
+      Loading.hide();
+      if (response.status == 200) {
+        await this.$store.dispatch("setarDados", {
+          key: "setLogin",
+          value: response.data,
+        });
+        this.user.cpf = response.data.user.cpf;
+        this.user.email = response.data.user.email;
+        this.user.hasDocs =
+          response.data.user.fotoFrente &&
+          response.data.user.fotoAtras &&
+          response.data.user.fotoSelfie;
+        this.parte += 1;
+      } else {
+        Notify.create({
+          message: "Número de Telefone inválido ou Código SMS incorreto.",
+          type: "warning",
+        });
       }
     },
   },
