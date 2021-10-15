@@ -127,6 +127,7 @@
       style="width: 90vw; max-width: 400px"
     >
       <div v-show="parte == 1" class="full-width">
+        {{ user.codigo }}
         <q-input
           class="parte1 full-width text-h5"
           label-color="primary"
@@ -436,7 +437,7 @@
         <div class="text-h8 q-mt-md text-justify">
           <span>
             Ao clicar em enviar, declaro que li e concordo com os
-            <a href="https://chavi.com.br/termos">termos de uso e priacidade</a
+            <a href="https://chavi.com.br/termos">termos de uso e privacidade</a
             >.
           </span>
         </div>
@@ -595,6 +596,7 @@ export default defineComponent({
           this.login.user.fotoAtras,
         terms: true,
       };
+      if (this.user.email.includes("@chaviuser")) this.user.email = "";
     }
     const params = this.getParams;
     if (params && params.entidadeId && params.imovelRef) {
@@ -608,9 +610,11 @@ export default defineComponent({
     async nextStep() {
       if (!this.$refs.forms.validate()) return;
       if (
-        this.user.email != this.login.user.email ||
-        this.user.cpf != this.login.user.cpf ||
-        this.user.name != this.login.user.nome
+        this.login &&
+        this.login.user &&
+        (this.user.email != this.login.user.email ||
+          this.user.cpf != this.login.user.cpf ||
+          this.user.name != this.login.user.nome)
       ) {
         console.log("opa");
         const response = await this.executeMethod({
@@ -857,10 +861,12 @@ export default defineComponent({
       window.open(link, opt);
     },
     onReset() {
-      this.user = { name: "", phone: "", cpf: "", email: "", terms: false };
+      this.user.name = "";
+      this.user.cpf = "";
+      this.user.email = "";
     },
     onValError(ref) {
-      this.parte = 1;
+      this.parte = 2;
     },
     verificarEmail(valor) {
       const regexp = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?/i;
@@ -1050,6 +1056,7 @@ export default defineComponent({
           response.data.user.fotoFrente &&
           response.data.user.fotoAtras &&
           response.data.user.fotoSelfie;
+        if (this.user.email.includes("@chaviuser")) this.user.email = "";
         this.parte += 1;
       } else {
         Notify.create({
