@@ -111,7 +111,6 @@ export default ({ app, router, store }) => {
             quality: 0.75,
             convertSize: 500000,
             success(result) {
-              console.log(result.size);
               resolve(result);
             },
             error(e) {

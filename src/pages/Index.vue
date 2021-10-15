@@ -674,11 +674,12 @@ export default defineComponent({
       // TODO: Verificar conflito dia seguinte
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
-
-      const now = moment().format("HH:mm").split(":");
+      const dia = scope.timestamp.day;
+      const now = moment().format("DD HH mm").split(" ");
       if (
         scope.timestamp.past ||
-        (parseInt(now[0]) == hora && minutos < parseInt(now[1]))
+        (parseInt(now[1]) == hora &&
+          minutos < parseInt(now[2] && parseInt(now[0] == dia)))
       ) {
         Dialog.create({
           title:
