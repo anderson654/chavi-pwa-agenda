@@ -293,6 +293,7 @@
               <q-file
                 v-model="fotoFrente"
                 accept="image/*"
+                :max-files="1"
                 clearable
                 borderless
                 label-color="primary"
@@ -316,6 +317,7 @@
               <q-file
                 v-model="fotoVerso"
                 accept="image/*"
+                :max-files="1"
                 clearable
                 borderless
                 label-color="primary"
@@ -338,6 +340,7 @@
               <q-file
                 v-model="fotoSelfie"
                 accept="image/*"
+                :max-files="1"
                 clearable
                 borderless
                 label-color="primary"
@@ -668,6 +671,7 @@ export default defineComponent({
       return events;
     },
     onTimeClick({ event, scope }) {
+      // TODO: Verificar conflito dia seguinte
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
 
@@ -787,9 +791,9 @@ export default defineComponent({
       };
 
       if (!this.user.hasDocs) {
-        this.user.fotoFrente = this.fotoFrente;
-        this.user.fotoAtras = this.fotoVerso;
-        this.user.fotoSelfie = this.fotoSelfie;
+        this.user.fotoFrente = await this.compressImage(this.fotoFrente);
+        this.user.fotoAtras = await this.compressImage(this.fotoVerso);
+        this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
 
         const blobFrente = {
           blob: new Blob([this.user.fotoFrente]),

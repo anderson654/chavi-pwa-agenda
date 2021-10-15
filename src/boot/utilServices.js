@@ -1,4 +1,5 @@
 import { mapGetters } from "vuex";
+import Compressor from "compressorjs";
 
 export default ({ app, router, store }) => {
   app.mixin({
@@ -100,6 +101,25 @@ export default ({ app, router, store }) => {
       },
       isBlank(o) {
         return o === null || o === undefined || o === "";
+      },
+      async compressImage(file) {
+        return new Promise((resolve, reject) => {
+          new Compressor(file, {
+            maxHeight: 512,
+            maxWidth: 512,
+            resize: "contain",
+            quality: 0.75,
+            convertSize: 500000,
+            success(result) {
+              console.log(result.size);
+              resolve(result);
+            },
+            error(e) {
+              console.log(e);
+              resolve(file);
+            },
+          });
+        });
       },
     },
   });
