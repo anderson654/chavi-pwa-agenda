@@ -93,6 +93,24 @@
                     </div>
                   </div>
                 </template>
+                <template
+                  v-for="(holiday, index) in getHoliday(timestamp.date)"
+                  :key="index"
+                >
+                  <div
+                    v-if="holiday && feriado"
+                    class="my-event full-width rounded-border bg-green-10"
+                    style="top: 0px; height: 100%; align-items: flex-start"
+                  >
+                    <div
+                      class="title q-calendar__ellipsis text-black text-center"
+                      style="font-size: 1.2rem"
+                    >
+                      Feriado <br />
+                      {{ holiday.dia }}
+                    </div>
+                  </div>
+                </template>
               </template>
             </template>
           </q-calendar>
@@ -383,7 +401,6 @@
             <div class="col-7 text-bold">{{ parseData() }}</div>
           </div>
           <div v-if="!user.hasDocs" class="row q-mt-md">
-            <!-- TODO: Utlizar FileReader.readArrayBuffer para conseguir o endereço local da imagem -->
             <div class="col-5">Foto Frente:</div>
             <div class="col-7">
               <q-img
@@ -582,6 +599,7 @@ export default defineComponent({
       this.user.imovelRef = params.imovelRef;
       this.carregarHorarios();
     }
+    this.setHoliday(new Date().getFullYear());
   },
   methods: {
     async nextStep() {
@@ -638,15 +656,6 @@ export default defineComponent({
       if (timeStartPos && timeDurationHeight) {
         s.top = timeStartPos(event.time) + "px";
         s.height = timeDurationHeight(event.duration) + "px";
-      }
-      s["align-items"] = "flex-start";
-      return s;
-    },
-    badgeStylesPast(timestamp, timeStartPos, timeDurationHeight) {
-      const s = {};
-      if (timeStartPos && timeDurationHeight) {
-        s.top = timeStartPos(timestamp.time) + "px";
-        s.height = timeDurationHeight(1) + "px";
       }
       s["align-items"] = "flex-start";
       return s;
@@ -910,7 +919,6 @@ export default defineComponent({
               this.noWeekend = this.cliente.preferenciaVisita.finalDeSemana
                 ? !this.cliente.preferenciaVisita.finalDeSemana
                 : true;
-              // TODO: implementar lógica do feriado
               this.feriado = this.cliente.preferenciaVisita.feriado
                 ? this.cliente.preferenciaVisita.feriado
                 : false;
@@ -1064,6 +1072,91 @@ export default defineComponent({
         default:
           return "";
       }
+    },
+    setHoliday(y) {
+      function easterDay(y) {
+        var c = Math.floor(y / 100);
+        var n = y - 19 * Math.floor(y / 19);
+        var k = Math.floor((c - 17) / 25);
+        var i = c - Math.floor(c / 4) - Math.floor((c - k) / 3) + 19 * n + 15;
+        i = i - 30 * Math.floor(i / 30);
+        i =
+          i -
+          Math.floor(i / 28) *
+            (1 -
+              Math.floor(i / 28) *
+                Math.floor(29 / (i + 1)) *
+                Math.floor((21 - n) / 11));
+        var j = y + Math.floor(y / 4) + i + 2 - c + Math.floor(c / 4);
+        j = j - 7 * Math.floor(j / 7);
+        var l = i - j;
+        var m = 3 + Math.floor((l + 40) / 44);
+        var d = l + 28 - 31 * Math.floor(m / 4);
+        return moment([y, m - 1, d]);
+      }
+      var anoNovo = moment("01/01/" + y, "DD/MM/YYYY");
+      var carnaval1 = easterDay(y).add(-48, "d");
+      var carnaval2 = easterDay(y).add(-47, "d");
+      var paixaoCristo = easterDay(y).add(-2, "d");
+      var pascoa = easterDay(y);
+      var tiradentes = moment("21/04/" + y, "DD/MM/YYYY");
+      var corpusChristi = easterDay(y).add(60, "d");
+      var diaTrabalho = moment("01/05/" + y, "DD/MM/YYYY");
+      var diaIndependencia = moment("07/09/" + y, "DD/MM/YYYY");
+      var nossaSenhora = moment("12/10/" + y, "DD/MM/YYYY");
+      var finados = moment("02/11/" + y, "DD/MM/YYYY");
+      var proclamaRepublica = moment("15/11/" + y, "DD/MM/YYYY");
+      var natal = moment("25/12/" + y, "DD/MM/YYYY");
+      this.holidays = [
+        { m: anoNovo, dia: "Ano Novo", d: anoNovo.format("DD/MM/YYYY") },
+        { m: carnaval1, dia: "Carnaval", d: carnaval1.format("DD/MM/YYYY") },
+        { m: carnaval2, dia: "Carnaval", d: carnaval2.format("DD/MM/YYYY") },
+        {
+          m: paixaoCristo,
+          dia: "Paix\u00E3o de Cristo",
+          d: paixaoCristo.format("DD/MM/YYYY"),
+        },
+        { m: pascoa, dia: "P\u00E1scoa", d: pascoa.format("DD/MM/YYYY") },
+        {
+          m: tiradentes,
+          dia: "Tiradentes",
+          d: tiradentes.format("DD/MM/YYYY"),
+        },
+        {
+          m: corpusChristi,
+          dia: "Corpus Christi",
+          d: corpusChristi.format("DD/MM/YYYY"),
+        },
+        {
+          m: diaTrabalho,
+          dia: "Dia do Trabalho",
+          d: diaTrabalho.format("DD/MM/YYYY"),
+        },
+        {
+          m: diaIndependencia,
+          dia: "Dia da Independ\u00EAncia do Brasil",
+          d: diaIndependencia.format("DD/MM/YYYY"),
+        },
+        {
+          m: nossaSenhora,
+          dia: "Nossa Senhora Aparecida",
+          d: nossaSenhora.format("DD/MM/YYYY"),
+        },
+        { m: finados, dia: "Finados", d: finados.format("DD/MM/YYYY") },
+        {
+          m: proclamaRepublica,
+          dia: "Proclama\u00E7\u00E3o da Rep\u00FAblica",
+          d: proclamaRepublica.format("DD/MM/YYYY"),
+        },
+        { m: natal, dia: "Natal", d: natal.format("DD/MM/YYYY") },
+      ];
+    },
+    getHoliday(date) {
+      date = moment(date).format("DD/MM/YYYY");
+      const filter = this.holidays.filter((holiday) => {
+        return holiday.d == date;
+      });
+      return filter;
     },
   },
 });
