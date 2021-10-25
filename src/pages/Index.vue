@@ -35,25 +35,42 @@
       </div>
       <div v-else>
         <span style="font-size: 1.4rem">
-          Primeiro, selecione o melhor dia para você visitar o imóvel
-          {{ user.imovelRef }}.
+          Primeiro, selecione o melhor <strong>dia e hora</strong> para você
+          visitar o imóvel {{ user.imovelRef }}.
         </span>
       </div>
     </div>
     <div class="full-width" v-if="!inForms">
       <div class="row justify-center items-center">
-        <navigation-bar
-          @today="calendarToday"
-          @prev="calendarPrev"
-          @next="calendarNext"
-        />
+        <div class="col-12 row justify-center items-center">
+          <navigation-bar
+            @today="onTodayMonth"
+            @prev="onPrevMonth"
+            @next="onNextMonth"
+          />
+          <div class="col-12" style="width: 80%">
+            <q-calendar-month
+              ref="calendarMonth"
+              v-model="selectedDate"
+              bordered
+              mini-mode
+              locale="pt-br"
+              :weekdays="getWeekDisplay"
+              :disabled-before="disabledBefore"
+              @click-date="onClickDate"
+            />
+          </div>
+        </div>
+        <div class="q-mt-md" style="width: 90%">
+          <q-separator color="primary" size="3px" />
+        </div>
       </div>
       <div class="flex flex-center q-pa-md">
         <div style="width: 80%">
           <q-calendar
             ref="calendar"
             weekday-align="left"
-            view="day"
+            :view="$q.platform.is.desktop ? 'week' : 'day'"
             locale="pt-br"
             style="width: 100%"
             cell-height="100px"
@@ -64,7 +81,6 @@
             :interval-count="intervalCount"
             :disabled-before="disabledBefore"
             bordered
-            no-active-date
             hour24-format
             v-model="selectedDate"
             @click-time="onTimeClick"
@@ -127,7 +143,6 @@
       style="width: 90vw; max-width: 400px"
     >
       <div v-show="parte == 1" class="full-width">
-        {{ user.codigo }}
         <q-input
           class="parte1 full-width text-h5"
           label-color="primary"
@@ -238,16 +253,15 @@
           class="parte1 full-width"
           type="email"
           v-model="user.email"
+          v-if="utilizarEmail"
           label-color="primary"
           style="font-size: 1.2rem"
-          label="Seu E-mail *"
+          label="Seu E-mail"
           lazy-rules
           clearable
           :debounce="1000"
           :rules="[
-            (val) =>
-              (val !== null && val !== '') || 'Por favor, insira seu E-mail.',
-            (val) => verificarEmail(val) || 'Insira um e-mail válido',
+            (val) => (val) => verificarEmail(val) || 'Insira um e-mail válido',
           ]"
         />
         <div class="full-width q-mt-xl">
@@ -282,6 +296,7 @@
         </div>
       </div>
       <div v-show="parte == 3 && utilizarDocumentos" class="full-width q-mt-lg">
+        <!-- TODO:  Continuar pelo celular talvez -->
         <div class="full-width">
           <div class="full-width text-center" style="font-size: 1.1rem">
             <span
@@ -382,7 +397,7 @@
             <div class="col-5">Telefone:</div>
             <div class="col-7 text-bold">{{ user.phone }}</div>
           </div>
-          <div class="row">
+          <div class="row" v-if="utilizarEmail">
             <div class="col-5">E-mail:</div>
             <div
               class="col-7 text-bold"
@@ -468,6 +483,7 @@ import { defineComponent } from "vue";
 import { Loading, Notify } from "quasar";
 import * as moment from "moment";
 import { QCalendarDay } from "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.esm.js";
+import { QCalendarMonth } from "@quasar/quasar-ui-qcalendar/dist/QCalendarMonth.esm.js";
 import NavigatioBar from "components/NavigationBar.vue";
 import {
   addToDate,
@@ -484,7 +500,11 @@ import { Dialog } from "quasar";
 
 export default defineComponent({
   name: "PageIndex",
-  components: { "q-calendar": QCalendarDay, "navigation-bar": NavigatioBar },
+  components: {
+    "q-calendar": QCalendarDay,
+    "navigation-bar": NavigatioBar,
+    "q-calendar-month": QCalendarMonth,
+  },
   data() {
     return {
       inForms: false,
@@ -512,6 +532,7 @@ export default defineComponent({
       utilizarDocumentos: true,
       verificarDocumentos: true,
       aprovarVisita: false,
+      utilizarEmail: true,
       /* Opções visitas */
       noWeekend: false,
       feriado: false,
@@ -584,6 +605,7 @@ export default defineComponent({
     },
   },
   mounted() {
+    this.selectedDate = today();
     if (this.login && this.login.user) {
       this.user = {
         name: this.login.user.nome,
@@ -607,6 +629,18 @@ export default defineComponent({
     this.setHoliday(new Date().getFullYear());
   },
   methods: {
+    onTodayMonth() {
+      this.$refs.calendarMonth.moveToToday();
+    },
+    onPrevMonth() {
+      this.$refs.calendarMonth.prev();
+    },
+    onNextMonth() {
+      this.$refs.calendarMonth.next();
+    },
+    onClickDate(data) {
+      console.log("onMoved", data);
+    },
     async nextStep() {
       if (!this.$refs.forms.validate()) return;
       if (
@@ -616,7 +650,6 @@ export default defineComponent({
           this.user.cpf != this.login.user.cpf ||
           this.user.name != this.login.user.nome)
       ) {
-        console.log("opa");
         const response = await this.executeMethod({
           url: "Usuarios/atualizar",
           method: "POST",
@@ -695,14 +728,25 @@ export default defineComponent({
         });
         return;
       }
-      if (minutos < 15) minutos = 15;
-      else if (minutos < 30) minutos = 30;
-      else if (minutos < 45) minutos = 45;
-      else if (minutos < 60) minutos = 60;
+
+      if (this.timeStepMin == 15) {
+        minutos = 15;
+        if (minutos <= 30) minutos = 30;
+        else if (minutos <= 45) minutos = 45;
+        else if (minutos <= 60) minutos = 60;
+      } else if (this.timeStepMin == 30) {
+        minutos = 30;
+        if (minutos <= 60) minutos = 60;
+      } else if (this.timeStepMin == 60) {
+        minutos = 60;
+      }
       const horario =
         hora.toString() +
         ":" +
-        (minutos - 15 == 0 ? "00" : minutos - 15).toString();
+        (minutos - this.timeStepMin == 0
+          ? "00"
+          : minutos - this.timeStepMin
+        ).toString();
 
       if (minutos == 60) hora = parseInt(hora) + 1;
 
@@ -711,6 +755,10 @@ export default defineComponent({
         ":" +
         (minutos == 60 || minutos == 0 ? "00" : minutos).toString();
       const diaSemana = this.getDayOfWeek(scope.timestamp.weekday);
+      const timeStep =
+        this.timeStepMin < 60
+          ? this.timeStepMin.toString() + " minutos"
+          : "1 hora";
       Dialog.create({
         title: "<span class='text-primary text-bold'>Agendamento</span>",
         message:
@@ -718,7 +766,9 @@ export default defineComponent({
           diaSemana +
           " as " +
           horario +
-          "?</strong><br/>A visita terá duarção de <strong>15 minutos</strong>.</span>",
+          "?</strong><br/>A visita terá duarção de <strong>" +
+          timeStep +
+          "</strong>.</span>",
         ok: "Sim",
         cancel: "Escolher outro",
         html: true,
@@ -728,7 +778,7 @@ export default defineComponent({
           title: "Horário Selecionado",
           date: scope.timestamp.date,
           time: horario,
-          duration: 15,
+          duration: this.timeStepMin,
           bgcolor: "green-10",
           textColor: "text-white",
         };
@@ -746,15 +796,6 @@ export default defineComponent({
           Loading.hide();
         }, 1500);
       });
-    },
-    calendarNext() {
-      this.$refs.calendar.next();
-    },
-    calendarToday() {
-      this.$refs.calendar.moveToToday();
-    },
-    calendarPrev() {
-      this.$refs.calendar.prev();
     },
     async onSubmit() {
       if (
@@ -871,7 +912,7 @@ export default defineComponent({
     verificarEmail(valor) {
       const regexp = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?/i;
       const regexp2 = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]/i;
-      return regexp.test(valor) || regexp2.test(valor);
+      return regexp.test(valor) || regexp2.test(valor) || !utilizarEmail;
     },
     verificarCPF(valor) {
       if (valor) {
@@ -914,27 +955,24 @@ export default defineComponent({
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
             if (this.cliente && this.cliente.preferenciaUsuario) {
-              this.utilizarDocumentos = this.cliente.preferenciaUsuario
-                .utilizarDocumentos
-                ? this.cliente.preferenciaUsuario.utilizarDocumentos
-                : true;
-              this.aprovarVisita = this.cliente.preferenciaUsuario.aprovarVisita
-                ? this.cliente.preferenciaUsuario.aprovarVisita
-                : false;
-              this.verificarDocumentos = this.cliente.preferenciaUsuario
-                .verificarDocumentos
-                ? this.cliente.preferenciaUsuario.verificarDocumentos
-                : true;
+              this.utilizarDocumentos =
+                this.cliente.preferenciaUsuario.utilizarDocumentos;
+              this.aprovarVisita =
+                this.cliente.preferenciaUsuario.aprovarVisita;
+              this.verificarDocumentos =
+                this.cliente.preferenciaUsuario.verificarDocumentos;
+              this.utilizarEmail =
+                this.cliente.preferenciaUsuario.utilizarEmail;
             }
             if (this.cliente && this.cliente.preferenciaVisita) {
               this.noWeekend = this.cliente.preferenciaVisita.finalDeSemana
-                ? !this.cliente.preferenciaVisita.finalDeSemana
+                ? false
                 : true;
-              this.feriado = this.cliente.preferenciaVisita.feriado
-                ? this.cliente.preferenciaVisita.feriado
-                : false;
-              this.timeStepMin = this.cliente.preferenciaVisita.intervalo
-                ? this.cliente.preferenciaVisita.intervalo
+              this.feriado = this.cliente.preferenciaVisita.feriado;
+              this.noSunday =
+                !this.cliente.preferenciaVisita.domingo && !this.noWeekend;
+              this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin
+                ? this.cliente.preferenciaVisita.intervaloMin
                 : 15;
               if (this.cliente.preferenciaVisita.horaInicial) {
                 this.horaInicial = this.cliente.preferenciaVisita.horaInicial
