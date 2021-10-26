@@ -20,7 +20,7 @@ export default store(function (/* { ssrContext } */) {
     },
     plugins: [
       createPersistedState({
-        storage: window.sessionStorage,
+        storage: window.localStorage,
       }),
     ],
     // enable strict mode (adds overhead!)

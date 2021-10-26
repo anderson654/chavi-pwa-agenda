@@ -43,12 +43,14 @@
     <div class="full-width" v-if="!inForms">
       <div class="row justify-center items-center">
         <div class="col-12 row justify-center items-center">
-          <navigation-bar
-            @today="onTodayMonth"
-            @prev="onPrevMonth"
-            @next="onNextMonth"
-          />
-          <div class="col-12" style="width: 80%">
+          <div class="col-12">
+            <navigation-bar
+              @today="onTodayMonth"
+              @prev="onPrevMonth"
+              @next="onNextMonth"
+            />
+          </div>
+          <div style="width: 80%" v-if="!$q.platform.is.desktop">
             <q-calendar-month
               ref="calendarMonth"
               v-model="selectedDate"
@@ -61,7 +63,7 @@
             />
           </div>
         </div>
-        <div class="q-mt-md" style="width: 90%">
+        <div class="q-mt-md" style="width: 90%" v-if="!$q.platform.is.desktop">
           <q-separator color="primary" size="3px" />
         </div>
       </div>
@@ -296,7 +298,6 @@
         </div>
       </div>
       <div v-show="parte == 3 && utilizarDocumentos" class="full-width q-mt-lg">
-        <!-- TODO:  Continuar pelo celular talvez -->
         <div class="full-width">
           <div class="full-width text-center" style="font-size: 1.1rem">
             <span
@@ -626,17 +627,22 @@ export default defineComponent({
       this.user.imovelRef = params.imovelRef;
       this.carregarHorarios();
     }
+    if (!params || !params.entidadeId || !params.imovelRef)
+      window.history.go(-1);
     this.setHoliday(new Date().getFullYear());
   },
   methods: {
     onTodayMonth() {
-      this.$refs.calendarMonth.moveToToday();
+      if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.moveToToday();
+      else this.$refs.calendar.moveToToday();
     },
     onPrevMonth() {
-      this.$refs.calendarMonth.prev();
+      if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.prev();
+      else this.$refs.calendar.prev();
     },
     onNextMonth() {
-      this.$refs.calendarMonth.next();
+      if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.next();
+      else this.$refs.calendar.next();
     },
     onClickDate(data) {
       console.log("onMoved", data);
@@ -708,7 +714,6 @@ export default defineComponent({
       return events;
     },
     onTimeClick({ event, scope }) {
-      // TODO: Verificar conflito dia seguinte
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
       const dia = scope.timestamp.day;
@@ -880,7 +885,10 @@ export default defineComponent({
           html: true,
           persistent: true,
         }).onOk(() => {
-          //TODO: retornar para pag. da imobiliária
+          //TODO: retornar para pag. da imobiliária ou fechar iframe
+          this.$store.dispatch("setarDados", { key: "setParams", value: {} });
+          location.reload();
+          // location.replace('url')
           console.log("retornar para pagina da imobiliária");
         });
       } else if (response && response.status) {
@@ -899,7 +907,7 @@ export default defineComponent({
     },
     open(link, opt) {
       opt = opt ? opt : "";
-      window.open(link, opt);
+      window.open(link, opt, "_system");
     },
     onReset() {
       this.user.name = "";
