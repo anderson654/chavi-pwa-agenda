@@ -15,8 +15,9 @@
       <div class="text-center q-my-lg" style="width: 70vw">
         <div v-if="inForms">
           <span style="font-size: 1.4rem" v-if="parte == 1">
-            Por segundo, insira seu nome e telefone.<br />
-            Em seguida, aguarde receber o códgio SMS e insira no campo indicado.
+            Agora, insira seu nome e telefone.<br />
+            Em seguida, aguarde receber um código SMS e insira no campo
+            indicado.
           </span>
           <span style="font-size: 1.4rem" v-if="parte == 2">
             Agora, preencha o formulário solicitando visita ao imóvel
@@ -207,7 +208,7 @@
             :debounce="1000"
             :rules="[
               (val) =>
-                (val !== null && val !== '') || 'Por favor, insira seu códgio.',
+                (val !== null && val !== '') || 'Por favor, insira seu código.',
               (val) =>
                 (val && val.length == 6) ||
                 'Por favor, insira seu código corretamente.',
@@ -216,7 +217,7 @@
           <q-btn-group push flat unelevated class="full-width row q-mt-md">
             <q-btn
               class="col-12"
-              :label="codeSent ? 'Verificar Telefone' : 'Enviar Códgio'"
+              :label="codeSent ? 'Verificar Telefone' : 'Enviar Código'"
               color="positive"
               @click="!codeSent ? sendPhone() : checkCodigo()"
             />
@@ -454,7 +455,7 @@
               <div class="col-7 text-bold">{{ user.cpf }}</div>
             </div>
             <div class="row">
-              <div class="col-5">Data da vistia:</div>
+              <div class="col-5">Data da visita:</div>
               <div class="col-7 text-bold">{{ parseData() }}</div>
             </div>
             <div v-if="!user.hasDocs" class="row q-mt-md">
@@ -490,9 +491,10 @@
           <div class="text-h8 q-mt-md text-justify">
             <span>
               Ao clicar em enviar, declaro que li e concordo com os
-              <a href="https://chavi.com.br/termos"
-                >termos de uso e privacidade</a
-              >.
+              <a href="https://chavi.com.br/termos" target="_blank">
+                termos de uso e privacidade
+              </a>
+              .
             </span>
           </div>
           <q-btn-group push flat unelevated class="full-width row q-my-md">
@@ -776,18 +778,18 @@ export default defineComponent({
         });
         return;
       }
-
+      console.log(hora, minutos, this.timeStepMin);
       if (this.timeStepMin == 15) {
-        minutos = 15;
-        if (minutos <= 30) minutos = 30;
-        else if (minutos <= 45) minutos = 45;
-        else if (minutos <= 60) minutos = 60;
-      } else if (this.timeStepMin == 30) {
-        minutos = 30;
-        if (minutos <= 60) minutos = 60;
-      } else if (this.timeStepMin == 60) {
-        minutos = 60;
+        if (minutos > 45) minutos = 60;
+        else if (minutos > 30) minutos = 45;
+        else if (minutos > 15) minutos = 30;
+        else minutos = 15;
       }
+      if (this.timeStepMin == 30) {
+        if (minutos > 30) minutos = 60;
+        else minutos = 30;
+      }
+      if (this.timeStepMin == 60) minutos = 60;
       const horario =
         hora.toString() +
         ":" +
@@ -807,6 +809,8 @@ export default defineComponent({
         this.timeStepMin < 60
           ? this.timeStepMin.toString() + " minutos"
           : "1 hora";
+      console.log(hora, minutos);
+      console.log(horario, horarioNormal, diaSemana, timeStep);
       Dialog.create({
         title: "<span class='text-primary text-bold'>Agendamento</span>",
         message:
@@ -814,11 +818,18 @@ export default defineComponent({
           diaSemana +
           " as " +
           horario +
-          "?</strong><br/>A visita terá duarção de <strong>" +
+          "?</strong><br/>A visita terá duração de <strong>" +
           timeStep +
           "</strong>.</span>",
-        ok: "Sim",
-        cancel: "Escolher outro",
+        ok: {
+          flat: true,
+          color: "positive",
+          label: "Sim",
+        },
+        cancel: {
+          flat: true,
+          label: "Escolher outro",
+        },
         html: true,
         persistent: true,
       }).onOk(() => {

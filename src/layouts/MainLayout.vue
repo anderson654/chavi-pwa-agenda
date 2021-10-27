@@ -43,7 +43,7 @@ export default defineComponent({
         const logo = this.$store.getters.getLogo;
         if (!logo) return false;
         return !logo.includes("http")
-          ? `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/` +
+          ? `${process.env.VUE_APP_API_URL}/StorageContainers/logoEntidade/download/` +
               logo
           : logo;
       },
