@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHr LpR lFf" class="Background">
+  <q-layout view="hHr LpR lFf">
     <q-page-container>
       <q-page padding> </q-page>
     </q-page-container>
@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { Notify, Dialog, Loading } from "quasar";
+import { Loading } from "quasar";
 
 export default {
   created: function () {
@@ -24,5 +24,3 @@ export default {
   },
 };
 </script>
-
-<style></style>
