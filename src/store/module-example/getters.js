@@ -4,3 +4,6 @@ export function getParams(state) {
 export function getLogin(state) {
   return state.login;
 }
+export function getLogo(state) {
+  return state.logo;
+}

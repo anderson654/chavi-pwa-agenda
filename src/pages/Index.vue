@@ -11,7 +11,7 @@
         agende uma visita.
       </span>
     </div>
-    <div v-else>
+    <div v-else class="flex-center column">
       <div class="text-center q-my-lg" style="width: 70vw">
         <div v-if="inForms">
           <span style="font-size: 1.4rem" v-if="parte == 1">
@@ -29,12 +29,12 @@
             }}
           </span>
           <div v-if="parte == 3">
-            <span style="font-size: 1.4rem">Estamos quase finalizando.</span
-            ><br />
-            <span style="font-size: 1.1rem"
-              >Para aumentarmos a segurança da sua visita, precisamos que valide
-              seu documento de identificação (RG ou CNH)</span
-            >
+            <span style="font-size: 1.4rem">Estamos quase finalizando.</span>
+            <br />
+            <span style="font-size: 1.1rem">
+              Para aumentarmos a segurança da sua visita, precisamos que valide
+              seu documento de identificação (RG ou CNH)
+            </span>
           </div>
           <div v-if="parte == 4">
             <span style="font-size: 1.4rem" class="text-primary">Pronto!</span
@@ -47,7 +47,7 @@
         </div>
         <div v-else>
           <span style="font-size: 1.4rem">
-            Primeiro, selecione o melhor <strong>dia e hora</strong> para você
+            Primeiro, clique no melhor <strong>dia e hora</strong> para você
             visitar o imóvel {{ user.imovelRef }}.
           </span>
         </div>
@@ -919,7 +919,16 @@ export default defineComponent({
       if (response && response.status == 200) {
         console.log(response);
         const message = response.data.text;
-
+        if (
+          response.data.responseWpp &&
+          response.data.responseWpp.statusCode != 200
+        ) {
+          Notify.create({
+            message:
+              "Falha ao enviar mensagem via Whats App, " +
+              response.data.responseWpp.statusText,
+          });
+        }
         Dialog.create({
           title:
             '<span class="text-primary" style="font-size:1.2rem">Finalizada</span>',
@@ -930,15 +939,20 @@ export default defineComponent({
         }).onOk(() => {
           //TODO: retornar para pag. da imobiliária ou fechar iframe
           this.$store.dispatch("setarDados", { key: "setParams", value: {} });
-          location.reload();
+          this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+          // location.reload();
           // location.replace('url')
           console.log("retornar para pagina da imobiliária");
         });
       } else if (response && response.status) {
-        const message = response.data;
+        const message = response.data
+          ? response.data.message
+          : response.message
+          ? response.message
+          : "";
         Dialog.create({
           title:
-            '<span class="text-primary" style="font-size:1.2rem">Ops, Aconteceu algo inesperado</span>',
+            '<span class="text-primary" style="font-size:1.2rem">Aconteceu algo inesperado!</span>',
           message:
             '<span style="font-size:1.0rem"> ' +
             message +
@@ -1005,6 +1019,10 @@ export default defineComponent({
           });
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
+            this.$store.dispatch("setarDados", {
+              key: "setLogo",
+              value: this.cliente.logo,
+            });
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarDocumentos =
                 this.cliente.preferenciaUsuario.utilizarDocumentos;

@@ -4,3 +4,6 @@ export function setParams(state, params) {
 export function setLogin(state, login) {
   state.login = login;
 }
+export function setLogo(state, logo) {
+  state.logo = logo;
+}
