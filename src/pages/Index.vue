@@ -924,7 +924,6 @@ export default defineComponent({
         request.headers = { "Content-Type": "multipart/form-data" };
         request.data = formData;
       }
-      //const response = {};
       const response = await this.executeMethod(request, false);
       Loading.hide();
       if (response && response.status == 200) {
@@ -932,6 +931,7 @@ export default defineComponent({
         const message = response.data.text;
         if (
           response.data.responseWpp &&
+          response.data.responseWpp.statusCode &&
           response.data.responseWpp.statusCode != 200
         ) {
           Notify.create({
@@ -951,8 +951,9 @@ export default defineComponent({
           //TODO: retornar para pag. da imobiliária ou fechar iframe
           this.$store.dispatch("setarDados", { key: "setParams", value: {} });
           this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
-          // location.reload();
-          // location.replace('url')
+          this.inForms = false;
+          this.semImovel = false;
+          this.parte = 1;
           console.log("retornar para pagina da imobiliária");
         });
       } else if (response && response.status) {
