@@ -15,6 +15,7 @@
           no-spinner
         />
         <q-img
+          style="cursor: pointer"
           src="chavi_marca.png"
           fit="contain"
           width="10vw"
