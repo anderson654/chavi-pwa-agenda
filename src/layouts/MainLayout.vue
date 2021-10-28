@@ -1,25 +1,30 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
-      <q-toolbar class="text-center bg-grey-3">
-        <q-toolbar-title class="flex flex-center q-gutter-x-xl">
-          <q-img
-            v-if="logo"
-            :src="logo"
-            fit="contain"
-            width="10vw"
-            style="min-width: 100px"
-            no-spinner
-          />
-
-          <q-img
-            src="chavi_marca.png"
-            fit="contain"
-            width="10vw"
-            style="min-width: 100px"
-            no-spinner
-          />
-        </q-toolbar-title>
+      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
+        <q-img
+          v-if="logo"
+          :src="logo"
+          fit="contain"
+          width="10vw"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+        />
+        <q-img
+          src="chavi_marca.png"
+          fit="contain"
+          width="10vw"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+        />
       </q-toolbar>
     </q-header>
 
