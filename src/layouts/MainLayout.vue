@@ -24,6 +24,7 @@
               : 'min-width: 70px; max-width: 130px'
           "
           no-spinner
+          @click="open('https://chavi.com.br', '_system')"
         />
       </q-toolbar>
     </q-header>
@@ -52,6 +53,11 @@ export default defineComponent({
               logo
           : logo;
       },
+    },
+  },
+  methods: {
+    open(url, target) {
+      window.open(url, target);
     },
   },
 });
