@@ -1,7 +1,9 @@
 import { mapGetters } from "vuex";
 import Compressor from "compressorjs";
+import VueQrcode from "@chenfengyuan/vue-qrcode";
 
 export default ({ app, router, store }) => {
+  app.component(VueQrcode.name, VueQrcode);
   app.mixin({
     computed: {
       ...mapGetters({
