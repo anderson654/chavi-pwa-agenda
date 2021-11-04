@@ -737,8 +737,8 @@ export default defineComponent({
         infos.user = {
           nome: this.login.user.nome,
           telefone: this.login.user.telefone,
-          email: this.login.user.email,
-          cpf: this.login.user.cpf,
+          email: this.user.email ? this.user.email : this.login.user.email,
+          cpf: this.user.cpf ? this.user.cpf : this.login.user.cpf,
           id: this.login.userId,
           fotoSelfie: this.login.user.fotoSelfie,
           fotoFrente: this.login.user.fotoFrente,
