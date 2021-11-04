@@ -7,7 +7,7 @@
     >
       <span>Ops! Nenhum imóvel selecionado para marcar uma visita.</span><br />
       <span
-        >Para corrigir isso vá até o site da imobiliária e escolha um imóvel e
+        >Para corrigir isso vá até o site da imobiliária, escolha um imóvel e
         agende uma visita.
       </span>
     </div>
@@ -20,7 +20,7 @@
             indicado.
           </span>
           <span style="font-size: 1.4rem" v-if="parte == 2">
-            Agora, preencha o formulário solicitando visita ao imóvel
+            Preencha o formulário solicitando visita ao imóvel
             {{ user && user.imovelRef ? user.imovelRef : "" }} da imobiliária
             {{ cliente && cliente.nome ? cliente.nome : "" }}.<br />
             {{
@@ -48,8 +48,8 @@
         </div>
         <div v-else>
           <span style="font-size: 1.4rem">
-            Primeiro, clique no melhor <strong>dia e hora</strong> para você
-            visitar o imóvel {{ user.imovelRef }}.
+            Clique no melhor <strong>dia e hora</strong> para você visitar o
+            imóvel {{ user.imovelRef }}.
           </span>
         </div>
       </div>
@@ -329,6 +329,17 @@
           v-show="parte == 3 && utilizarDocumentos"
           class="full-width q-mt-lg"
         >
+          <div v-if="isDesktop" class="full-width text-center">
+            <span class="full-width" style="font-size: 1.1rem">
+              Caso queria, escaneie esse QRCode para continuar pelo smartphone.
+            </span>
+            <div>
+              <vue-qrcode
+                :value="qrcode"
+                :options="{ width: 200 }"
+              ></vue-qrcode>
+            </div>
+          </div>
           <div class="full-width">
             <div class="full-width text-center" style="font-size: 1.1rem">
               <span
@@ -579,15 +590,18 @@ export default defineComponent({
       aprovarVisita: false,
       utilizarEmail: true,
       /* Opções visitas */
-      noWeekend: false,
+      sabado: false,
       feriado: false,
       horaInicial: 6,
       horaFinal: 19,
-      noSunday: false,
+      domingo: false,
       timeStepMin: 15,
     };
   },
   computed: {
+    isDesktop() {
+      return this.$q.platform.is.desktop;
+    },
     getFotoFrente() {
       return URL.createObjectURL(this.fotoFrente);
     },
@@ -643,9 +657,9 @@ export default defineComponent({
       return "(##) #####-####";
     },
     getWeekDisplay() {
-      let week = [0, 1, 2, 3, 4, 5, 6];
-      if (this.noSunday) week = [1, 2, 3, 4, 5, 6];
-      if (this.noWeekend) week = [1, 2, 3, 4, 5];
+      let week = [1, 2, 3, 4, 5];
+      if (this.domingo) week.unshift(0);
+      if (this.sabado) week.push(6);
       return week;
     },
   },
@@ -669,7 +683,37 @@ export default defineComponent({
     if (params && params.entidadeId && params.imovelRef) {
       this.user.entidadeId = params.entidadeId;
       this.user.imovelRef = params.imovelRef;
+      this.user.validadeInicial = this.login.validadeInicial
+        ? this.login.validadeInicial
+        : "";
+      this.user.validadeFinal = this.login.validadeFinal
+        ? this.login.validadeFinal
+        : "";
       this.carregarHorarios();
+      this.montarQrcode();
+      if (this.login.validadeInicial && this.login.validadeFinal) {
+        // Pula para preencher o formulário
+        this.inForms = true;
+        this.parte = 2;
+        // Define horário selecionado quando no browser
+        const data = moment(this.login.validadeInicial);
+        const visita = {
+          title: "Horário Selecionado",
+          date: data.format("YYYY-MM-DD"),
+          time: data.format("HH:mm"),
+          duration: this.timeStepMin,
+          bgcolor: "green-10",
+          textColor: "text-white",
+        };
+        this.events.push(visita);
+        // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
+        delete this.login.validadeInicial;
+        delete this.login.validadeFinal;
+        this.$store.dispatch("setarDados", {
+          key: "setLogin",
+          value: this.login,
+        });
+      }
     }
     this.semImovel = false;
     if (!params || !params.entidadeId || !params.imovelRef)
@@ -677,6 +721,39 @@ export default defineComponent({
     this.setHoliday(new Date().getFullYear());
   },
   methods: {
+    montarQrcode() {
+      let url = "";
+      if (this.user && this.user.entidadeId && this.user.imovelRef) {
+        url +=
+          "http://10.151.52.64:8080/" +
+          this.user.entidadeId +
+          "/" +
+          this.user.imovelRef;
+      }
+      let infos = {};
+      if (this.login && this.login.id && this.login.user) {
+        infos.id = this.login.id;
+        infos.userId = this.login.userId;
+        infos.user = {
+          nome: this.login.user.nome,
+          telefone: this.login.user.telefone,
+          email: this.login.user.email,
+          cpf: this.login.user.cpf,
+          id: this.login.userId,
+          fotoSelfie: this.login.user.fotoSelfie,
+          fotoFrente: this.login.user.fotoFrente,
+          fotoAtras: this.login.user.fotoAtras,
+        };
+      }
+      if (this.user.validadeInicial)
+        infos.validadeInicial = this.user.validadeInicial;
+      if (this.user.validadeFinal)
+        infos.validadeFinal = this.user.validadeFinal;
+
+      if (infos) url += "/?login=" + JSON.stringify(infos);
+      this.qrcode = encodeURI(url);
+      console.log(this.qrcode);
+    },
     onTodayMonth() {
       if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.moveToToday();
       else this.$refs.calendar.moveToToday();
@@ -701,22 +778,25 @@ export default defineComponent({
           this.user.cpf != this.login.user.cpf ||
           this.user.name != this.login.user.nome)
       ) {
+        let dados = {
+          id: this.login.userId,
+          email: this.user.email,
+          cpf: this.user.cpf,
+          nome: this.user.name,
+        };
+        if (!this.user.email) delete dados.email;
         const response = await this.executeMethod({
           url: "Usuarios/atualizar",
           method: "POST",
           data: {
-            dados: {
-              id: this.login.userId,
-              email: this.user.email,
-              cpf: this.user.cpf,
-              nome: this.user.name,
-            },
+            dados: dados,
           },
         });
         if (response.status == 200) {
-          this.login = response.data;
+          this.login.user = response.data;
         }
       }
+      this.montarQrcode();
       this.utilizarDocumentos && !this.user.hasDocs
         ? (this.parte += 1)
         : (this.parte += 2);
@@ -772,7 +852,7 @@ export default defineComponent({
           title:
             "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
           message:
-            "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário que ainda não passou.</span>",
+            "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
           html: true,
           ok: "Ok",
         });
@@ -833,6 +913,7 @@ export default defineComponent({
         html: true,
         persistent: true,
       }).onOk(() => {
+        console.log(scope.timestamp.date, horario);
         const visita = {
           title: "Horário Selecionado",
           date: scope.timestamp.date,
@@ -848,6 +929,7 @@ export default defineComponent({
         this.user.validadeFinal = new Date(
           scope.timestamp.date + " " + horarioNormal
         ).getTime();
+        this.montarQrcode();
         Loading.show();
         setTimeout(() => {
           this.inForms = true;
@@ -887,8 +969,6 @@ export default defineComponent({
       }
 
       Loading.show({ message: "Gerando a visita..." });
-      // Enviar visita
-      // Validar fotos caso seja tirada pela camera (Limitar Tamanho)
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
@@ -936,8 +1016,7 @@ export default defineComponent({
         ) {
           Notify.create({
             message:
-              "Falha ao enviar mensagem via Whats App, " +
-              response.data.responseWpp.statusText,
+              "Algo inesperado aconteceu, não foi possível enviar mensagem via Whats App.",
           });
         }
         Dialog.create({
@@ -1046,12 +1125,13 @@ export default defineComponent({
                 this.cliente.preferenciaUsuario.utilizarEmail;
             }
             if (this.cliente && this.cliente.preferenciaVisita) {
-              this.noWeekend = this.cliente.preferenciaVisita.finalDeSemana
-                ? false
-                : true;
+              this.sabado = this.cliente.preferenciaVisita.sabado
+                ? true
+                : false;
               this.feriado = this.cliente.preferenciaVisita.feriado;
-              this.noSunday =
-                !this.cliente.preferenciaVisita.domingo && !this.noWeekend;
+              this.domingo = this.cliente.preferenciaVisita.domingo
+                ? true
+                : false;
               this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin
                 ? this.cliente.preferenciaVisita.intervaloMin
                 : 15;
