@@ -13,6 +13,7 @@
               : 'min-width: 70px; max-width: 130px'
           "
           no-spinner
+          class="q-my-sm"
         />
         <q-img
           style="cursor: pointer"
@@ -25,6 +26,7 @@
               : 'min-width: 70px; max-width: 130px'
           "
           no-spinner
+          class="q-my-sm"
           @click="open('https://chavi.com.br', '_system')"
         />
       </q-toolbar>
