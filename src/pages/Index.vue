@@ -725,7 +725,7 @@ export default defineComponent({
       let url = "";
       if (this.user && this.user.entidadeId && this.user.imovelRef) {
         url +=
-          "http://10.151.52.64:8080/" +
+          "https://agenda.chavi.com.br/" +
           this.user.entidadeId +
           "/" +
           this.user.imovelRef;
