@@ -15,9 +15,15 @@ export default {
     // 605e23666d9f030c2e6444ea
     // Casa
     let myParams = this.$route.params;
-
+    let query = this.$route.query;
     this.$store.dispatch("setarDados", { key: "setParams", value: myParams });
-
+    console.log(query);
+    if (query && query.login) {
+      this.$store.dispatch("setarDados", {
+        key: "setLogin",
+        value: JSON.parse(query.login),
+      });
+    }
     Loading.hide();
 
     this.$router.push("/");
