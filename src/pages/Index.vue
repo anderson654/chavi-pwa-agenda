@@ -257,6 +257,7 @@
             clearable
             :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
           />
+          <!-- //TODO: Retirar cpf do caso da hotmilk -->
           <q-input
             class="parte1 full-width"
             type="tel"
@@ -500,8 +501,10 @@
             </div>
           </div>
           <div class="text-h8 q-mt-md text-justify">
+            <!-- TODO: Ajustar checkbox -->
+            <q-checkbox v-model="user.terms" />
             <span>
-              Ao clicar em enviar, declaro que li e concordo com os
+              Declaro que li e concordo com os
               <a href="https://chavi.com.br/termos" target="_blank">
                 termos de uso e privacidade
               </a>
@@ -579,7 +582,7 @@ export default defineComponent({
         phone: "",
         cpf: "",
         email: "",
-        terms: true,
+        terms: false,
         hasDocs: false,
       },
       newUser: true,
@@ -592,8 +595,8 @@ export default defineComponent({
       /* Opções visitas */
       sabado: false,
       feriado: false,
-      horaInicial: 6,
-      horaFinal: 19,
+      horaInicial: 0,
+      horaFinal: 24,
       domingo: false,
       timeStepMin: 15,
     };
@@ -603,13 +606,25 @@ export default defineComponent({
       return this.$q.platform.is.desktop;
     },
     getFotoFrente() {
-      return URL.createObjectURL(this.fotoFrente);
+      try {
+        return URL.createObjectURL(this.fotoFrente);
+      } catch {
+        return this.fotoFrente;
+      }
     },
     getFotoAtras() {
-      return URL.createObjectURL(this.fotoVerso);
+      try {
+        return URL.createObjectURL(this.fotoVerso);
+      } catch {
+        return this.fotoVerso;
+      }
     },
     getFotoSelfie() {
-      return URL.createObjectURL(this.fotoSelfie);
+      try {
+        return URL.createObjectURL(this.fotoSelfie);
+      } catch {
+        return this.fotoSelfie;
+      }
     },
     login: {
       get() {
@@ -675,7 +690,7 @@ export default defineComponent({
           this.login.user.fotoSelfie &&
           this.login.user.fotoFrente &&
           this.login.user.fotoAtras,
-        terms: true,
+        terms: false,
       };
       if (this.user.email.includes("@chaviuser")) this.user.email = "";
     }
@@ -751,8 +766,12 @@ export default defineComponent({
         infos.validadeFinal = this.user.validadeFinal;
 
       if (infos) url += "/?login=" + JSON.stringify(infos);
-      this.qrcode = encodeURI(url);
-      console.log(this.qrcode);
+      try {
+        this.qrcode = encodeURI(url);
+        console.log(this.qrcode);
+      } catch {
+        this.qrcode = url;
+      }
     },
     onTodayMonth() {
       if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.moveToToday();
@@ -944,7 +963,10 @@ export default defineComponent({
         this.fotoFrente.length &&
         this.fotoFrente.length == 0
       ) {
-        Notify.create({ message: "Insira a foto da frente do seu documento" });
+        Notify.create({
+          message: "Insira a foto da frente do seu documento",
+          type: "warning",
+        });
         return;
       }
       if (
@@ -952,7 +974,10 @@ export default defineComponent({
         this.fotoVerso.length &&
         this.fotoVerso.length == 0
       ) {
-        Notify.create({ message: "Insira a foto do verso do seu documento" });
+        Notify.create({
+          message: "Insira a foto do verso do seu documento",
+          type: "warning",
+        });
         return;
       }
       if (
@@ -960,11 +985,14 @@ export default defineComponent({
         this.fotoSelfie.length &&
         this.fotoSelfie.length == 0
       ) {
-        Notify.create({ message: "Insira uma selfie sua" });
+        Notify.create({ message: "Insira uma selfie sua", type: "warning" });
         return;
       }
       if (!this.user.terms) {
-        Notify.create({ message: "Para prosseguir, aceite os termos de uso" });
+        Notify.create({
+          message: "Para prosseguir, aceite os termos de uso e privacidade",
+          type: "warning",
+        });
         return;
       }
 
@@ -1028,8 +1056,6 @@ export default defineComponent({
           persistent: true,
         }).onOk(() => {
           //TODO: retornar para pag. da imobiliária ou fechar iframe
-          this.$store.dispatch("setarDados", { key: "setParams", value: {} });
-          this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
           this.inForms = false;
           this.semImovel = false;
           this.parte = 1;
@@ -1147,6 +1173,7 @@ export default defineComponent({
               }
             }
             this.events = response.data.horarios;
+            console.log(this.cliente);
             this.formatData();
           } else {
             console.log("deu ruim ", response);
