@@ -20,14 +20,7 @@
             indicado.
           </span>
           <span style="font-size: 1.4rem" v-if="parte == 2">
-            Preencha o formulário solicitando visita ao imóvel
-            {{ user && user.imovelRef ? user.imovelRef : "" }} da imobiliária
-            {{ cliente && cliente.nome ? cliente.nome : "" }}.<br />
-            {{
-              isRegistredUser
-                ? "Caso tenha algum campo faltando, por favor, preencha-o"
-                : ""
-            }}
+            Preencha seus dados:
           </span>
           <div v-if="parte == 3">
             <span style="font-size: 1.4rem">Estamos quase finalizando.</span>
@@ -47,10 +40,7 @@
           </div>
         </div>
         <div v-else>
-          <span style="font-size: 1.4rem">
-            Clique no melhor <strong>dia e hora</strong> para você visitar o
-            imóvel {{ user.imovelRef }}.
-          </span>
+          <span style="font-size: 1.4rem" v-html="tituloCalendario"> </span>
         </div>
       </div>
       <div class="full-width" v-if="!inForms">
@@ -62,6 +52,12 @@
                 @prev="onPrevMonth"
                 @next="onNextMonth"
               />
+            </div>
+            <div
+              class="row justify-center items-center full-width"
+              style="font-size: 1rem"
+            >
+              <span> {{ getMonth }} </span>
             </div>
             <div style="width: 80%" v-if="!$q.platform.is.desktop">
               <q-calendar-month
@@ -133,7 +129,7 @@
                     :key="index"
                   >
                     <div
-                      v-if="holiday && feriado"
+                      v-if="holiday && !liberarFeriado"
                       class="my-event full-width rounded-border bg-green-10"
                       style="top: 0px; height: 100%; align-items: flex-start"
                     >
@@ -163,7 +159,7 @@
         @submit="onSubmit"
         @reset="onReset"
         @validation-error="onValError"
-        style="width: 90vw; max-width: 400px"
+        style="width: 90vw; max-width: 500px"
       >
         <div v-show="parte == 1" class="full-width">
           <q-input
@@ -265,6 +261,7 @@
             label-color="primary"
             style="font-size: 1.2rem"
             label="Seu CPF *"
+            hint="000.000.000-00"
             lazy-rules
             clearable
             mask="###.###.###-##"
@@ -467,10 +464,17 @@
               <div class="col-7 text-bold">{{ user.cpf }}</div>
             </div>
             <div class="row">
-              <div class="col-5">Data da visita:</div>
+              <div class="col-5">Horário:</div>
               <div class="col-7 text-bold">{{ parseData() }}</div>
             </div>
-            <div v-if="!user.hasDocs" class="row q-mt-md">
+            <div class="row" v-if="getEndereco">
+              <div class="col-5">Local:</div>
+              <div
+                class="col-7 text-bold"
+                v-html="getEndereco.replace('\n', '<br/>')"
+              ></div>
+            </div>
+            <div v-if="!user.hasDocs && utilizarDocumentos" class="row q-mt-md">
               <div class="col-5">Foto Frente:</div>
               <div class="col-7">
                 <q-img
@@ -570,6 +574,7 @@ export default defineComponent({
       semImovel: false,
       parte: 1,
       selectedDate: "",
+      duracao: "",
       type: "",
       cliente: {},
       events: [],
@@ -594,7 +599,7 @@ export default defineComponent({
       utilizarEmail: true,
       /* Opções visitas */
       sabado: false,
-      feriado: false,
+      liberarFeriado: false,
       horaInicial: 0,
       horaFinal: 24,
       domingo: false,
@@ -602,6 +607,51 @@ export default defineComponent({
     };
   },
   computed: {
+    getEndereco() {
+      return this.cliente && this.cliente.enderecoImovel
+        ? this.cliente.enderecoImovel
+        : "";
+    },
+    tituloCalendario() {
+      return !this.isHotmilk
+        ? "Clique no melhor <strong>dia e hora</strong> para visitar o imóvel " +
+            this.user.imovelRef +
+            "."
+        : "Agende o melhor <strong>dia e hora</strong> para utilizar a sala.";
+    },
+    isHotmilk() {
+      console.log(
+        this.cliente &&
+          this.cliente.nome &&
+          this.cliente.nome.toString().toLowerCase() == "hotmilk"
+      );
+      return (
+        this.cliente &&
+        this.cliente.nome &&
+        this.cliente.nome.toString().toLowerCase() == "hotmilk"
+      );
+    },
+    getMonth() {
+      const mes = [
+        "",
+        "Janeiro",
+        "Fevereiro",
+        "Março",
+        "Abril",
+        "Maio",
+        "Junho",
+        "Julho",
+        "Agosto",
+        "Setembro",
+        "Outubro",
+        "Novembro",
+        "Dezembro",
+      ];
+      const mesNum = this.selectedDate
+        ? this.selectedDate.split("-")[1]
+        : moment().format("MM");
+      return mes[parseInt(mesNum)];
+    },
     isDesktop() {
       return this.$q.platform.is.desktop;
     },
@@ -768,7 +818,6 @@ export default defineComponent({
       if (infos) url += "/?login=" + JSON.stringify(infos);
       try {
         this.qrcode = encodeURI(url);
-        console.log(this.qrcode);
       } catch {
         this.qrcode = url;
       }
@@ -822,12 +871,16 @@ export default defineComponent({
     },
     parseData() {
       if (this.user.validadeInicial && this.user.validadeFinal) {
-        const inicial = moment(new Date(this.user.validadeInicial)).format(
-          "DD/MM/YY HH:mm"
-        );
-        const final = moment(new Date(this.user.validadeFinal)).format("HH:mm");
+        const inicial = moment(new Date(this.user.validadeInicial));
+        const final = moment(new Date(this.user.validadeFinal));
+        const seMesmoDia =
+          inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
 
-        return inicial + " - " + final;
+        return seMesmoDia
+          ? inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm")
+          : inicial.format("DD/MM/YYYY HH:mm") +
+              " - " +
+              final.format("DD/MM/YYYY HH:mm");
       }
       return "";
     },
@@ -877,7 +930,6 @@ export default defineComponent({
         });
         return;
       }
-      console.log(hora, minutos, this.timeStepMin);
       if (this.timeStepMin == 15) {
         if (minutos > 45) minutos = 60;
         else if (minutos > 30) minutos = 45;
@@ -908,54 +960,105 @@ export default defineComponent({
         this.timeStepMin < 60
           ? this.timeStepMin.toString() + " minutos"
           : "1 hora";
-      console.log(hora, minutos);
-      console.log(horario, horarioNormal, diaSemana, timeStep);
-      Dialog.create({
-        title: "<span class='text-primary text-bold'>Agendamento</span>",
-        message:
-          "<span style='font-size:1.1rem'>Você confirma o seu agendamento <strong> " +
-          diaSemana +
-          " as " +
-          horario +
-          "?</strong><br/>A visita terá duração de <strong>" +
-          timeStep +
-          "</strong>.</span>",
-        ok: {
-          flat: true,
-          color: "positive",
-          label: "Sim",
-        },
-        cancel: {
-          flat: true,
-          label: "Escolher outro",
-        },
-        html: true,
-        persistent: true,
-      }).onOk(() => {
-        console.log(scope.timestamp.date, horario);
-        const visita = {
-          title: "Horário Selecionado",
-          date: scope.timestamp.date,
-          time: horario,
-          duration: this.timeStepMin,
-          bgcolor: "green-10",
-          textColor: "text-white",
-        };
-        this.events.push(visita);
-        this.user.validadeInicial = new Date(
-          scope.timestamp.date + " " + horario
-        ).getTime();
-        this.user.validadeFinal = new Date(
-          scope.timestamp.date + " " + horarioNormal
-        ).getTime();
-        this.montarQrcode();
-        Loading.show();
-        setTimeout(() => {
-          this.inForms = true;
-          if (this.login && this.login.id && this.login.user) this.parte = 2;
-          Loading.hide();
-        }, 1500);
-      });
+      if (!this.isHotmilk) {
+        Dialog.create({
+          title: "<span class='text-primary text-bold'>Agendamento</span>",
+          message:
+            "<span style='font-size:1.1rem'>Você confirma o seu agendamento <strong> " +
+            diaSemana +
+            " as " +
+            horario +
+            "?</strong><br/>A visita terá duração de <strong>" +
+            timeStep +
+            "</strong>.</span>",
+          ok: {
+            flat: true,
+            color: "positive",
+            label: "Sim",
+          },
+          cancel: {
+            flat: true,
+            label: "Escolher outro",
+          },
+          html: true,
+          persistent: true,
+        }).onOk(() => {
+          const visita = {
+            title: "Horário Selecionado",
+            date: scope.timestamp.date,
+            time: horario,
+            duration: this.timeStepMin,
+            bgcolor: "green-10",
+            textColor: "text-white",
+          };
+          this.events.push(visita);
+          this.user.validadeInicial = new Date(
+            scope.timestamp.date + " " + horario
+          ).getTime();
+          this.user.validadeFinal = new Date(
+            scope.timestamp.date + " " + horarioNormal
+          ).getTime();
+          this.montarQrcode();
+          Loading.show();
+          setTimeout(() => {
+            this.inForms = true;
+            if (this.login && this.login.id && this.login.user) this.parte = 2;
+            Loading.hide();
+          }, 1500);
+        });
+      } else {
+        Dialog.create({
+          title: "<span class='text-primary text-bold'>Agendamento</span>",
+          message:
+            "<span class='text-black' style='font-size: 1rem'> Selecione a duração da sua utilização: </span>",
+          options: {
+            type: "radio",
+            model: this.duracao,
+            items: [
+              { label: "15 minutos", value: "15" },
+              { label: "30 minutos", value: "30" },
+              { label: "1 hora", value: "60" },
+              { label: "1:30 hora", value: "90" },
+              { label: "2 horas", value: "120" },
+              { label: "2:30 horas", value: "150" },
+              { label: "3 horas", value: "180" },
+            ],
+          },
+          ok: {
+            flat: true,
+            color: "positive",
+            label: "Confirmar",
+          },
+          cancel: {
+            flat: true,
+            label: "Escolher outro",
+          },
+          html: true,
+          persistent: true,
+        }).onOk((data) => {
+          const visita = {
+            title: "Horário Selecionado",
+            date: scope.timestamp.date,
+            time: horario,
+            duration: parseInt(data),
+            bgcolor: "green-10",
+            textColor: "text-white",
+          };
+          this.events.push(visita);
+          const validadeInicial = new Date(
+            scope.timestamp.date + " " + horario
+          ).getTime();
+          this.user.validadeInicial = validadeInicial;
+          this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
+          this.montarQrcode();
+          Loading.show();
+          setTimeout(() => {
+            this.inForms = true;
+            if (this.login && this.login.id && this.login.user) this.parte = 2;
+            Loading.hide();
+          }, 1500);
+        });
+      }
     },
     async onSubmit() {
       if (
@@ -1035,7 +1138,6 @@ export default defineComponent({
       const response = await this.executeMethod(request, false);
       Loading.hide();
       if (response && response.status == 200) {
-        console.log(response);
         const message = response.data.text;
         if (
           response.data.responseWpp &&
@@ -1059,7 +1161,6 @@ export default defineComponent({
           this.inForms = false;
           this.semImovel = false;
           this.parte = 1;
-          console.log("retornar para pagina da imobiliária");
         });
       } else if (response && response.status) {
         const message = response.data
@@ -1154,13 +1255,15 @@ export default defineComponent({
               this.sabado = this.cliente.preferenciaVisita.sabado
                 ? true
                 : false;
-              this.feriado = this.cliente.preferenciaVisita.feriado;
+              this.liberarFeriado = this.cliente.preferenciaVisita.feriado;
               this.domingo = this.cliente.preferenciaVisita.domingo
                 ? true
                 : false;
-              this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin
-                ? this.cliente.preferenciaVisita.intervaloMin
-                : 15;
+              if (this.cliente.preferenciaVisita.intervaloMin) {
+                this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin;
+                this.duracao =
+                  this.cliente.preferenciaVisita.intervaloMin.toString();
+              }
               if (this.cliente.preferenciaVisita.horaInicial) {
                 this.horaInicial = this.cliente.preferenciaVisita.horaInicial
                   .toString()
@@ -1173,7 +1276,6 @@ export default defineComponent({
               }
             }
             this.events = response.data.horarios;
-            console.log(this.cliente);
             this.formatData();
           } else {
             console.log("deu ruim ", response);
