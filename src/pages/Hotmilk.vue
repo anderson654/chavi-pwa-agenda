@@ -45,7 +45,9 @@
                 color="primary"
                 text-color="white"
                 label="Sala de Reunião"
-                @click="$router.push('/5ee6bd904639f5bb55915447/Sala01')"
+                @click="
+                  $router.push('/5ee6bd904639f5bb55915447/Sala de Reunião 01')
+                "
               />
             </div>
           </div>
