@@ -5,6 +5,10 @@ const routes = [
     children: [{ path: "", component: () => import("pages/Index.vue") }],
   },
   {
+    path: "/hotmilk",
+    component: () => import("pages/Hotmilk.vue"),
+  },
+  {
     path: "/:entidadeId/:imovelRef",
     component: () => import("layouts/Registro.vue"),
   },
