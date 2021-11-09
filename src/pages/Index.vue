@@ -1115,7 +1115,6 @@ export default defineComponent({
           blob: new Blob([this.user.fotoFrente]),
           name: this.user.fotoFrente.name,
         };
-
         const blobAtras = {
           blob: new Blob([this.user.fotoAtras]),
           name: this.user.fotoAtras.name,
@@ -1158,9 +1157,9 @@ export default defineComponent({
           persistent: true,
         }).onOk(() => {
           //TODO: retornar para pag. da imobiliária ou fechar iframe
-          this.inForms = false;
-          this.semImovel = false;
-          this.parte = 1;
+          this.$store.dispatch("setarDados", { key: "setParams", value: {} });
+          this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+          window.open("https://agenda.chavi.com.br", "_self");
         });
       } else if (response && response.status) {
         const message = response.data
