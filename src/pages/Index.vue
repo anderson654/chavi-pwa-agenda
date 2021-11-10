@@ -1086,9 +1086,17 @@ export default defineComponent({
           const validadeInicial = new Date(
             scope.timestamp.date + " " + horario
           ).getTime();
+          console.log("data:  ", JSON.stringify(data));
           this.user.validadeInicial = validadeInicial;
           this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
-          console.log("this.user.:  ", JSON.stringify(this.user));
+          console.log(
+            "this.user.validadeInicial:  ",
+            JSON.stringify(this.user.validadeInicial)
+          );
+          console.log(
+            "this.user.validadeFinal:  ",
+            JSON.stringify(this.user.validadeFinal)
+          );
           this.montarQrcode();
           Loading.show();
           setTimeout(() => {
