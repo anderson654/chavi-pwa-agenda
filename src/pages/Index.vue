@@ -868,9 +868,6 @@ export default defineComponent({
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial));
         const final = moment(new Date(this.user.validadeFinal));
-        console.log("inicial:  ", inicial);
-        console.log("final:  ", final);
-        console.log("this.user:  ", JSON.stringify(this.user));
         const seMesmoDia =
           inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
 
@@ -909,7 +906,6 @@ export default defineComponent({
       return events;
     },
     onTimeClick({ event, scope }) {
-      console.log("scope:  ", JSON.stringify(scope));
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
       const dia = scope.timestamp.day;
@@ -958,10 +954,6 @@ export default defineComponent({
         this.timeStepMin < 60
           ? this.timeStepMin.toString() + " minutos"
           : "1 hora";
-      console.log("diaSemana:  ", diaSemana);
-      console.log("timeStep:  ", timeStep);
-      console.log("horario:  ", horario);
-      console.log("horarioNormal:  ", horarioNormal);
       if (!this.isHotmilk) {
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
@@ -994,26 +986,12 @@ export default defineComponent({
             textColor: "text-white",
           };
           this.events.push(visita);
-          console.log("visita:  ", JSON.stringify(visita));
           this.user.validadeInicial = new Date(
             scope.timestamp.date + " " + horario
           ).getTime();
-          console.log(
-            "scope.timestamp.date horario:  ",
-            JSON.stringify(scope.timestamp.date + " " + horario)
-          );
           this.user.validadeFinal = new Date(
             scope.timestamp.date + " " + horarioNormal
           ).getTime();
-          console.log(
-            "scope.timestamp.date horarioNormal:  ",
-            JSON.stringify(scope.timestamp.date + " " + horarioNormal)
-          );
-          console.log(
-            "Aqui ",
-            this.user.validadeInicial,
-            this.user.validadeFinal
-          );
           this.montarQrcode();
           Loading.show();
           setTimeout(() => {
@@ -1037,9 +1015,6 @@ export default defineComponent({
           { label: "3 horas", value: "180" },
         ];
         const itens = [{ label: "15 minutos", value: "15" }];
-        console.log("date:  ", JSON.stringify(date));
-        console.log("horario:  ", JSON.stringify(horario));
-        console.log("dateTime:  ", JSON.stringify(dateTime));
         for (const index in options) {
           const opt = options[index];
           const ms = parseInt(opt.value) * 60 * 1000;
@@ -1051,7 +1026,6 @@ export default defineComponent({
             if (filter.timestampInicial >= dateTimeFinal) itens.push(opt);
           } else itens.push(opt);
         }
-        console.log("itens:  ", JSON.stringify(itens));
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
           message:
@@ -1081,28 +1055,12 @@ export default defineComponent({
             bgcolor: "green-10",
             textColor: "text-white",
           };
-          console.log("visita:  ", JSON.stringify(visita));
           this.events.push(visita);
           const validadeInicial = new Date(
             (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
           ).getTime();
-          console.log(
-            "data:  ",
-            JSON.stringify(
-              (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
-            )
-          );
-          console.log("data:  ", JSON.stringify(data));
           this.user.validadeInicial = validadeInicial;
           this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
-          console.log(
-            "this.user.validadeInicial:  ",
-            JSON.stringify(this.user.validadeInicial)
-          );
-          console.log(
-            "this.user.validadeFinal:  ",
-            JSON.stringify(this.user.validadeFinal)
-          );
           this.montarQrcode();
           Loading.show();
           setTimeout(() => {
