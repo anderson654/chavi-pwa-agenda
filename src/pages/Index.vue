@@ -1084,7 +1084,7 @@ export default defineComponent({
           console.log("visita:  ", JSON.stringify(visita));
           this.events.push(visita);
           const validadeInicial = new Date(
-            scope.timestamp.date + " " + horario
+            (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
           ).getTime();
           console.log("data:  ", JSON.stringify(data));
           this.user.validadeInicial = validadeInicial;
