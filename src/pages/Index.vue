@@ -1170,7 +1170,9 @@ export default defineComponent({
           //TODO: retornar para pag. da imobiliária ou fechar iframe
           this.$store.dispatch("setarDados", { key: "setParams", value: {} });
           this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
-          window.open("https://agenda.chavi.com.br", "_self");
+          if (response.data && response.data.url)
+            window.open(response.data.url, "_self");
+          else window.open("https://agenda.chavi.com.br", "_self");
         });
       } else if (response && response.status) {
         const message = response.data
