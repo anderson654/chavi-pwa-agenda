@@ -1025,7 +1025,8 @@ export default defineComponent({
           { label: "3 horas", value: "180" },
         ];
         const itens = [{ label: "15 minutos", value: "15" }];
-
+        console.log("scope:  ", JSON.stringify(date));
+        console.log("scope:  ", JSON.stringify(dateTime));
         for (const index in options) {
           const opt = options[index];
           const ms = parseInt(opt.value) * 60 * 1000;
@@ -1037,7 +1038,7 @@ export default defineComponent({
             if (filter.timestampInicial >= dateTimeFinal) itens.push(opt);
           } else itens.push(opt);
         }
-
+        console.log("scope:  ", JSON.stringify(itens));
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
           message:
@@ -1067,12 +1068,14 @@ export default defineComponent({
             bgcolor: "green-10",
             textColor: "text-white",
           };
+          console.log("scope:  ", JSON.stringify(visita));
           this.events.push(visita);
           const validadeInicial = new Date(
             scope.timestamp.date + " " + horario
           ).getTime();
           this.user.validadeInicial = validadeInicial;
           this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
+          console.log("this.user.:  ", JSON.stringify(this.user));
           this.montarQrcode();
           Loading.show();
           setTimeout(() => {
