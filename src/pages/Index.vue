@@ -1086,6 +1086,12 @@ export default defineComponent({
           const validadeInicial = new Date(
             (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
           ).getTime();
+          console.log(
+            "data:  ",
+            JSON.stringify(
+              (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
+            )
+          );
           console.log("data:  ", JSON.stringify(data));
           this.user.validadeInicial = validadeInicial;
           this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
