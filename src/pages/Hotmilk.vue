@@ -35,7 +35,7 @@
       <q-page padding>
         <div class="full-width text-center text-black text-h5 q-mt-lg">
           <span
-            >Agendamento para sala de reunião. Para realiza-lo, selecione a sala
+            >Agendamento para sala de reunião. Para realizá-lo, selecione a sala
             desejada abaixo:</span
           >
         </div>

@@ -830,7 +830,7 @@ export default defineComponent({
       else this.$refs.calendar.next();
     },
     onClickDate(data) {
-      console.log("onMoved", data);
+      console.log("onMoved", JSON.stringify(data));
     },
     async nextStep() {
       if (!this.$refs.forms.validate()) return;
@@ -868,6 +868,9 @@ export default defineComponent({
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial));
         const final = moment(new Date(this.user.validadeFinal));
+        console.log("inicial:  ", inicial);
+        console.log("final:  ", final);
+        console.log("this.user:  ", JSON.stringify(this.user));
         const seMesmoDia =
           inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
 
@@ -906,6 +909,7 @@ export default defineComponent({
       return events;
     },
     onTimeClick({ event, scope }) {
+      console.log("scope:  ", JSON.stringify(scope));
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
       const dia = scope.timestamp.day;
@@ -954,6 +958,9 @@ export default defineComponent({
         this.timeStepMin < 60
           ? this.timeStepMin.toString() + " minutos"
           : "1 hora";
+      console.log("scope:  ", diaSemana);
+      console.log("scope:  ", timeStep);
+      console.log("scope:  ", horario);
       if (!this.isHotmilk) {
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
@@ -992,6 +999,11 @@ export default defineComponent({
           this.user.validadeFinal = new Date(
             scope.timestamp.date + " " + horarioNormal
           ).getTime();
+          console.log(
+            "Aqui ",
+            this.user.validadeInicial,
+            this.user.validadeFinal
+          );
           this.montarQrcode();
           Loading.show();
           setTimeout(() => {
