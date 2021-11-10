@@ -1024,7 +1024,9 @@ export default defineComponent({
         });
       } else {
         const date = scope.timestamp.date;
-        const dateTime = new Date(date + " " + horario).getTime();
+        const dateTime = new Date(
+          (date + " " + horario).replace(/\-/g, "/")
+        ).getTime();
         const options = [
           { label: "30 minutos", value: "30" },
           { label: "45 minutos", value: "45" },
