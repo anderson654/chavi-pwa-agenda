@@ -3,8 +3,12 @@
 </template>
 <script>
 import { defineComponent } from "vue";
+import { install } from "resize-observer";
 export default defineComponent({
   name: "App",
+  created() {
+    install();
+  },
 });
 </script>
 <style scoped>
