@@ -620,11 +620,6 @@ export default defineComponent({
         : "Agende o melhor <strong>dia e hora</strong> para utilizar a sala.";
     },
     isHotmilk() {
-      console.log(
-        this.cliente &&
-          this.cliente.nome &&
-          this.cliente.nome.toString().toLowerCase() == "hotmilk"
-      );
       return (
         this.cliente &&
         this.cliente.nome &&
@@ -948,7 +943,6 @@ export default defineComponent({
           ? "00"
           : minutos - this.timeStepMin
         ).toString();
-
       if (minutos == 60) hora = parseInt(hora) + 1;
 
       const horarioNormal =
@@ -1007,6 +1001,31 @@ export default defineComponent({
           }, 1500);
         });
       } else {
+        const date = scope.timestamp.date;
+        const dateTime = new Date(date + " " + horario).getTime();
+        const options = [
+          { label: "30 minutos", value: "30" },
+          { label: "45 minutos", value: "45" },
+          { label: "1 hora", value: "60" },
+          { label: "1:30 hora", value: "90" },
+          { label: "2 horas", value: "120" },
+          { label: "2:30 horas", value: "150" },
+          { label: "3 horas", value: "180" },
+        ];
+        const itens = [{ label: "15 minutos", value: "15" }];
+
+        for (const index in options) {
+          const opt = options[index];
+          const ms = parseInt(opt.value) * 60 * 1000;
+          const filter = this.events.find((item) => {
+            return item.timestampInicial > dateTime;
+          });
+          if (filter) {
+            const dateTimeFinal = dateTime + ms;
+            if (filter.timestampInicial >= dateTimeFinal) itens.push(opt);
+          } else itens.push(opt);
+        }
+
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
           message:
@@ -1014,15 +1033,7 @@ export default defineComponent({
           options: {
             type: "radio",
             model: this.duracao,
-            items: [
-              { label: "15 minutos", value: "15" },
-              { label: "30 minutos", value: "30" },
-              { label: "1 hora", value: "60" },
-              { label: "1:30 hora", value: "90" },
-              { label: "2 horas", value: "120" },
-              { label: "2:30 horas", value: "150" },
-              { label: "3 horas", value: "180" },
-            ],
+            items: itens,
           },
           ok: {
             flat: true,
@@ -1275,6 +1286,7 @@ export default defineComponent({
               }
             }
             this.events = response.data.horarios;
+            console.log("events ", this.events);
             this.formatData();
           } else {
             console.log("deu ruim ", response);
@@ -1299,6 +1311,7 @@ export default defineComponent({
             duration: duracao,
             bgcolor: "red-5",
             textColor: "text-white",
+            timestampInicial: horario.timestampInicial,
           });
         }
         this.events = optionsOff;
