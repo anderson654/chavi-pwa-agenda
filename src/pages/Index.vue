@@ -958,9 +958,10 @@ export default defineComponent({
         this.timeStepMin < 60
           ? this.timeStepMin.toString() + " minutos"
           : "1 hora";
-      console.log("scope:  ", diaSemana);
-      console.log("scope:  ", timeStep);
-      console.log("scope:  ", horario);
+      console.log("diaSemana:  ", diaSemana);
+      console.log("timeStep:  ", timeStep);
+      console.log("horario:  ", horario);
+      console.log("horarioNormal:  ", horarioNormal);
       if (!this.isHotmilk) {
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
@@ -993,12 +994,21 @@ export default defineComponent({
             textColor: "text-white",
           };
           this.events.push(visita);
+          console.log("visita:  ", JSON.stringify(visita));
           this.user.validadeInicial = new Date(
             scope.timestamp.date + " " + horario
           ).getTime();
+          console.log(
+            "scope.timestamp.date horario:  ",
+            JSON.stringify(scope.timestamp.date + " " + horario)
+          );
           this.user.validadeFinal = new Date(
             scope.timestamp.date + " " + horarioNormal
           ).getTime();
+          console.log(
+            "scope.timestamp.date horarioNormal:  ",
+            JSON.stringify(scope.timestamp.date + " " + horarioNormal)
+          );
           console.log(
             "Aqui ",
             this.user.validadeInicial,
@@ -1025,8 +1035,9 @@ export default defineComponent({
           { label: "3 horas", value: "180" },
         ];
         const itens = [{ label: "15 minutos", value: "15" }];
-        console.log("scope:  ", JSON.stringify(date));
-        console.log("scope:  ", JSON.stringify(dateTime));
+        console.log("date:  ", JSON.stringify(date));
+        console.log("horario:  ", JSON.stringify(horario));
+        console.log("dateTime:  ", JSON.stringify(dateTime));
         for (const index in options) {
           const opt = options[index];
           const ms = parseInt(opt.value) * 60 * 1000;
@@ -1038,7 +1049,7 @@ export default defineComponent({
             if (filter.timestampInicial >= dateTimeFinal) itens.push(opt);
           } else itens.push(opt);
         }
-        console.log("scope:  ", JSON.stringify(itens));
+        console.log("itens:  ", JSON.stringify(itens));
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
           message:
@@ -1068,7 +1079,7 @@ export default defineComponent({
             bgcolor: "green-10",
             textColor: "text-white",
           };
-          console.log("scope:  ", JSON.stringify(visita));
+          console.log("visita:  ", JSON.stringify(visita));
           this.events.push(visita);
           const validadeInicial = new Date(
             scope.timestamp.date + " " + horario
