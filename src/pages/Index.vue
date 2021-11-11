@@ -623,7 +623,8 @@ export default defineComponent({
       return (
         this.cliente &&
         this.cliente.nome &&
-        this.cliente.nome.toString().toLowerCase() == "hotmilk"
+        (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
+          this.cliente.nome.toString().toLowerCase() == "dormakaba")
       );
     },
     getMonth() {
