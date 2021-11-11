@@ -253,8 +253,8 @@
             clearable
             :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
           />
-          <!-- //TODO: Retirar cpf do caso da hotmilk -->
           <q-input
+            v-if="!isHotmilk"
             class="parte1 full-width"
             type="tel"
             v-model="user.cpf"
