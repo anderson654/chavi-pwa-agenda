@@ -59,7 +59,7 @@
                 text-color="white"
                 label="Sala de Reunião - Bloco 1 - 1º andar"
                 @click="
-                  $router.push('/5ee6bd904639f5bb55915447/Sala de Reunião 01')
+                  $router.push('/618ec1c37ec86fa253e9d3ab/Sala de Reunião 01')
                 "
               />
             </div>
