@@ -26,7 +26,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="open('https://chavi.com.br/', '_blank')"
+          @click="openLink('https://chavi.com.br/', '_blank')"
         />
       </q-toolbar>
     </q-header>
@@ -75,6 +75,7 @@
       >
         <div>
           <span
+            @click="openLink('https://chavi.com.br/', '_blank')"
             class="text-black text-h6"
             style="cursor: pointer; text-decoration: underline"
           >
@@ -90,7 +91,7 @@
 <script>
 export default {
   methods: {
-    open(url, target) {
+    openLink(url, target) {
       window.open(url, target);
     },
   },
