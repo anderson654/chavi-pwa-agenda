@@ -26,7 +26,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="open('https://chavi.com.br', '_system')"
+          @click="open('https://chavi.com.br/', '_blank')"
         />
       </q-toolbar>
     </q-header>
@@ -88,7 +88,13 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    open(url, target) {
+      window.open(url, target);
+    },
+  },
+};
 </script>
 
 <style></style>
