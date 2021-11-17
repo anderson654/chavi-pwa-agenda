@@ -26,7 +26,6 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="openLink('https://chavi.com.br', '_blank')"
         />
       </q-toolbar>
     </q-header>
