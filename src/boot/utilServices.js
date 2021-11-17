@@ -32,7 +32,13 @@ export default ({ app, router, store }) => {
           if (response.status === 0)
             errorMsg =
               "Erro conectando ao servidor, por favor tente novamente mais tarde";
-          else {
+          else if (response.status == 401) {
+            Notify.create({
+              message: "Token de acesso expirou, faça seu login novamente",
+              type: "warning",
+            });
+            this.logout();
+          } else {
             errorMsg =
               "code: " +
               response.status +
