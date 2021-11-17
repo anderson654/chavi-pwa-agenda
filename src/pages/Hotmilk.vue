@@ -15,7 +15,6 @@
           class="q-my-sm"
         />
         <q-img
-          style="cursor: pointer"
           src="chavi_marca.png"
           fit="contain"
           width="150px"
