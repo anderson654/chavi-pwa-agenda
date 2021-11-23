@@ -721,6 +721,12 @@ export default defineComponent({
       let week = [1, 2, 3, 4, 5];
       if (this.domingo) week.unshift(0);
       if (this.sabado) week.push(6);
+      setTimeout(() => {
+        this.onNextMonth();
+        setTimeout(() => {
+          this.onTodayMonth();
+        }, 500);
+      }, 500);
       return week;
     },
   },
