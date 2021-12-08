@@ -731,61 +731,66 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.selectedDate = today();
-    if (this.login && this.login.user) {
-      this.user = {
-        name: this.login.user.nome,
-        phone: this.login.user.telefone,
-        email: this.login.user.email,
-        cpf: this.login.user.cpf,
-        hasDocs:
-          this.login.user.fotoSelfie &&
-          this.login.user.fotoFrente &&
-          this.login.user.fotoAtras,
-        terms: false,
-      };
-      if (this.user.email.includes("@chaviuser")) this.user.email = "";
-    }
-    const params = this.getParams;
-    if (params && params.entidadeId && params.imovelRef) {
-      this.user.entidadeId = params.entidadeId;
-      this.user.imovelRef = params.imovelRef;
-      this.user.validadeInicial = this.login.validadeInicial
-        ? this.login.validadeInicial
-        : "";
-      this.user.validadeFinal = this.login.validadeFinal
-        ? this.login.validadeFinal
-        : "";
-      this.carregarHorarios();
-      this.montarQrcode();
-      if (this.login.validadeInicial && this.login.validadeFinal) {
-        // Pula para preencher o formulário
-        this.inForms = true;
-        this.parte = 2;
-        // Define horário selecionado quando no browser
-        const data = moment(this.login.validadeInicial);
-        const visita = {
-          title: "Horário Selecionado",
-          date: data.format("YYYY-MM-DD"),
-          time: data.format("HH:mm"),
-          duration: this.timeStepMin,
-          bgcolor: "green-10",
-          textColor: "text-white",
+    try {
+      this.selectedDate = today();
+      if (this.login && this.login.user) {
+        this.user = {
+          name: this.login.user.nome,
+          phone: this.login.user.telefone,
+          email: this.login.user.email,
+          cpf: this.login.user.cpf,
+          hasDocs:
+            this.login.user.fotoSelfie &&
+            this.login.user.fotoFrente &&
+            this.login.user.fotoAtras,
+          terms: false,
         };
-        this.events.push(visita);
-        // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
-        delete this.login.validadeInicial;
-        delete this.login.validadeFinal;
-        this.$store.dispatch("setarDados", {
-          key: "setLogin",
-          value: this.login,
-        });
+        if (this.user.email.includes("@chaviuser")) this.user.email = "";
       }
-    }
-    this.semImovel = false;
-    if (!params || !params.entidadeId || !params.imovelRef)
+      const params = this.getParams;
+      if (params && params.entidadeId && params.imovelRef) {
+        this.user.entidadeId = params.entidadeId;
+        this.user.imovelRef = params.imovelRef;
+        this.user.validadeInicial = this.login.validadeInicial
+          ? this.login.validadeInicial
+          : "";
+        this.user.validadeFinal = this.login.validadeFinal
+          ? this.login.validadeFinal
+          : "";
+        this.carregarHorarios();
+        this.montarQrcode();
+        if (this.login.validadeInicial && this.login.validadeFinal) {
+          // Pula para preencher o formulário
+          this.inForms = true;
+          this.parte = 2;
+          // Define horário selecionado quando no browser
+          const data = moment(this.login.validadeInicial);
+          const visita = {
+            title: "Horário Selecionado",
+            date: data.format("YYYY-MM-DD"),
+            time: data.format("HH:mm"),
+            duration: this.timeStepMin,
+            bgcolor: "green-10",
+            textColor: "text-white",
+          };
+          this.events.push(visita);
+          // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
+          delete this.login.validadeInicial;
+          delete this.login.validadeFinal;
+          this.$store.dispatch("setarDados", {
+            key: "setLogin",
+            value: this.login,
+          });
+        }
+      }
+      this.semImovel = false;
+      if (!params || !params.entidadeId || !params.imovelRef)
+        this.semImovel = true;
+      this.setHoliday(new Date().getFullYear());
+    } catch (e) {
+      console.log("Erro ao carregar ", e);
       this.semImovel = true;
-    this.setHoliday(new Date().getFullYear());
+    }
   },
   methods: {
     montarQrcode() {
@@ -1316,7 +1321,6 @@ export default defineComponent({
           const title = horario.usuario
             ? "Ocupado<br/>" + horario.usuario
             : "Ocupado";
-          console.log(title);
           optionsOff.push({
             title: title,
             date: inicio.date,
