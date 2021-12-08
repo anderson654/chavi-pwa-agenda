@@ -119,7 +119,7 @@
                       "
                     >
                       <div class="title q-calendar__ellipsis">
-                        {{ event.title }}
+                        <span class="text-center" v-html="event.title"></span>
                         <q-tooltip>{{ event.time }}</q-tooltip>
                       </div>
                     </div>
@@ -1313,8 +1313,12 @@ export default defineComponent({
             moment(horario.timestampInicial).format("YYYY-MM-DD HH:mm")
           );
           const duracao = horario.intervalo / 60000;
+          const title = horario.usuario
+            ? "Ocupado<br/>" + horario.usuario
+            : "Ocupado";
+          console.log(title);
           optionsOff.push({
-            title: "Ocupado",
+            title: title,
             date: inicio.date,
             time: inicio.time,
             duration: duracao,
