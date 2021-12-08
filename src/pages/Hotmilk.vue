@@ -37,29 +37,62 @@
             desejada abaixo:</span
           >
         </div>
-        <div class="full-width flex flex-center" style="margin-top: 100px">
+        <div
+          class="full-width flex flex-center q-gutter-x-lg"
+          style="margin-top: 100px"
+          v-for="(bloco, index) in blocos"
+          :key="index"
+        >
           <div
+            v-for="(andar, index2) in bloco.andares"
+            :key="index2"
             class="
-              text-center
-              column
-              q-gutter-lg
-              shadow-1
               full-width
-              q-py-xs q-pb-xl
+              row
+              flex-center
+              q-gutter-x-md q-mb-md
+              bg-grey-3
+              q-py-md
             "
             style="border-radius: 20px"
           >
-            <span class="text-black text-h5">Bloco 1 Andar 1</span>
-            <div>
-              <q-btn
-                class="q-pa-sm text-bold"
-                color="primary"
-                text-color="white"
-                label="Sala de Reunião - Bloco 1 - 1º andar"
-                @click="
-                  $router.push('/5ee6bd904639f5bb55915447/Sala de Reunião 01')
+            <div class="full-width text-center q-mb-xl">
+              <span class="text-black text-h5"
+                >Bloco {{ bloco.num }} Andar {{ andar.num }}</span
+              >
+            </div>
+            <div v-for="(sala, index3) in andar.salas" :key="index3">
+              <div
+                class="
+                  text-center
+                  column
+                  shadow-1
+                  q-gutter-y-lg q-py-xs q-pb-xl
+                  bg-white
                 "
-              />
+                style="border-radius: 20px; width: 300px"
+              >
+                <div class="text-center q-px-lg" style="max-width: 300px">
+                  <q-btn
+                    class="text-bold"
+                    color="primary"
+                    text-color="white"
+                    :label="sala.ref"
+                    @click="$router.push(sala.link)"
+                  />
+                </div>
+                <div>
+                  <q-img
+                    :src="sala.foto"
+                    spinner-color="white"
+                    style="
+                      height: 200px;
+                      max-width: 250px;
+                      object-fit: contain !important;
+                    "
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -88,6 +121,37 @@
 
 <script>
 export default {
+  data() {
+    return {
+      blocos: [
+        {
+          num: 1,
+          andares: [
+            {
+              num: 1,
+              salas: [
+                {
+                  ref: "Sala de Reunião 01",
+                  link: "/5ee6bd904639f5bb55915447/Sala de Reunião 01",
+                  foto: "sala_reuniao_01_b1a1.png",
+                },
+                {
+                  ref: "Mini Sala 01",
+                  link: "/5ee6bd904639f5bb55915447/Mini Sala 01",
+                  foto: "mini_sala_01_b1a1.png",
+                },
+                {
+                  ref: "Mini Sala 02",
+                  link: "/5ee6bd904639f5bb55915447/Mini Sala 02",
+                  foto: "mini_sala_02_b1a1.png",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  },
   methods: {
     open(url, target) {
       window.open(url, target);
