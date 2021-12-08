@@ -61,7 +61,11 @@
                 >Bloco {{ bloco.num }} Andar {{ andar.num }}</span
               >
             </div>
-            <div v-for="(sala, index3) in andar.salas" :key="index3">
+            <div
+              class="q-gutter-y-sm"
+              v-for="(sala, index3) in andar.salas"
+              :key="index3"
+            >
               <div
                 class="
                   text-center
@@ -70,7 +74,7 @@
                   q-gutter-y-lg q-py-xs q-pb-xl
                   bg-white
                 "
-                style="border-radius: 20px; width: 300px"
+                style="border-radius: 20px; width: 300px; margin-bottom: 50px"
               >
                 <div class="text-center q-px-lg" style="max-width: 300px">
                   <q-btn
