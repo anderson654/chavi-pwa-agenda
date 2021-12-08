@@ -68,6 +68,7 @@
                 locale="pt-br"
                 :weekdays="getWeekDisplay"
                 :disabled-before="disabledBefore"
+                :disabled-after="disabledAfter"
                 @click-date="onClickDate"
               />
             </div>
@@ -95,6 +96,7 @@
               :interval-start="intervalStart"
               :interval-count="intervalCount"
               :disabled-before="disabledBefore"
+              :disabled-after="disabledAfter"
               bordered
               hour24-format
               v-model="selectedDate"
@@ -604,6 +606,7 @@ export default defineComponent({
       horaFinal: 24,
       domingo: false,
       timeStepMin: 15,
+      liberarAgendamento: -1,
     };
   },
   computed: {
@@ -712,6 +715,14 @@ export default defineComponent({
     disabledBefore() {
       let ts = parseTimestamp(today());
       ts = addToDate(ts, { day: -1 });
+      return ts.date;
+    },
+    disabledAfter() {
+      if (!this.liberarAgendamento || this.liberarAgendamento < 0) return;
+      let ts = parseTimestamp(today());
+      ts = addToDate(ts, {
+        day: this.liberarAgendamento + 1,
+      });
       return ts.date;
     },
     phoneMask() {
@@ -932,6 +943,18 @@ export default defineComponent({
             "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
           message:
             "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
+          html: true,
+          ok: "Ok",
+        });
+        return;
+      }
+      let diaFuturo = parseInt(now[0]) + this.liberarAgendamento;
+      if (this.liberarAgendamento > -1 && diaFuturo <= dia) {
+        Dialog.create({
+          title:
+            "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+          message:
+            "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
           html: true,
           ok: "Ok",
         });
@@ -1297,6 +1320,12 @@ export default defineComponent({
                 this.horaFinal = this.cliente.preferenciaVisita.horaFinal
                   .toString()
                   .split(":")[0];
+              }
+              if (this.cliente.preferenciaVisita.liberarAgendamento) {
+                this.liberarAgendamento = this.cliente.preferenciaVisita
+                  .liberarAgendamento
+                  ? this.cliente.preferenciaVisita.liberarAgendamento
+                  : -1;
               }
             }
             this.events = response.data.horarios;
