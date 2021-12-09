@@ -1049,17 +1049,22 @@ export default defineComponent({
           { label: "2:30 horas", value: "150" },
           { label: "3 horas", value: "180" },
         ];
-        const itens = [{ label: "15 minutos", value: "15" }];
+        const inicial = options.find((item) => {
+          return item.value == this.timeStepMin;
+        });
+        const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
         for (const index in options) {
           const opt = options[index];
+          const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
           const ms = parseInt(opt.value) * 60 * 1000;
           const filter = this.events.find((item) => {
             return item.timestampInicial > dateTime;
           });
           if (filter) {
             const dateTimeFinal = dateTime + ms;
-            if (filter.timestampInicial >= dateTimeFinal) itens.push(opt);
-          } else itens.push(opt);
+            if (filter.timestampInicial >= dateTimeFinal && inteiro)
+              itens.push(opt);
+          } else if (inteiro) itens.push(opt);
         }
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
