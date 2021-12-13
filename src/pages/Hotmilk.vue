@@ -157,7 +157,7 @@ export default {
                 {
                   ref: "Auditório 01",
                   link: "/5ee6bd904639f5bb55915447/Auditório 01",
-                  foto: "autidorio_b1a2.png",
+                  foto: "auditorio_b1a2.png",
                 },
               ],
             },
