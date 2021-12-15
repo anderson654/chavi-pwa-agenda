@@ -140,13 +140,13 @@ export default {
                   foto: "sala_reuniao_01_b1a1.png",
                 },
                 {
-                  ref: "Mini Sala 01",
-                  link: "/5ee6bd904639f5bb55915447/Mini Sala 01",
+                  ref: "Meeting Point 01",
+                  link: "/5ee6bd904639f5bb55915447/Meeting Point 01",
                   foto: "mini_sala_01_b1a1.png",
                 },
                 {
-                  ref: "Mini Sala 02",
-                  link: "/5ee6bd904639f5bb55915447/Mini Sala 02",
+                  ref: "Meeting Point 02",
+                  link: "/5ee6bd904639f5bb55915447/Meeting Point 02",
                   foto: "mini_sala_02_b1a1.png",
                 },
               ],
