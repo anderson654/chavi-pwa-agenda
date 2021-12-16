@@ -6,6 +6,20 @@ import { defineComponent } from "vue";
 import { install } from "resize-observer";
 export default defineComponent({
   name: "App",
+  async beforeCreate() {
+    await new Promise(async (resolve, reject) => {
+      try {
+        let keys = await caches.keys();
+        console.log("KEYS ", keys);
+        for (let key of keys) {
+          caches.delete(key);
+        }
+        resolve();
+      } catch {
+        resolve();
+      }
+    });
+  },
   created() {
     install();
   },
