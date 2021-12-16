@@ -134,6 +134,7 @@ module.exports = configure(function (ctx) {
       workboxOptions: {
         skipWaiting: true,
         clientsClaim: true,
+        cleanupOutdatedCaches: true,
       }, // only for GenerateSW
 
       // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
