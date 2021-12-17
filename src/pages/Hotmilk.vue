@@ -132,6 +132,7 @@
                 <div>
                   <q-img
                     :src="sala.foto"
+                    @click="$router.push(sala.link)"
                     spinner-color="white"
                     style="
                       height: 200px;
@@ -207,7 +208,7 @@ export default {
                 },
                 {
                   ref: "Sala de Reunião 01 - 2o Andar",
-                  link: "/5ee6bd904639f5bb55915447/Auditório 01",
+                  link: "/5ee6bd904639f5bb55915447/Sala de Reunião 01 - 2o Andar",
                   foto: "sala_reuniao_01_b1a2.png",
                 },
               ],
