@@ -33,18 +33,58 @@
       <q-page padding>
         <div class="full-width text-center text-black text-h5 q-mt-lg">
           <span
-            >Agendamento para sala de reunião. Para realizá-lo, selecione a sala
-            desejada abaixo:</span
+            >Agendamento para reuniões. Para realizá-lo, selecione a sala
+            desejada.</span
           >
         </div>
         <div
+          v-if="selecionarBloco"
+          class="full-width text-h5 text-center"
+          style="margin-top: 100px"
+        >
+          <div>
+            <span>Em qual bloco você esta?</span>
+          </div>
+          <div class="q-gutter-x-md q-mt-md">
+            <q-btn
+              v-for="(bloco, index) in blocos"
+              :key="index"
+              push
+              rounded
+              color="primary"
+              :label="'Bloco ' + bloco.num"
+              @click="
+                selecionarBloco = false;
+                blocoSelecionado = bloco.num;
+              "
+            />
+          </div>
+        </div>
+        <div
+          v-else-if="!selecionarBloco && blocoSelecionado > 0"
           class="full-width flex flex-center q-gutter-x-lg"
           style="margin-top: 100px"
-          v-for="(bloco, index) in blocos"
-          :key="index"
         >
+          <div class="full-width text-center text-primary text-bold q-mb-md">
+            <span class="text-h4 text-bold">Bloco{{ blocoSelecionado }}</span>
+            <div class="q-mt-md">
+              <q-btn
+                style="font-size: 0.8rem; background-color: #0070a0"
+                class="q-px-md"
+                dense
+                rounded
+                push
+                text-color="white"
+                label="Selecionar outro bloco"
+                @click="
+                  selecionarBloco = true;
+                  blocoSelecionado = 0;
+                "
+              />
+            </div>
+          </div>
           <div
-            v-for="(andar, index2) in bloco.andares"
+            v-for="(andar, index2) in blocos[blocoSelecionado - 1].andares"
             :key="index2"
             class="
               full-width
@@ -57,8 +97,8 @@
             style="border-radius: 20px"
           >
             <div class="full-width text-center q-mb-xl">
-              <span class="text-black text-h5"
-                >Bloco {{ bloco.num }} Andar {{ andar.num }}</span
+              <span class="text-black text-h5 text-bold">
+                Andar {{ andar.num }}</span
               >
             </div>
             <div
@@ -78,6 +118,8 @@
               >
                 <div class="text-center q-px-lg" style="max-width: 300px">
                   <q-btn
+                    rounded
+                    push
                     class="text-bold"
                     color="primary"
                     text-color="white"
@@ -127,6 +169,8 @@
 export default {
   data() {
     return {
+      selecionarBloco: true,
+      blocoSelecionado: 0,
       blocos: [
         {
           num: 1,
@@ -158,6 +202,41 @@ export default {
                   ref: "Auditório 01",
                   link: "/5ee6bd904639f5bb55915447/Auditório 01",
                   foto: "auditorio_b1a2.png",
+                },
+                {
+                  ref: "Sala de Reunião 01 - 2o Andar",
+                  link: "/5ee6bd904639f5bb55915447/Auditório 01",
+                  foto: "sala_reuniao_01_b1a2.png",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          num: 2,
+          andares: [
+            {
+              num: 3,
+              salas: [
+                {
+                  ref: "Auditório Margareth Hamilton",
+                  link: "/5ee6bd904639f5bb55915447/Auditório Margareth Hamilton",
+                  foto: "default_room.png",
+                },
+                // {
+                //   ref: "Aceleradora Hotmilk",
+                //   link: "/5ee6bd904639f5bb55915447/Aceleradora Hotmilk",
+                //   foto: "",
+                // },
+              ],
+            },
+            {
+              num: 4,
+              salas: [
+                {
+                  ref: "Sala Henry Chesbrough",
+                  link: "/5ee6bd904639f5bb55915447/Sala Henry Chesbrough",
+                  foto: "default_room.png",
                 },
               ],
             },
