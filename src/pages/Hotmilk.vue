@@ -45,13 +45,15 @@
           <div>
             <span>Em qual bloco você esta?</span>
           </div>
-          <div class="q-gutter-x-md q-mt-md">
+          <div class="q-gutter-md q-mt-md">
             <q-btn
               v-for="(bloco, index) in blocos"
               :key="index"
               push
               rounded
               color="primary"
+              class="text-bold"
+              style="max-width: 200px; width: 100%"
               :label="'Bloco ' + bloco.num"
               @click="
                 selecionarBloco = false;
@@ -66,7 +68,7 @@
           style="margin-top: 100px"
         >
           <div class="full-width text-center text-primary text-bold q-mb-md">
-            <span class="text-h4 text-bold">Bloco{{ blocoSelecionado }}</span>
+            <span class="text-h4 text-bold">Bloco {{ blocoSelecionado }}</span>
             <div class="q-mt-md">
               <q-btn
                 style="font-size: 0.8rem; background-color: #0070a0"
