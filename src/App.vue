@@ -10,7 +10,6 @@ export default defineComponent({
     await new Promise(async (resolve, reject) => {
       try {
         let keys = await caches.keys();
-        console.log("KEYS ", keys);
         for (let key of keys) {
           caches.delete(key);
         }
