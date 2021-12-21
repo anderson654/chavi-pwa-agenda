@@ -224,6 +224,17 @@
         <div v-show="parte == 2" class="full-width">
           <q-input
             class="parte1 full-width"
+            label-color="primary"
+            style="font-size: 1.2rem"
+            v-model="user.name"
+            label="Seu nome *"
+            hint="Nome e sobrenome"
+            lazy-rules
+            clearable
+            :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
+          />
+          <q-input
+            class="parte1 full-width"
             type="tel"
             v-model="user.phone"
             label-color="primary"
@@ -243,18 +254,18 @@
                 (val && val.length == 15) ||
                 'Por favor, insira seu telefone no formato desejado.',
             ]"
-          />
-          <q-input
-            class="parte1 full-width"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-model="user.name"
-            label="Seu nome *"
-            hint="Nome e sobrenome"
-            lazy-rules
-            clearable
-            :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
-          />
+          >
+            <template v-slot:append>
+              <q-btn
+                style="font-size: 0.7rem"
+                icon="logout"
+                flat
+                dense
+                color="secondary"
+                @click="logout()"
+              />
+            </template>
+          </q-input>
           <q-input
             v-if="!isHotmilk"
             class="parte1 full-width"
@@ -804,6 +815,30 @@ export default defineComponent({
     }
   },
   methods: {
+    logout() {
+      Dialog.create({
+        title: "Aviso",
+        message: "Você esta prestes a fazer logout. Você tem certeza?",
+        ok: {
+          label: "Sim",
+          color: "positive",
+        },
+        cancel: {
+          label: "Não",
+          color: "negative",
+        },
+      }).onOk(async () => {
+        this.user.name = "";
+        this.user.phone = "";
+        this.user.cpf = "";
+        this.user.email = "";
+        await this.$store.dispatch("setarDados", {
+          key: "setLogin",
+          value: [],
+        });
+        this.parte = 1;
+      });
+    },
     montarQrcode() {
       let url = "";
       if (this.user && this.user.entidadeId && this.user.imovelRef) {
