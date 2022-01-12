@@ -1,6 +1,7 @@
 import { mapGetters } from "vuex";
 import Compressor from "compressorjs";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { Notify } from "quasar";
 
 export default ({ app, router, store }) => {
   app.component(VueQrcode.name, VueQrcode);
@@ -37,7 +38,7 @@ export default ({ app, router, store }) => {
               message: "Token de acesso expirou, faça seu login novamente",
               type: "warning",
             });
-            this.logout();
+            this.logout(true);
           } else {
             errorMsg =
               "code: " +
