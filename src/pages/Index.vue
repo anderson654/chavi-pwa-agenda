@@ -136,11 +136,7 @@
                       style="top: 0px; height: 100%; align-items: flex-start"
                     >
                       <div
-                        class="
-                          title
-                          q-calendar__ellipsis
-                          text-black text-center
-                        "
+                        class="title q-calendar__ellipsis text-black text-center"
                         style="font-size: 1.2rem"
                       >
                         Feriado <br />
@@ -623,7 +619,9 @@ export default defineComponent({
   computed: {
     getEndereco() {
       return this.cliente && this.cliente.enderecoImovel
-        ? this.cliente.enderecoImovel
+        ? this.user.imovelRef + " - " + this.cliente.enderecoImovel
+        : this.user.imovelRef
+        ? this.user.imovelRef
         : "";
     },
     tituloCalendario() {
@@ -815,7 +813,19 @@ export default defineComponent({
     }
   },
   methods: {
-    logout() {
+    async logout(force) {
+      if (force) {
+        this.user.name = "";
+        this.user.phone = "";
+        this.user.cpf = "";
+        this.user.email = "";
+        await this.$store.dispatch("setarDados", {
+          key: "setLogin",
+          value: [],
+        });
+        this.parte = 1;
+        return;
+      }
       Dialog.create({
         title: "Aviso",
         message: "Você esta prestes a fazer logout. Você tem certeza?",

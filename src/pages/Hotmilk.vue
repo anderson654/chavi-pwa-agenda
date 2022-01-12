@@ -88,14 +88,7 @@
           <div
             v-for="(andar, index2) in blocos[blocoSelecionado - 1].andares"
             :key="index2"
-            class="
-              full-width
-              row
-              flex-center
-              q-gutter-x-md q-mb-md
-              bg-grey-3
-              q-py-md
-            "
+            class="full-width row flex-center q-gutter-x-md q-mb-md bg-grey-3 q-py-md"
             style="border-radius: 20px"
           >
             <div class="full-width text-center q-mb-xl">
@@ -109,13 +102,7 @@
               :key="index3"
             >
               <div
-                class="
-                  text-center
-                  column
-                  shadow-1
-                  q-gutter-y-lg q-py-xs q-pb-xl
-                  bg-white
-                "
+                class="text-center column shadow-1 q-gutter-y-lg q-py-xs q-pb-xl bg-white"
                 style="border-radius: 20px; width: 300px; margin-bottom: 50px"
               >
                 <div class="text-center q-px-lg" style="max-width: 300px">
@@ -210,6 +197,16 @@ export default {
                   ref: "Sala de Reunião 01 - 2o Andar",
                   link: "/5ee6bd904639f5bb55915447/Sala de Reunião 01 - 2o Andar",
                   foto: "sala_reuniao_01_b1a2.png",
+                },
+                {
+                  ref: "Sala de Reunião 02 - 2o Andar",
+                  link: "/5ee6bd904639f5bb55915447/Sala de Reunião 02 - 2o Andar",
+                  foto: "sala_reuniao_02_b1a2.png",
+                },
+                {
+                  ref: "Sala de Reunião 03 - 2o Andar",
+                  link: "/5ee6bd904639f5bb55915447/Sala de Reunião 03 - 2o Andar",
+                  foto: "sala_reuniao_03_b1a2.png",
                 },
               ],
             },
