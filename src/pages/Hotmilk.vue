@@ -246,7 +246,7 @@ export default {
     };
   },
   methods: {
-    open(url, target) {
+    openLink(url, target) {
       window.open(url, target);
     },
   },
