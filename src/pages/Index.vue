@@ -3,13 +3,22 @@
     <div
       v-if="semImovel"
       style="height: 100vvh; font-color: black; font-size: 1.5rem"
-      class="absolute-center full-width text-center"
+      class="absolute-center row full-width justify-around"
     >
-      <span>Ops! Nenhum imóvel selecionado para marcar uma visita.</span><br />
-      <span
-        >Para corrigir isso vá até o site da imobiliária, escolha um imóvel e
-        agende uma visita.
-      </span>
+      <q-btn
+        color="primary"
+        style="width: 200px; min-width: 150px"
+        @click="$router.push('/dormakaba')"
+      >
+        <q-img src="dormakaba.png" />
+      </q-btn>
+      <q-btn
+        color="primary"
+        style="width: 200px; min-width: 150px"
+        @click="$router.push('/hotmilk')"
+      >
+        <q-img src="hotmilk.png" />
+      </q-btn>
     </div>
     <div v-else class="flex-center column">
       <div class="text-center q-my-lg" style="width: 70vw">
@@ -1255,8 +1264,8 @@ export default defineComponent({
           this.$store.dispatch("setarDados", { key: "setParams", value: {} });
           this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
           if (response.data && response.data.url)
-            window.open(response.data.url, "_self");
-          else window.open("https://agenda.chavi.com.br", "_self");
+            this.openURL(response.data.url, "_self");
+          else this.openURL("https://agenda.chavi.com.br", "_self");
         });
       } else if (response && response.status) {
         const message = response.data
@@ -1276,9 +1285,8 @@ export default defineComponent({
         });
       }
     },
-    open(link, opt) {
-      opt = opt ? opt : "";
-      window.open(link, opt, "_system");
+    openURL(link, target) {
+      window.open(link, target);
     },
     onReset() {
       this.user.name = "";
