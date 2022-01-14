@@ -1252,7 +1252,6 @@ export default defineComponent({
           html: true,
           persistent: true,
         }).onOk(() => {
-          //TODO: retornar para pag. da imobiliária ou fechar iframe
           this.$store.dispatch("setarDados", { key: "setParams", value: {} });
           this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
           if (response.data && response.data.url)
@@ -1394,18 +1393,20 @@ export default defineComponent({
         let optionsOff = [];
         for (let horario of this.events) {
           const inicio = parseTimestamp(
-            moment(horario.timestampInicial).format("YYYY-MM-DD HH:mm")
+            moment(parseInt(horario.timestampInicial)).format(
+              "YYYY-MM-DD HH:mm"
+            )
           );
           const duracao = horario.intervalo / 60000;
-          const title = horario.usuario
+          const titleBusy = horario.usuario
             ? "Ocupado<br/>" + horario.usuario
             : "Ocupado";
           optionsOff.push({
-            title: title,
+            title: horario.paraAprovar ? "Pendente" : titleBusy,
             date: inicio.date,
             time: inicio.time,
             duration: duracao,
-            bgcolor: "red-5",
+            bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
             textColor: "text-white",
             timestampInicial: horario.timestampInicial,
           });
