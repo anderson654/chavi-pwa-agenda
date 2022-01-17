@@ -3,13 +3,22 @@
     <div
       v-if="semImovel"
       style="height: 100vvh; font-color: black; font-size: 1.5rem"
-      class="absolute-center full-width text-center"
+      class="absolute-center row full-width justify-around"
     >
-      <span>Ops! Nenhum imóvel selecionado para marcar uma visita.</span><br />
-      <span
-        >Para corrigir isso vá até o site da imobiliária, escolha um imóvel e
-        agende uma visita.
-      </span>
+      <q-btn
+        color="primary"
+        style="width: 200px; min-width: 150px"
+        @click="$router.push('/dormakaba')"
+      >
+        <q-img src="dormakaba.png" />
+      </q-btn>
+      <q-btn
+        color="primary"
+        style="width: 200px; min-width: 150px"
+        @click="$router.push('/hotmilk')"
+      >
+        <q-img src="hotmilk.png" />
+      </q-btn>
     </div>
     <div v-else class="flex-center column">
       <div class="text-center q-my-lg" style="width: 70vw">
@@ -136,11 +145,7 @@
                       style="top: 0px; height: 100%; align-items: flex-start"
                     >
                       <div
-                        class="
-                          title
-                          q-calendar__ellipsis
-                          text-black text-center
-                        "
+                        class="title q-calendar__ellipsis text-black text-center"
                         style="font-size: 1.2rem"
                       >
                         Feriado <br />
@@ -623,7 +628,9 @@ export default defineComponent({
   computed: {
     getEndereco() {
       return this.cliente && this.cliente.enderecoImovel
-        ? this.cliente.enderecoImovel
+        ? this.user.imovelRef + " - " + this.cliente.enderecoImovel
+        : this.user.imovelRef
+        ? this.user.imovelRef
         : "";
     },
     tituloCalendario() {
@@ -815,7 +822,19 @@ export default defineComponent({
     }
   },
   methods: {
-    logout() {
+    async logout(force) {
+      if (force) {
+        this.user.name = "";
+        this.user.phone = "";
+        this.user.cpf = "";
+        this.user.email = "";
+        await this.$store.dispatch("setarDados", {
+          key: "setLogin",
+          value: [],
+        });
+        this.parte = 1;
+        return;
+      }
       Dialog.create({
         title: "Aviso",
         message: "Você esta prestes a fazer logout. Você tem certeza?",
@@ -1242,12 +1261,11 @@ export default defineComponent({
           html: true,
           persistent: true,
         }).onOk(() => {
-          //TODO: retornar para pag. da imobiliária ou fechar iframe
           this.$store.dispatch("setarDados", { key: "setParams", value: {} });
           this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
           if (response.data && response.data.url)
-            window.open(response.data.url, "_self");
-          else window.open("https://agenda.chavi.com.br", "_self");
+            this.openURL(response.data.url, "_self");
+          else this.openURL("https://agenda.chavi.com.br", "_self");
         });
       } else if (response && response.status) {
         const message = response.data
@@ -1267,9 +1285,8 @@ export default defineComponent({
         });
       }
     },
-    open(link, opt) {
-      opt = opt ? opt : "";
-      window.open(link, opt, "_system");
+    openURL(link, target) {
+      window.open(link, target);
     },
     onReset() {
       this.user.name = "";
@@ -1384,18 +1401,20 @@ export default defineComponent({
         let optionsOff = [];
         for (let horario of this.events) {
           const inicio = parseTimestamp(
-            moment(horario.timestampInicial).format("YYYY-MM-DD HH:mm")
+            moment(parseInt(horario.timestampInicial)).format(
+              "YYYY-MM-DD HH:mm"
+            )
           );
           const duracao = horario.intervalo / 60000;
-          const title = horario.usuario
+          const titleBusy = horario.usuario
             ? "Ocupado<br/>" + horario.usuario
             : "Ocupado";
           optionsOff.push({
-            title: title,
+            title: horario.paraAprovar ? "Pendente" : titleBusy,
             date: inicio.date,
             time: inicio.time,
             duration: duracao,
-            bgcolor: "red-5",
+            bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
             textColor: "text-white",
             timestampInicial: horario.timestampInicial,
           });
