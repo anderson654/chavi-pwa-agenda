@@ -3,18 +3,18 @@
     <div
       v-if="semImovel"
       style="height: 100vvh; font-color: black; font-size: 1.5rem"
-      class="absolute-center row full-width justify-around"
+      class="absolute-center row full-width justify-around q-gutter-md"
     >
       <q-btn
         color="primary"
-        style="width: 200px; min-width: 150px"
+        style="width: 200px; min-width: 150px; height: 125px"
         @click="$router.push('/dormakaba')"
       >
         <q-img src="dormakaba.png" />
       </q-btn>
       <q-btn
         color="primary"
-        style="width: 200px; min-width: 150px"
+        style="width: 200px; min-width: 150px; height: 125px"
         @click="$router.push('/hotmilk')"
       >
         <q-img src="hotmilk.png" />
@@ -145,7 +145,11 @@
                       style="top: 0px; height: 100%; align-items: flex-start"
                     >
                       <div
-                        class="title q-calendar__ellipsis text-black text-center"
+                        class="
+                          title
+                          q-calendar__ellipsis
+                          text-black text-center
+                        "
                         style="font-size: 1.2rem"
                       >
                         Feriado <br />
