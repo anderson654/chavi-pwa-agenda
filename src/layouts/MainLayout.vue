@@ -16,10 +16,9 @@
           class="q-my-sm"
         />
         <q-img
-          style="cursor: pointer"
+          style="cursor: pointer; min-width: 150px"
           src="chavi_marca.png"
           fit="contain"
-          width="10vw"
           :style="
             $q.platform.is.desktop
               ? 'min-width: 50px; max-width: 150px'
