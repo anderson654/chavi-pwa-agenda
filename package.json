@@ -11,6 +11,7 @@
   "dependencies": {
     "@chenfengyuan/vue-qrcode": "^2.0.0-rc.1",
     "@quasar/extras": "^1.0.0",
+    "await-internet": "^1.0.1",
     "axios": "^0.21.1",
     "compressorjs": "^1.1.1",
     "core-js": "^3.6.5",
