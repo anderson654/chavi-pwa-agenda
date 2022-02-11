@@ -145,11 +145,7 @@
                       style="top: 0px; height: 100%; align-items: flex-start"
                     >
                       <div
-                        class="
-                          title
-                          q-calendar__ellipsis
-                          text-black text-center
-                        "
+                        class="title q-calendar__ellipsis text-black text-center"
                         style="font-size: 1.2rem"
                       >
                         Feriado <br />
@@ -183,6 +179,7 @@
             :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
           />
           <q-input
+            v-if="!loginEmail"
             class="parte1 full-width"
             type="tel"
             label-color="primary"
@@ -200,6 +197,24 @@
               (val) =>
                 (val && val.length == 15) ||
                 'Por favor, insira seu telefone no formato (41) 91122-3344.',
+            ]"
+          />
+          <q-input
+            v-else
+            class="parte1 full-width"
+            type="email"
+            label-color="primary"
+            style="font-size: 1.2rem"
+            v-model="user.email"
+            label="Seu Email *"
+            lazy-rules
+            :debounce="1000"
+            :rules="[
+              (val) =>
+                (val !== null && val !== '') || 'Por favor, insira seu e-mail.',
+              (val) =>
+                verificarEmail(val) ||
+                'Por favor, insira seu email em um formato correto.',
             ]"
           />
           <q-input
@@ -226,7 +241,7 @@
               class="col-12"
               :label="codeSent ? 'Verificar Telefone' : 'Enviar Código'"
               color="positive"
-              @click="!codeSent ? sendPhone() : checkCodigo()"
+              @click="!codeSent ? sendCode() : checkCode()"
             />
           </q-btn-group>
         </div>
@@ -243,6 +258,7 @@
             :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
           />
           <q-input
+            v-if="!loginEmail"
             class="parte1 full-width"
             type="tel"
             v-model="user.phone"
@@ -276,6 +292,35 @@
             </template>
           </q-input>
           <q-input
+            class="parte1 full-width"
+            type="email"
+            v-model="user.email"
+            v-if="utilizarEmail"
+            :disable="loginEmail"
+            label-color="primary"
+            style="font-size: 1.2rem"
+            label="Seu E-mail"
+            lazy-rules
+            clearable
+            :debounce="1000"
+            :rules="[
+              (val) => (val) =>
+                verificarEmail(val) || 'Insira um e-mail válido',
+            ]"
+          >
+            <template v-slot:append>
+              <q-btn
+                v-if="loginEmail"
+                style="font-size: 0.7rem"
+                icon="logout"
+                flat
+                dense
+                color="secondary"
+                @click="logout()"
+              />
+            </template>
+          </q-input>
+          <q-input
             v-if="!isHotmilk"
             class="parte1 full-width"
             type="tel"
@@ -292,22 +337,6 @@
               (val) =>
                 (val !== null && val !== '') || 'Por favor, insira seu CPF.',
               (val) => verificarCPF(val) || 'Digite um CPF válido',
-            ]"
-          />
-          <q-input
-            class="parte1 full-width"
-            type="email"
-            v-model="user.email"
-            v-if="utilizarEmail"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            label="Seu E-mail"
-            lazy-rules
-            clearable
-            :debounce="1000"
-            :rules="[
-              (val) => (val) =>
-                verificarEmail(val) || 'Insira um e-mail válido',
             ]"
           />
           <div class="full-width q-mt-xl">
@@ -619,6 +648,7 @@ export default defineComponent({
       verificarDocumentos: true,
       aprovarVisita: false,
       utilizarEmail: true,
+      loginEmail: false,
       /* Opções visitas */
       sabado: false,
       liberarFeriado: false,
@@ -1106,6 +1136,7 @@ export default defineComponent({
           { label: "2 horas", value: "120" },
           { label: "2:30 horas", value: "150" },
           { label: "3 horas", value: "180" },
+          { label: "4 horas", value: "240" },
         ];
         const inicial = options.find((item) => {
           return item.value == this.timeStepMin;
@@ -1257,20 +1288,48 @@ export default defineComponent({
               "Algo inesperado aconteceu, não foi possível enviar mensagem via Whats App.",
           });
         }
-        Dialog.create({
+        const dialog = {
           title:
             '<span class="text-primary" style="font-size:1.2rem">Finalizada</span>',
           message: '<span style="font-size:1.0rem"> ' + message + " </span>",
           ok: "Entendido",
           html: true,
           persistent: true,
-        }).onOk(() => {
-          this.$store.dispatch("setarDados", { key: "setParams", value: {} });
-          this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
-          if (response.data && response.data.url)
-            this.openURL(response.data.url, "_self");
-          else this.openURL("https://agenda.chavi.com.br", "_self");
-        });
+        };
+        if (response.data.ics) dialog.cancel = "Agendar visita";
+        Dialog.create(dialog)
+          .onOk(() => {
+            this.$store.dispatch("setarDados", { key: "setParams", value: {} });
+            this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+            if (response.data && response.data.url)
+              this.openURL(response.data.url, "_self");
+            else this.openURL("https://agenda.chavi.com.br", "_self");
+          })
+          .onCancel(async () => {
+            const ics = response.data.ics;
+            window.open(
+              `${process.env.VUE_APP_API_URL}/StorageContainers/ics/download/${ics}`,
+              "_system"
+            );
+            Dialog.create({
+              title:
+                '<span class="text-primary" style="font-size:1.2rem">Download do agendamento sendo feito</span>',
+              message:
+                '<span style="font-size:1.0rem">Após o download, abra o arquivo para marcar o agendamento em sua agenda</span>',
+              ok: "Abrir visita",
+              persistent: true,
+              html: true,
+            }).onOk(() => {
+              this.$store.dispatch("setarDados", {
+                key: "setParams",
+                value: {},
+              });
+              this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+              if (response.data && response.data.url)
+                this.openURL(response.data.url, "_self");
+              else this.openURL("https://agenda.chavi.com.br", "_self");
+            });
+          });
       } else if (response && response.status) {
         const message = response.data
           ? response.data.message
@@ -1332,6 +1391,9 @@ export default defineComponent({
     },
     async carregarHorarios() {
       try {
+        Loading.show({
+          message: "Carregando dados",
+        });
         const cliente = this.user.entidadeId;
         const imovel = this.user.imovelRef;
         if (cliente) {
@@ -1358,6 +1420,7 @@ export default defineComponent({
                 this.cliente.preferenciaUsuario.verificarDocumentos;
               this.utilizarEmail =
                 this.cliente.preferenciaUsuario.utilizarEmail;
+              this.loginEmail = this.cliente.preferenciaUsuario.loginEmail;
             }
             if (this.cliente && this.cliente.preferenciaVisita) {
               this.sabado = this.cliente.preferenciaVisita.sabado
@@ -1398,6 +1461,8 @@ export default defineComponent({
         }
       } catch (e) {
         console.log(e);
+      } finally {
+        Loading.hide();
       }
     },
     formatData() {
@@ -1426,7 +1491,11 @@ export default defineComponent({
         this.events = optionsOff;
       }
     },
-    async sendPhone() {
+    async sendCode() {
+      if (this.loginEmail) {
+        // TODO: Implementar fluxo servidor de login por e-mail
+        return;
+      }
       if (this.user && this.user.phone && this.user.phone.length == 15) {
         Loading.show({ message: "Verificando cadastro do usuário" });
         let response = await this.executeMethod(
@@ -1456,7 +1525,12 @@ export default defineComponent({
         Loading.hide();
       }
     },
-    async checkCodigo() {
+    async checkCode() {
+      if (this.loginEmail) {
+        // TODO: Implementar fluxo verificação de código
+        return;
+      }
+
       if (this.newUser) {
         Loading.show({ delay: 400 });
         let response = await this.executeMethod(
