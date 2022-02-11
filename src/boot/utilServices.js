@@ -1,7 +1,8 @@
 import { mapGetters } from "vuex";
 import Compressor from "compressorjs";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
-import { Notify } from "quasar";
+import { Loading, Notify } from "quasar";
+import internet from "await-internet";
 
 export default ({ app, router, store }) => {
   app.component(VueQrcode.name, VueQrcode);
@@ -127,6 +128,35 @@ export default ({ app, router, store }) => {
               resolve(file);
             },
           });
+        });
+      },
+      /**
+       * Verifica se a conexão da internet está estável
+       * @returns Boolean
+       */
+      checkConnectionStatus() {
+        return new Promise((resolve, reject) => {
+          Loading.show({
+            message: "Verificando status da conexão de internet",
+          });
+          internet({
+            test: ["agenda.chavi.com.br", "google.com.br"],
+            maxTries: 5,
+            pause: 5000,
+            timeout: 10000,
+            maxWait: 100000,
+          })
+            .then(() => {
+              console.log("Connected to internet");
+              resolve(true);
+            })
+            .catch((e) => {
+              console.log("Error connection to internet", e);
+              reject(false);
+            })
+            .finally(() => {
+              Loading.hide();
+            });
         });
       },
     },
