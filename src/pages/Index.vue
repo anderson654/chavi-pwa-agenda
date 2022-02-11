@@ -239,7 +239,7 @@
           <q-btn-group push flat unelevated class="full-width row q-mt-md">
             <q-btn
               class="col-12"
-              :label="codeSent ? 'Verificar Telefone' : 'Enviar Código'"
+              :label="codeSent ? 'Verificar Código' : 'Enviar Código'"
               color="positive"
               @click="!codeSent ? sendCode() : checkCode()"
             />
@@ -296,7 +296,6 @@
             type="email"
             v-model="user.email"
             v-if="utilizarEmail"
-            :disable="loginEmail"
             label-color="primary"
             style="font-size: 1.2rem"
             label="Seu E-mail"
@@ -1296,7 +1295,7 @@ export default defineComponent({
           html: true,
           persistent: true,
         };
-        if (response.data.ics) dialog.cancel = "Agendar visita";
+        if (response.data.ics) dialog.cancel = "Salvar no calendário";
         Dialog.create(dialog)
           .onOk(() => {
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
@@ -1362,7 +1361,7 @@ export default defineComponent({
     verificarEmail(valor) {
       const regexp = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?/i;
       const regexp2 = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]/i;
-      return regexp.test(valor) || regexp2.test(valor) || !utilizarEmail;
+      return regexp.test(valor) || regexp2.test(valor) || !this.utilizarEmail;
     },
     verificarCPF(valor) {
       if (valor) {
@@ -1492,13 +1491,23 @@ export default defineComponent({
       }
     },
     async sendCode() {
-      if (this.loginEmail) {
-        // TODO: Implementar fluxo servidor de login por e-mail
+      let response;
+      if (
+        !this.user ||
+        (this.loginEmail && !this.user.email) ||
+        (!this.loginEmail && !this.user.phone)
+      ) {
         return;
       }
-      if (this.user && this.user.phone && this.user.phone.length == 15) {
-        Loading.show({ message: "Verificando cadastro do usuário" });
-        let response = await this.executeMethod(
+      Loading.show({ message: "Verificando cadastro do usuário" });
+      if (this.loginEmail)
+        response = await this.executeMethod({
+          url: "Usuarios/verificarEmail",
+          method: "post",
+          data: { email: this.user.email },
+        });
+      else
+        response = await this.executeMethod(
           {
             url: "Usuarios/loginTelefone",
             method: "post",
@@ -1506,45 +1515,56 @@ export default defineComponent({
           },
           false
         );
-        if (response.status == 200 || response.status == 201) {
-          Notify.create({
-            message: "Código de Confirmação enviado com Sucesso.",
-            type: "positive",
-          });
-          this.codeSent = true;
-          this.newUser = response.status == 200 ? false : true;
-          if (response.status === 201) {
-            this.user.codigo = response.data;
-          }
-        } else {
-          Notify.create({
-            message: "Erro ao enviar Informações ao Servidor.",
-            type: "negative",
-          });
+      if (response.status == 200 || response.status == 201) {
+        Notify.create({
+          message: "Código de Confirmação enviado com Sucesso.",
+          type: "positive",
+        });
+        this.codeSent = true;
+        this.newUser = response.status == 200 ? false : true;
+        if (response.status === 201) {
+          this.user.codigo = response.data;
         }
-        Loading.hide();
+      } else {
+        Notify.create({
+          message: "Erro ao enviar Informações ao Servidor.",
+          type: "negative",
+        });
       }
+      Loading.hide();
     },
     async checkCode() {
-      if (this.loginEmail) {
-        // TODO: Implementar fluxo verificação de código
-        return;
-      }
-
+      let response;
       if (this.newUser) {
         Loading.show({ delay: 400 });
-        let response = await this.executeMethod(
-          {
-            url: "Usuarios/cadastrar",
-            method: "post",
-            data: {
-              telefone: this.user.phone,
-              nomeCompleto: this.user.name.trim(),
-              loginCodigo: this.user.codigo,
+        if (this.loginEmail)
+          response = await this.executeMethod(
+            {
+              url: "Usuarios/cadastroPorEmail",
+              method: "post",
+              data: {
+                dados: {
+                  email: this.user.email,
+                  nome: this.user.name.trim(),
+                  codigo: this.user.codigo,
+                },
+              },
             },
-          },
-          false
-        );
+            false
+          );
+        else
+          response = await this.executeMethod(
+            {
+              url: "Usuarios/cadastrar",
+              method: "post",
+              data: {
+                telefone: this.user.phone,
+                nomeCompleto: this.user.name.trim(),
+                loginCodigo: this.user.codigo,
+              },
+            },
+            false
+          );
         Loading.hide();
         if (response.status != 200) {
           Notify.create({
@@ -1556,12 +1576,12 @@ export default defineComponent({
         } else if (response.status == 200) this.newUser = false;
       }
       Loading.show({ delay: 400 });
-      let response = await this.executeMethod(
+      response = await this.executeMethod(
         {
           url: "Usuarios/novoLogin",
           method: "post",
           data: {
-            username: this.user.phone,
+            username: this.loginEmail ? this.user.email : this.user.phone,
             codigo: this.user.codigoInput,
           },
         },
