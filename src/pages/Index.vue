@@ -586,6 +586,23 @@
           </q-btn-group>
         </div>
       </q-form>
+      <q-footer
+        class="full-width fixed-bottom q-py-xs flex justify-center bg-grey-3"
+        elevated
+      >
+        <q-btn
+          style="max-width: 200px"
+          class="full-width"
+          outline
+          rounded
+          push
+          no-caps
+          color="primary"
+          icon="home"
+          label="Início"
+          @click="telaInicial()"
+        />
+      </q-footer>
     </div>
   </q-page>
 </template>
@@ -671,7 +688,7 @@ export default defineComponent({
         ? "Clique no melhor <strong>dia e hora</strong> para visitar o imóvel " +
             this.user.imovelRef +
             "."
-        : "Agende o melhor <strong>dia e hora</strong> para utilizar a sala.";
+        : `Agende o melhor <strong>dia e hora</strong> para utilizar ${this.user.imovelRef}`;
     },
     isHotmilk() {
       return (
@@ -855,6 +872,11 @@ export default defineComponent({
     }
   },
   methods: {
+    async telaInicial() {
+      await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
+      await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+      this.semImovel = true;
+    },
     async logout(force) {
       if (force) {
         this.user.name = "";
@@ -1300,6 +1322,7 @@ export default defineComponent({
           .onOk(() => {
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+            this.semImovel = true;
             if (response.data && response.data.url)
               this.openURL(response.data.url, "_self");
             else this.openURL("https://agenda.chavi.com.br", "_self");
@@ -1324,6 +1347,7 @@ export default defineComponent({
                 value: {},
               });
               this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+              this.semImovel = true;
               if (response.data && response.data.url)
                 this.openURL(response.data.url, "_self");
               else this.openURL("https://agenda.chavi.com.br", "_self");
