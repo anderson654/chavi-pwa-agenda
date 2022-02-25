@@ -8,13 +8,6 @@
       <q-btn
         color="primary"
         style="width: 200px; min-width: 150px; height: 125px"
-        @click="$router.push('/dormakaba')"
-      >
-        <q-img src="dormakaba.png" />
-      </q-btn>
-      <q-btn
-        color="primary"
-        style="width: 200px; min-width: 150px; height: 125px"
         @click="$router.push('/hotmilk')"
       >
         <q-img src="hotmilk.png" />
@@ -870,6 +863,7 @@ export default defineComponent({
       console.log("Erro ao carregar ", e);
       this.semImovel = true;
     }
+    if (this.semImovel) this.$router.push("/hotmilk");
   },
   methods: {
     async telaInicial() {
