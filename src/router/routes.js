@@ -8,10 +8,10 @@ const routes = [
     path: "/hotmilk",
     component: () => import("pages/Hotmilk.vue"),
   },
-  {
-    path: "/dormakaba",
-    component: () => import("pages/Dormakaba.vue"),
-  },
+  // {
+  //   path: "/dormakaba",
+  //   component: () => import("pages/Dormakaba.vue"),
+  // },
   {
     path: "/:entidadeId/:imovelRef",
     component: () => import("layouts/Registro.vue"),
