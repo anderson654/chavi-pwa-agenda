@@ -192,6 +192,7 @@
             :rules="[(val) => (val && val.length > 0) || 'Insira o seu nome']"
           />
           <q-input
+            v-if="isHotmilk"
             class="parte1 full-width text-h5"
             label-color="primary"
             style="font-size: 1.2rem"
@@ -1012,7 +1013,9 @@ export default defineComponent({
           this.user.cpf != this.login.user.cpf ||
           this.user.name != this.login.user.nome)
       ) {
-        const nome = this.user.name + " - " + this.user.empresa;
+        const nome = this.isHotmilk
+          ? this.user.name + " - " + this.user.empresa
+          : this.user.name;
         let dados = {
           id: this.login.userId,
           email: this.user.email,
@@ -1606,7 +1609,9 @@ export default defineComponent({
     },
     async checkCode() {
       let response;
-      const nome = this.user.name + " - " + this.user.empresa;
+      const nome = this.isHotmilk
+        ? this.user.name + " - " + this.user.empresa
+        : this.user.name;
       if (this.newUser) {
         Loading.show({ delay: 400 });
         if (this.loginEmail)
