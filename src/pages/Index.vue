@@ -33,16 +33,36 @@
             </span>
           </div>
           <div v-if="parte == 4">
-            <span style="font-size: 1.4rem" class="text-primary">Pronto!</span
-            ><br />
+            <span style="font-size: 1.4rem" class="text-primary">
+              Sua reserva em {{ user.imovelRef }} está quase pronta
+            </span>
+            <div class="full-width flex justify-center q-mt-sm">
+              <q-img
+                v-if="logo"
+                :src="logo"
+                spinner-color="primary"
+                fit="contain"
+                style="max-width: 300px"
+              />
+            </div>
+            <br />
             <span style="font-size: 1.2rem"
               >Agora é só revisar os dados e enviar a solicitação de
               agendamento.</span
             >
           </div>
         </div>
-        <div v-else>
+        <div v-else class="text-center column">
           <span style="font-size: 1.4rem" v-html="tituloCalendario"> </span>
+          <div class="full-width flex justify-center q-mt-sm">
+            <q-img
+              v-if="logo"
+              :src="logo"
+              spinner-color="primary"
+              fit="contain"
+              style="max-width: 300px"
+            />
+          </div>
         </div>
       </div>
       <div class="full-width" v-if="!inForms">
@@ -167,9 +187,18 @@
             label-color="primary"
             style="font-size: 1.2rem"
             v-model="user.name"
-            label="Seu nome *"
+            label="Seu nome*"
             lazy-rules
-            :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
+            :rules="[(val) => (val && val.length > 0) || 'Insira o seu nome']"
+          />
+          <q-input
+            class="parte1 full-width text-h5"
+            label-color="primary"
+            style="font-size: 1.2rem"
+            v-model="user.empresa"
+            label="Sua empresa ou instituição*"
+            lazy-rules
+            :rules="[(val) => (val && val.length > 0) || 'Complete esse campo']"
           />
           <q-input
             v-if="!loginEmail"
@@ -574,12 +603,14 @@
               class="col-6 q-ml-xs"
               label="Enviar"
               type="submit"
+              @click="onSubmit"
               color="positive"
             />
           </q-btn-group>
         </div>
       </q-form>
       <q-footer
+        v-if="isHotmilk"
         class="full-width fixed-bottom q-py-xs flex justify-center bg-grey-3"
         elevated
       >
@@ -644,6 +675,7 @@ export default defineComponent({
       fotoVerso: [],
       user: {
         name: "",
+        empresa: "",
         phone: "",
         cpf: "",
         email: "",
@@ -669,6 +701,12 @@ export default defineComponent({
     };
   },
   computed: {
+    logo() {
+      let path = `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/`;
+      return this.cliente && this.cliente.fotoImovel
+        ? path + this.cliente.fotoImovel
+        : false;
+    },
     getEndereco() {
       return this.cliente && this.cliente.enderecoImovel
         ? this.user.imovelRef + " - " + this.cliente.enderecoImovel
@@ -870,6 +908,7 @@ export default defineComponent({
       await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
       await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
       this.semImovel = true;
+      this.$router.push("/hotmilk");
     },
     async logout(force) {
       if (force) {
@@ -967,11 +1006,12 @@ export default defineComponent({
           this.user.cpf != this.login.user.cpf ||
           this.user.name != this.login.user.nome)
       ) {
+        const nome = this.user.name + " - " + this.user.empresa;
         let dados = {
           id: this.login.userId,
           email: this.user.email,
           cpf: this.user.cpf,
-          nome: this.user.name,
+          nome: nome,
         };
         if (!this.user.email) delete dados.email;
         const response = await this.executeMethod({
@@ -1149,9 +1189,9 @@ export default defineComponent({
           { label: "1 hora", value: "60" },
           { label: "1:30 hora", value: "90" },
           { label: "2 horas", value: "120" },
-          { label: "2:30 horas", value: "150" },
-          { label: "3 horas", value: "180" },
-          { label: "4 horas", value: "240" },
+          // { label: "2:30 horas", value: "150" },
+          // { label: "3 horas", value: "180" },
+          // { label: "4 horas", value: "240" },
         ];
         const inicial = options.find((item) => {
           return item.value == this.timeStepMin;
@@ -1173,7 +1213,7 @@ export default defineComponent({
         Dialog.create({
           title: "<span class='text-primary text-bold'>Agendamento</span>",
           message:
-            "<span class='text-black' style='font-size: 1rem'> Selecione a duração da sua utilização: </span>",
+            "<span class='text-black' style='font-size: 1rem'> Selecione a duração da sua utilização: </span> <br/> <span style='font-size: 0.8rem'>Acima de duas horas os agendamentos estão sugeitos a aprovação.</span>",
           options: {
             type: "radio",
             model: this.duracao,
@@ -1209,7 +1249,12 @@ export default defineComponent({
           Loading.show();
           setTimeout(() => {
             this.inForms = true;
-            if (this.login && this.login.id && this.login.user) this.parte = 2;
+            if (this.login && this.login.id && this.login.user) {
+              console.log(!this.utilizarEmail, !this.utilizarDocumentos);
+              if (!this.utilizarEmail && !this.utilizarDocumentos)
+                this.parte = 4;
+              else this.parte = 2;
+            }
             Loading.hide();
           }, 1500);
         });
@@ -1227,6 +1272,7 @@ export default defineComponent({
         });
         return;
       }
+
       if (
         this.fotoVerso &&
         this.fotoVerso.length &&
@@ -1238,6 +1284,7 @@ export default defineComponent({
         });
         return;
       }
+
       if (
         this.fotoSelfie &&
         this.fotoSelfie.length &&
@@ -1246,6 +1293,7 @@ export default defineComponent({
         Notify.create({ message: "Insira uma selfie sua", type: "warning" });
         return;
       }
+
       if (!this.user.terms) {
         Notify.create({
           message: "Para prosseguir, aceite os termos de uso e privacidade",
@@ -1253,14 +1301,14 @@ export default defineComponent({
         });
         return;
       }
-
       Loading.show({ message: "Gerando a visita..." });
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
         data: this.user,
       };
-
+      this.user.paraAprovar =
+        this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
       if (!this.user.hasDocs) {
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
@@ -1470,7 +1518,6 @@ export default defineComponent({
               }
             }
             this.events = response.data.horarios;
-            console.log("events ", this.events);
             this.formatData();
           } else {
             console.log("deu ruim ", response);
@@ -1553,6 +1600,7 @@ export default defineComponent({
     },
     async checkCode() {
       let response;
+      const nome = this.user.name + " - " + this.user.empresa;
       if (this.newUser) {
         Loading.show({ delay: 400 });
         if (this.loginEmail)
@@ -1563,7 +1611,7 @@ export default defineComponent({
               data: {
                 dados: {
                   email: this.user.email,
-                  nome: this.user.name.trim(),
+                  nome: nome.trim(),
                   codigo: this.user.codigo,
                 },
               },
@@ -1577,7 +1625,7 @@ export default defineComponent({
               method: "post",
               data: {
                 telefone: this.user.phone,
-                nomeCompleto: this.user.name.trim(),
+                nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
               },
             },
@@ -1619,6 +1667,7 @@ export default defineComponent({
           response.data.user.fotoSelfie;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
         this.parte += 1;
+        if (!this.utilizarEmail && !this.utilizarDocumentos) this.nextStep();
       } else {
         Notify.create({
           message: "Número de Telefone inválido ou Código SMS incorreto.",

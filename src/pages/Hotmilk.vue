@@ -45,21 +45,27 @@
           <div>
             <span>Em qual bloco você esta?</span>
           </div>
-          <div class="q-gutter-md q-mt-md">
-            <q-btn
+          <div class="flex justify-around q-mt-md">
+            <div
               v-for="(bloco, index) in blocos"
               :key="index"
-              push
-              rounded
-              color="primary"
-              class="text-bold"
-              style="max-width: 200px; width: 100%"
-              :label="'Bloco ' + bloco.num"
-              @click="
-                selecionarBloco = false;
-                blocoSelecionado = bloco.num;
-              "
-            />
+              class="q-my-sm column flex content-center"
+              style="width: 48%"
+            >
+              <q-btn
+                push
+                rounded
+                color="primary"
+                class="text-bold q-mb-md"
+                style="max-width: 300px; width: 100%"
+                :label="'Bloco ' + bloco.num"
+                @click="
+                  selecionarBloco = false;
+                  blocoSelecionado = bloco.num;
+                "
+              />
+              <q-img :src="bloco.foto" fit="contain" style="max-width: 300px" />
+            </div>
           </div>
         </div>
         <div
@@ -68,8 +74,7 @@
           style="margin-top: 100px"
         >
           <div class="full-width text-center text-primary text-bold q-mb-md">
-            <span class="text-h4 text-bold">Bloco {{ blocoSelecionado }}</span>
-            <div class="q-mt-md">
+            <div class="q-mb-md">
               <q-btn
                 style="font-size: 0.8rem; background-color: #0070a0"
                 class="q-px-md"
@@ -84,18 +89,12 @@
                 "
               />
             </div>
+            <span class="text-h4 text-bold">Bloco {{ blocoSelecionado }}</span>
           </div>
           <div
             v-for="(andar, index2) in blocos[blocoSelecionado - 1].andares"
             :key="index2"
-            class="
-              full-width
-              row
-              flex-center
-              q-gutter-x-md q-mb-md
-              bg-grey-3
-              q-py-md
-            "
+            class="full-width row flex-center q-gutter-x-md q-mb-md bg-grey-3 q-py-md"
             style="border-radius: 20px"
           >
             <div class="full-width text-center q-mb-xl">
@@ -109,13 +108,7 @@
               :key="index3"
             >
               <div
-                class="
-                  text-center
-                  column
-                  shadow-1
-                  q-gutter-y-lg q-py-xs q-pb-xl
-                  bg-white
-                "
+                class="text-center column shadow-1 q-gutter-y-lg q-py-xs q-pb-xl bg-white"
                 style="border-radius: 20px; width: 300px; margin-bottom: 50px"
               >
                 <div class="text-center q-px-lg" style="max-width: 300px">
@@ -176,6 +169,7 @@ export default {
       blocoSelecionado: 0,
       blocos: [
         {
+          foto: "bloco_1.png",
           num: 1,
           andares: [
             {
@@ -226,6 +220,7 @@ export default {
           ],
         },
         {
+          foto: "bloco_2.png",
           num: 2,
           andares: [
             {
@@ -234,13 +229,18 @@ export default {
                 {
                   ref: "Auditório Margareth Hamilton",
                   link: "/5ee6bd904639f5bb55915447/Auditório Margareth Hamilton",
-                  foto: "default_room.png",
+                  foto: "auditorio_margareth_hamilton.png",
                 },
-                // {
-                //   ref: "Aceleradora Hotmilk",
-                //   link: "/5ee6bd904639f5bb55915447/Aceleradora Hotmilk",
-                //   foto: "",
-                // },
+                {
+                  ref: "Aceleradora Hotmilk",
+                  link: "/5ee6bd904639f5bb55915447/Aceleradora Hotmilk",
+                  foto: "sala_hotmilk_aceleradora.png",
+                },
+                {
+                  ref: "Lean Startup",
+                  link: "/5ee6bd904639f5bb55915447/Lean Startup",
+                  foto: "sala_lean_startup.png",
+                },
               ],
             },
             {
@@ -249,7 +249,7 @@ export default {
                 {
                   ref: "Sala Henry Chesbrough",
                   link: "/5ee6bd904639f5bb55915447/Sala Henry Chesbrough",
-                  foto: "default_room.png",
+                  foto: "sala_henry_chesbrough.png",
                 },
               ],
             },
