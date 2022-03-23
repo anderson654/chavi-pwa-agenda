@@ -176,8 +176,8 @@ export default {
               num: 1,
               salas: [
                 {
-                  ref: "Sala de Reunião 01",
-                  link: "/5ee6bd904639f5bb55915447/Sala de Reunião 01",
+                  ref: "Sala 01 Tarumã",
+                  link: "/5ee6bd904639f5bb55915447/Sala 01 Tarumã",
                   foto: "sala_reuniao_01_b1a1.png",
                 },
                 {
@@ -201,18 +201,18 @@ export default {
                   foto: "auditorio_b1a2.png",
                 },
                 {
-                  ref: "Sala de Reunião 01 - 2o Andar",
-                  link: "/5ee6bd904639f5bb55915447/Sala de Reunião 01 - 2o Andar",
+                  ref: "Sala 01 Rebouças",
+                  link: "/5ee6bd904639f5bb55915447/Sala 01 Rebouças",
                   foto: "sala_reuniao_01_b1a2.png",
                 },
                 {
-                  ref: "Sala de Reunião 02 - 2o Andar",
-                  link: "/5ee6bd904639f5bb55915447/Sala de Reunião 02 - 2o Andar",
+                  ref: "Sala 02 Ópera de Arame",
+                  link: "/5ee6bd904639f5bb55915447/Sala 02 Ópera de Arame",
                   foto: "sala_reuniao_02_b1a2.png",
                 },
                 {
-                  ref: "Sala de Reunião 03 - 2o Andar",
-                  link: "/5ee6bd904639f5bb55915447/Sala de Reunião 03 - 2o Andar",
+                  ref: "Sala 03 Rua das Flores",
+                  link: "/5ee6bd904639f5bb55915447/Sala 03 Rua das Flores",
                   foto: "sala_reuniao_03_b1a2.png",
                 },
               ],
