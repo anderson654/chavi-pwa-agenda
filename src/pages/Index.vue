@@ -703,6 +703,12 @@ export default defineComponent({
   computed: {
     logo() {
       let path = `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/`;
+      if (
+        this.cliente &&
+        this.cliente.fotoImovel &&
+        this.cliente.fotoImovel.indexOf("https://") > -1
+      )
+        return this.cliente.fotoImovel;
       return this.cliente && this.cliente.fotoImovel
         ? path + this.cliente.fotoImovel
         : false;
