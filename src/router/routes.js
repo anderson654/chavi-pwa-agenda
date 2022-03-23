@@ -8,6 +8,11 @@ const routes = [
     path: "/hotmilk",
     component: () => import("pages/Hotmilk.vue"),
   },
+  {
+    path: "/galvao",
+    component: () => import("layouts/Galvao.vue"),
+    children: [{ path: "", component: () => import("pages/Index.vue") }],
+  },
   // {
   //   path: "/dormakaba",
   //   component: () => import("pages/Dormakaba.vue"),
@@ -16,7 +21,6 @@ const routes = [
     path: "/:entidadeId/:imovelRef",
     component: () => import("layouts/Registro.vue"),
   },
-
   // Always leave this as last one,
   // but you can also remove it
   {
