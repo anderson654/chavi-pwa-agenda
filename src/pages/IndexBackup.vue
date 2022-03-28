@@ -1,6 +1,5 @@
 <template>
   <q-page class="flex-center column">
-    <!-- SEM IMÓVEL -->
     <div
       v-if="semImovel"
       style="height: 100vvh; font-color: black; font-size: 1.5rem"
@@ -14,9 +13,7 @@
         <q-img src="hotmilk.png" />
       </q-btn>
     </div>
-    <!-- CALENDÁRIO -->
     <div v-else class="flex-center column">
-      <!-- TÍTULOS/HEADES -->
       <div class="text-center q-my-lg" style="width: 70vw">
         <div v-if="inForms">
           <span style="font-size: 1.4rem" v-if="parte == 1">
@@ -68,11 +65,9 @@
           </div>
         </div>
       </div>
-      <!-- CALENDÁRIO -->
       <div class="full-width" v-if="!inForms">
         <div class="row justify-center items-center">
           <div class="col-12 row justify-center items-center">
-            <!-- BTN NAVEGAÇÃO -->
             <div class="col-12">
               <navigation-bar
                 @today="onTodayMonth"
@@ -86,7 +81,6 @@
             >
               <span> {{ getMonth }} </span>
             </div>
-            <!-- NAVEGAÇÃO (MESES) VERSÃO MOBILE -->
             <div style="width: 80%" v-if="!$q.platform.is.desktop">
               <q-calendar-month
                 ref="calendarMonth"
@@ -109,7 +103,6 @@
             <q-separator color="primary" size="3px" />
           </div>
         </div>
-        <!-- CALENDÁRIO PARA AGENDAMENTO -->
         <div class="flex flex-center q-pa-md">
           <div style="width: 80%">
             <q-calendar
@@ -188,9 +181,7 @@
         @validation-error="onValError"
         style="width: 90vw; max-width: 500px"
       >
-        <!-- LOGIN -->
         <div v-show="parte == 1" class="full-width">
-          <!-- NOME DO USUÁRIO -->
           <q-input
             class="parte1 full-width text-h5"
             label-color="primary"
@@ -200,9 +191,8 @@
             lazy-rules
             :rules="[(val) => (val && val.length > 0) || 'Insira o seu nome']"
           />
-          <!-- NOME DA EMPRESA TODO: IMPLEMENTAR UM CAMPO SERVER SIDE PRA ISSO-->
           <q-input
-            v-if="isCoworking"
+            v-if="isHotmilk"
             class="parte1 full-width text-h5"
             label-color="primary"
             style="font-size: 1.2rem"
@@ -211,7 +201,6 @@
             lazy-rules
             :rules="[(val) => (val && val.length > 0) || 'Complete esse campo']"
           />
-          <!-- LOGIN TELEFONE -->
           <q-input
             v-if="!loginEmail"
             class="parte1 full-width"
@@ -220,7 +209,7 @@
             style="font-size: 1.2rem"
             v-model="user.phone"
             label="Seu Telefone *"
-            hint="(41) 95588-4433"
+            hint="(41) 98888-8888"
             lazy-rules
             :mask="phoneMask"
             :debounce="1000"
@@ -233,7 +222,6 @@
                 'Por favor, insira seu telefone no formato (41) 91122-3344.',
             ]"
           />
-          <!-- LOGIN EMAIL -->
           <q-input
             v-else
             class="parte1 full-width"
@@ -252,7 +240,6 @@
                 'Por favor, insira seu email em um formato correto.',
             ]"
           />
-          <!-- CÓDIGO DE VERIFICAÇÃO -->
           <q-input
             class="parte1 full-width"
             type="tel"
@@ -272,7 +259,6 @@
                 'Por favor, insira seu código corretamente.',
             ]"
           />
-          <!-- BOTÕES VALIDAR LOGIN -->
           <q-btn-group push flat unelevated class="full-width row q-mt-md">
             <q-btn
               class="col-12"
@@ -282,9 +268,7 @@
             />
           </q-btn-group>
         </div>
-        <!-- DADOS DO USER -->
         <div v-show="parte == 2" class="full-width">
-          <!-- NOME -->
           <q-input
             class="parte1 full-width"
             label-color="primary"
@@ -296,19 +280,8 @@
             clearable
             :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
           />
-          <!-- NOME DA EMPRESA TODO: IMPLEMENTAR UM CAMPO SERVER SIDE PRA ISSO-->
           <q-input
-            v-if="isCoworking"
-            class="parte1 full-width text-h5"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-model="user.empresa"
-            label="Sua empresa ou instituição*"
-            lazy-rules
-            :rules="[(val) => (val && val.length > 0) || 'Complete esse campo']"
-          />
-          <!-- TELEFONE -->
-          <q-input
+            v-if="!loginEmail"
             class="parte1 full-width"
             type="tel"
             v-model="user.phone"
@@ -318,7 +291,7 @@
             hint="(41) 98888-8888"
             lazy-rules
             :mask="phoneMask"
-            :readonly="!loginEmail"
+            readonly
             clearable
             :debounce="1000"
             :rules="[
@@ -341,7 +314,6 @@
               />
             </template>
           </q-input>
-          <!-- EMAIL -->
           <q-input
             class="parte1 full-width"
             type="email"
@@ -370,9 +342,8 @@
               />
             </template>
           </q-input>
-          <!-- CPF -->
           <q-input
-            v-if="utilizarCPF"
+            v-if="!isHotmilk"
             class="parte1 full-width"
             type="tel"
             v-model="user.cpf"
@@ -390,7 +361,6 @@
               (val) => verificarCPF(val) || 'Digite um CPF válido',
             ]"
           />
-          <!-- BOTÕES DE AÇÃO -->
           <div class="full-width q-mt-xl">
             <q-btn-group
               push
@@ -426,7 +396,6 @@
             </q-btn-group>
           </div>
         </div>
-        <!-- AQUISIÇÃO DAS FOTOS DOS DOCUMENTOS -->
         <div
           v-show="parte == 3 && utilizarDocumentos"
           class="full-width q-mt-lg"
@@ -539,16 +508,11 @@
             </q-btn-group>
           </div>
         </div>
-        <!-- REVISÃO DOS DADOS -->
         <div v-if="parte == 4" class="full-width flex flex-center">
           <div class="column full-width" style="font-size: 1.2rem">
             <div class="row">
               <div class="col-5">Nome:</div>
               <div class="col-7 text-bold">{{ user.name }}</div>
-            </div>
-            <div class="row" v-if="isCoworking && user.empresa">
-              <div class="col-5">Empresa:</div>
-              <div class="col-7 text-bold">{{ user.empresa }}</div>
             </div>
             <div class="row">
               <div class="col-5">Telefone:</div>
@@ -568,7 +532,7 @@
                 {{ user.email }}
               </div>
             </div>
-            <div class="row" v-if="utilizarCPF">
+            <div class="row">
               <div class="col-5">CPF:</div>
               <div class="col-7 text-bold">{{ user.cpf }}</div>
             </div>
@@ -647,7 +611,7 @@
         </div>
       </q-form>
       <q-footer
-        v-if="isCoworking && isHotmilk"
+        v-if="isHotmilk"
         class="full-width fixed-bottom q-py-xs flex justify-center bg-grey-3"
         elevated
       >
@@ -687,6 +651,7 @@ import "@quasar/quasar-ui-qcalendar/dist/QCalendarVariables.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarTransitions.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
 import { Dialog } from "quasar";
+
 export default defineComponent({
   name: "PageIndex",
   components: {
@@ -726,7 +691,6 @@ export default defineComponent({
       aprovarVisita: false,
       utilizarEmail: true,
       loginEmail: false,
-      utilizarCPF: false,
       /* Opções visitas */
       sabado: false,
       liberarFeriado: false,
@@ -735,30 +699,9 @@ export default defineComponent({
       domingo: false,
       timeStepMin: 15,
       liberarAgendamento: -1,
-      tempoMaximo: 60,
-      tempoMinimoAprovacao: 0,
-      isCoworking: false,
     };
   },
   computed: {
-    tempoMinimoAprovacaoLabel() {
-      const aux = [
-        { value: 15, label: "15 minutos" },
-        { value: 30, label: "30 minutos" },
-        { value: 45, label: "45 minutos" },
-        { value: 60, label: "1 hora" },
-        { value: 90, label: "1 hora e 30 min" },
-        { value: 120, label: "2 hora" },
-        { value: 180, label: "3 hora" },
-        { value: 240, label: "4 hora" },
-        { value: 300, label: "5 hora" },
-        { value: 360, label: "6 hora" },
-      ];
-
-      return aux.find((item) => {
-        return item.value == this.tempoMinimoAprovacao;
-      }).label;
-    },
     logo() {
       let path = `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/`;
       if (
@@ -779,7 +722,7 @@ export default defineComponent({
         : "";
     },
     tituloCalendario() {
-      return !this.isCoworking
+      return !this.isHotmilk
         ? "Clique no melhor <strong>dia e hora</strong> para visitar o imóvel " +
             this.user.imovelRef +
             "."
@@ -899,8 +842,8 @@ export default defineComponent({
         this.onNextMonth();
         setTimeout(() => {
           this.onTodayMonth();
-        }, 200);
-      }, 200);
+        }, 500);
+      }, 500);
       return week;
     },
   },
@@ -908,14 +851,8 @@ export default defineComponent({
     try {
       this.selectedDate = today();
       if (this.login && this.login.user) {
-        const vetor = this.login.user.nome.split("-");
-        console.log("vetor", vetor);
-        console.log("vetor", this.login.user.nome);
-        const nome = vetor[0].trim();
-        const empresa = vetor.length > 1 ? vetor[1].trim() : "";
         this.user = {
-          name: nome,
-          empresa: empresa,
+          name: this.login.user.nome,
           phone: this.login.user.telefone,
           email: this.login.user.email,
           cpf: this.login.user.cpf,
@@ -983,7 +920,6 @@ export default defineComponent({
     async logout(force) {
       if (force) {
         this.user.name = "";
-        this.user.empresa = "";
         this.user.phone = "";
         this.user.cpf = "";
         this.user.email = "";
@@ -1007,7 +943,6 @@ export default defineComponent({
         },
       }).onOk(async () => {
         this.user.name = "";
-        this.user.empresa = "";
         this.user.phone = "";
         this.user.cpf = "";
         this.user.email = "";
@@ -1078,11 +1013,9 @@ export default defineComponent({
           this.user.cpf != this.login.user.cpf ||
           this.user.name != this.login.user.nome)
       ) {
-        console.log(this.isCoworking);
-        const nome = this.isCoworking
+        const nome = this.isHotmilk
           ? this.user.name + " - " + this.user.empresa
           : this.user.name;
-        console.log(nome);
         let dados = {
           id: this.login.userId,
           email: this.user.email,
@@ -1168,7 +1101,7 @@ export default defineComponent({
         return;
       }
       let diaFuturo = parseInt(now[0]) + this.liberarAgendamento;
-      if (this.liberarAgendamento > -1 && diaFuturo < dia) {
+      if (this.liberarAgendamento > -1 && diaFuturo <= dia) {
         Dialog.create({
           title:
             "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
@@ -1199,101 +1132,142 @@ export default defineComponent({
         ).toString();
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const date = scope.timestamp.date;
-      const dateTime = new Date(
-        (date + " " + horario).replace(/\-/g, "/")
-      ).getTime();
-      const options = [
-        { label: "30 minutos", value: "30" },
-        { label: "45 minutos", value: "45" },
-        { label: "1 hora", value: "60" },
-        { label: "1:30 hora", value: "90" },
-        { label: "2 horas", value: "120" },
-        { label: "2:30 horas", value: "150" },
-        { label: "3 horas", value: "180" },
-        { label: "4 horas", value: "240" },
-        { label: "5 horas", value: "300" },
-        { label: "6 horas", value: "360" },
-      ];
-      const inicial = options.find((item) => {
-        return item.value == this.timeStepMin;
-      });
-      const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
-      const filter = options.filter((item) => {
-        return parseInt(item.value) <= this.tempoMaximo;
-      });
-      for (const opt of filter) {
-        const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
-        const ms = parseInt(opt.value) * 60 * 1000;
-        const filter = this.events.find((item) => {
-          return item.timestampInicial > dateTime;
+      const horarioNormal =
+        hora.toString() +
+        ":" +
+        (minutos == 60 || minutos == 0 ? "00" : minutos).toString();
+      const diaSemana = this.getDayOfWeek(scope.timestamp.weekday);
+      const timeStep =
+        this.timeStepMin < 60
+          ? this.timeStepMin.toString() + " minutos"
+          : "1 hora";
+      if (!this.isHotmilk) {
+        Dialog.create({
+          title: "<span class='text-primary text-bold'>Agendamento</span>",
+          message:
+            "<span style='font-size:1.1rem'>Você confirma o seu agendamento <strong> " +
+            diaSemana +
+            " as " +
+            horario +
+            "?</strong><br/>A visita terá duração de <strong>" +
+            timeStep +
+            "</strong>.</span>",
+          ok: {
+            flat: true,
+            color: "positive",
+            label: "Sim",
+          },
+          cancel: {
+            flat: true,
+            label: "Escolher outro",
+          },
+          html: true,
+          persistent: true,
+        }).onOk(() => {
+          const visita = {
+            title: "Horário Selecionado",
+            date: scope.timestamp.date,
+            time: horario,
+            duration: this.timeStepMin,
+            bgcolor: "green-10",
+            textColor: "text-white",
+          };
+          this.events.push(visita);
+          this.user.validadeInicial = new Date(
+            scope.timestamp.date + " " + horario
+          ).getTime();
+          this.user.validadeFinal = new Date(
+            scope.timestamp.date + " " + horarioNormal
+          ).getTime();
+          this.montarQrcode();
+          Loading.show();
+          setTimeout(() => {
+            this.inForms = true;
+            if (this.login && this.login.id && this.login.user) this.parte = 2;
+            Loading.hide();
+          }, 1500);
         });
-        if (filter) {
-          const dateTimeFinal = dateTime + ms;
-          if (filter.timestampInicial >= dateTimeFinal && inteiro)
-            itens.push(opt);
-        } else if (inteiro) itens.push(opt);
-      }
-      Dialog.create({
-        title: `<span class='text-primary text-bold'>Agendamento</span>`,
-        message: `<span class='text-black' style='font-size: 1rem'> 
-            Selecione a duração da sua utilização: 
-          </span>
-          ${
-            this.tempoMinimoAprovacao != 0 && this.aprovarVisita
-              ? `<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel} os agendamentos estão sugeitos a aprovação. </span>`
-              : !this.aprovarVisita
-              ? "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à serem aprovados. </span>"
-              : ""
-          }
-          `,
-        options: {
-          type: "radio",
-          model: this.duracao,
-          items: itens,
-        },
-        ok: {
-          flat: true,
-          color: "positive",
-          label: "Confirmar",
-        },
-        cancel: {
-          flat: true,
-          label: "Escolher outro",
-        },
-        html: true,
-        persistent: true,
-      }).onOk((data) => {
-        const visita = {
-          title: "Horário Selecionado",
-          date: scope.timestamp.date,
-          time: horario,
-          duration: parseInt(data),
-          bgcolor: "green-10",
-          textColor: "text-white",
-        };
-        this.events.push(visita);
-        const validadeInicial = new Date(
-          (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
+      } else {
+        const date = scope.timestamp.date;
+        const dateTime = new Date(
+          (date + " " + horario).replace(/\-/g, "/")
         ).getTime();
-        this.user.validadeInicial = validadeInicial;
-        this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
-        this.montarQrcode();
-        Loading.show();
-        setTimeout(() => {
-          this.inForms = true;
-          if (this.login && this.login.id && this.login.user) {
-            if (
-              !this.utilizarEmail &&
-              !this.utilizarDocumentos &&
-              !this.utilizarCPF
-            )
-              this.parte = 4;
-            else this.parte = 2;
-          }
-          Loading.hide();
-        }, 1500);
-      });
+        const options = [
+          { label: "30 minutos", value: "30" },
+          { label: "45 minutos", value: "45" },
+          { label: "1 hora", value: "60" },
+          { label: "1:30 hora", value: "90" },
+          { label: "2 horas", value: "120" },
+          // { label: "2:30 horas", value: "150" },
+          // { label: "3 horas", value: "180" },
+          // { label: "4 horas", value: "240" },
+        ];
+        const inicial = options.find((item) => {
+          return item.value == this.timeStepMin;
+        });
+        const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
+        for (const index in options) {
+          const opt = options[index];
+          const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
+          const ms = parseInt(opt.value) * 60 * 1000;
+          const filter = this.events.find((item) => {
+            return item.timestampInicial > dateTime;
+          });
+          if (filter) {
+            const dateTimeFinal = dateTime + ms;
+            if (filter.timestampInicial >= dateTimeFinal && inteiro)
+              itens.push(opt);
+          } else if (inteiro) itens.push(opt);
+        }
+        Dialog.create({
+          title: "<span class='text-primary text-bold'>Agendamento</span>",
+          message:
+            "<span class='text-black' style='font-size: 1rem'> Selecione a duração da sua utilização: </span> <br/> <span style='font-size: 0.8rem'>Acima de duas horas os agendamentos estão sugeitos a aprovação.</span>",
+          options: {
+            type: "radio",
+            model: this.duracao,
+            items: itens,
+          },
+          ok: {
+            flat: true,
+            color: "positive",
+            label: "Confirmar",
+          },
+          cancel: {
+            flat: true,
+            label: "Escolher outro",
+          },
+          html: true,
+          persistent: true,
+        }).onOk((data) => {
+          const visita = {
+            title: "Horário Selecionado",
+            date: scope.timestamp.date,
+            time: horario,
+            duration: parseInt(data),
+            bgcolor: "green-10",
+            textColor: "text-white",
+          };
+          this.events.push(visita);
+          const validadeInicial = new Date(
+            (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
+          ).getTime();
+          this.user.validadeInicial = validadeInicial;
+          this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
+          this.montarQrcode();
+          Loading.show();
+          setTimeout(() => {
+            this.inForms = true;
+            if (this.login && this.login.id && this.login.user) {
+              console.log(!this.utilizarEmail, !this.utilizarDocumentos);
+              if (!this.utilizarEmail && !this.utilizarDocumentos)
+                this.parte = 4;
+              else this.parte = 2;
+            }
+            Loading.hide();
+          }, 1500);
+        });
+      }
     },
     async onSubmit() {
       if (
@@ -1453,7 +1427,6 @@ export default defineComponent({
     },
     onReset() {
       this.user.name = "";
-      this.user.empresa = "";
       this.user.cpf = "";
       this.user.email = "";
     },
@@ -1513,28 +1486,17 @@ export default defineComponent({
               value: this.cliente.logo,
             });
             if (this.cliente && this.cliente.preferenciaUsuario) {
-              this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
               this.utilizarDocumentos =
                 this.cliente.preferenciaUsuario.utilizarDocumentos;
+              this.aprovarVisita =
+                this.cliente.preferenciaUsuario.aprovarVisita;
               this.verificarDocumentos =
                 this.cliente.preferenciaUsuario.verificarDocumentos;
               this.utilizarEmail =
                 this.cliente.preferenciaUsuario.utilizarEmail;
               this.loginEmail = this.cliente.preferenciaUsuario.loginEmail;
-              this.aprovarVisita =
-                this.cliente.preferenciaUsuario.aprovarVisita;
             }
             if (this.cliente && this.cliente.preferenciaVisita) {
-              this.tempoMinimoAprovacao = this.cliente.preferenciaVisita
-                .tempoMinimoAprovacao
-                ? this.cliente.preferenciaVisita.tempoMinimoAprovacao
-                : 0;
-              this.tempoMaximo = this.cliente.preferenciaVisita.tempoMaximo
-                ? this.cliente.preferenciaVisita.tempoMaximo
-                : 60;
-              this.isCoworking = this.cliente.preferenciaVisita.coworking
-                ? this.cliente.preferenciaVisita.coworking
-                : false;
               this.sabado = this.cliente.preferenciaVisita.sabado
                 ? true
                 : false;
@@ -1567,12 +1529,6 @@ export default defineComponent({
             this.events = response.data.horarios;
             this.formatData();
           } else {
-            Notify.create({
-              message:
-                "Não foi possível localizar o imóvel ou sala em questão. Verifique o seu link de acesso e tente novamente",
-              type: "warning",
-            });
-            this.semImovel = true;
             console.log("deu ruim ", response);
           }
         }
@@ -1653,7 +1609,7 @@ export default defineComponent({
     },
     async checkCode() {
       let response;
-      const nome = this.isCoworking
+      const nome = this.isHotmilk
         ? this.user.name + " - " + this.user.empresa
         : this.user.name;
       if (this.newUser) {
@@ -1714,7 +1670,6 @@ export default defineComponent({
           key: "setLogin",
           value: response.data,
         });
-
         this.user.cpf = response.data.user.cpf;
         this.user.email = response.data.user.email;
         this.user.hasDocs =
