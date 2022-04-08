@@ -640,7 +640,6 @@
               class="col-6 q-ml-xs"
               label="Enviar"
               type="submit"
-              @click="onSubmit"
               color="positive"
             />
           </q-btn-group>
@@ -728,16 +727,18 @@ export default defineComponent({
       loginEmail: false,
       utilizarCPF: false,
       /* Opções visitas */
-      sabado: false,
-      liberarFeriado: false,
-      horaInicial: 0,
-      horaFinal: 24,
+      isCoworking: false,
       domingo: false,
+      liberarFeriado: false,
+      habilitarPublicoExterno: false,
+      horaFinal: 24,
+      horaInicial: 0,
       timeStepMin: 15,
       liberarAgendamento: -1,
+      sabado: false,
       tempoMaximo: 60,
       tempoMinimoAprovacao: 0,
-      isCoworking: false,
+      numeroVisitantesExternos: 0,
     };
   },
   computed: {
@@ -1236,8 +1237,8 @@ export default defineComponent({
       }
       Dialog.create({
         title: `<span class='text-primary text-bold'>Agendamento</span>`,
-        message: `<span class='text-black' style='font-size: 1rem'> 
-            Selecione a duração da sua utilização: 
+        message: `<span class='text-black' style='font-size: 1rem'>
+            Selecione a duração da sua utilização:
           </span>
           ${
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
@@ -1279,20 +1280,69 @@ export default defineComponent({
         this.user.validadeInicial = validadeInicial;
         this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
         this.montarQrcode();
-        Loading.show();
-        setTimeout(() => {
-          this.inForms = true;
-          if (this.login && this.login.id && this.login.user) {
-            if (
-              !this.utilizarEmail &&
-              !this.utilizarDocumentos &&
-              !this.utilizarCPF
-            )
-              this.parte = 4;
-            else this.parte = 2;
-          }
-          Loading.hide();
-        }, 1500);
+
+        if (this.habilitarPublicoExterno) {
+          Dialog.create({
+            title:
+              '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
+            message: `
+              <span>
+                Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
+                Insira 0 (zero) caso não haja participantes externos.
+              </span>
+            `,
+            prompt: {
+              model: 0,
+              type: "number",
+            },
+            ok: {
+              label: "Continuar",
+              color: "positive",
+              flat: true,
+            },
+            cancel: {
+              label: "Escolher outro horário",
+              color: "primary",
+              flat: true,
+            },
+            html: true,
+          })
+            .onOk((res) => {
+              Loading.show();
+              setTimeout(() => {
+                this.inForms = true;
+                this.numeroVisitantesExternos = res;
+                if (this.login && this.login.id && this.login.user) {
+                  if (
+                    !this.utilizarEmail &&
+                    !this.utilizarDocumentos &&
+                    !this.utilizarCPF
+                  )
+                    this.parte = 4;
+                  else this.parte = 2;
+                }
+                Loading.hide();
+              }, 1500);
+            })
+            .onCancel(() => {
+              this.events.pop();
+            });
+        } else {
+          Loading.show();
+          setTimeout(() => {
+            this.inForms = true;
+            if (this.login && this.login.id && this.login.user) {
+              if (
+                !this.utilizarEmail &&
+                !this.utilizarDocumentos &&
+                !this.utilizarCPF
+              )
+                this.parte = 4;
+              else this.parte = 2;
+            }
+            Loading.hide();
+          }, 1500);
+        }
       });
     },
     async onSubmit() {
@@ -1337,6 +1387,9 @@ export default defineComponent({
         return;
       }
       Loading.show({ message: "Gerando a visita..." });
+      this.user.numeroVisitantesExternos = parseInt(
+        this.numeroVisitantesExternos
+      );
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
@@ -1361,8 +1414,9 @@ export default defineComponent({
           blob: new Blob([this.user.fotoSelfie]),
           name: this.user.fotoSelfie.name,
         };
-
-        let d = { ...this.user };
+        let d = {
+          ...this.user,
+        };
         let formData = new FormData();
         Object.keys(d).forEach((key) => formData.append(key, d[key]));
         formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
@@ -1563,6 +1617,10 @@ export default defineComponent({
                   ? this.cliente.preferenciaVisita.liberarAgendamento
                   : -1;
               }
+              this.habilitarPublicoExterno = this.cliente.preferenciaVisita
+                .habilitarPublicoExterno
+                ? this.cliente.preferenciaVisita.habilitarPublicoExterno
+                : false;
             }
             this.events = response.data.horarios;
             this.formatData();
