@@ -168,7 +168,11 @@
                   blocoSelecionado = bloco.num;
                 "
               />
-              <q-img :src="bloco.foto" fit="contain" style="max-width: 300px" />
+              <q-img
+                :src="bloco.foto"
+                fit="contain"
+                style="max-width: 300px; max-height: "
+              />
             </div>
           </div>
         </div>
@@ -208,7 +212,7 @@
                 :src="getImage(imovel.foto)"
                 contain
                 spinner-color="primary"
-                style="max-width: 180px"
+                style="max-width: 180px; max-height: 180px"
               />
             </div>
             <div class="col-8 column items-center justify-around">
