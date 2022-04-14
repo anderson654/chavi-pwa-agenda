@@ -30,7 +30,7 @@
     </q-header>
 
     <q-page-container>
-      <q-page padding>
+      <q-page padding v-if="imoveis && imoveis.length == 0">
         <div class="full-width text-center text-black text-h5 q-mt-lg">
           <span
             >Agendamento para reuniões. Para realizá-lo, selecione a sala
@@ -134,6 +134,90 @@
                     "
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </q-page>
+      <q-page padding>
+        <!-- SELEÇÃO DO BLOCO -->
+        <div
+          v-if="selecionarBloco"
+          class="full-width text-h5 text-center"
+          style="margin-top: 100px"
+        >
+          <div>
+            <span>Em qual bloco você esta?</span>
+          </div>
+          <div class="flex justify-around q-mt-md">
+            <div
+              v-for="(bloco, index) in blocos"
+              :key="index"
+              class="q-my-sm column flex content-center"
+              style="width: 48%"
+            >
+              <q-btn
+                push
+                rounded
+                color="primary"
+                class="text-bold q-mb-md"
+                style="max-width: 300px; width: 100%"
+                :label="'Bloco ' + bloco.num"
+                @click="
+                  selecionarBloco = false;
+                  blocoSelecionado = bloco.num;
+                "
+              />
+              <q-img :src="bloco.foto" fit="contain" style="max-width: 300px" />
+            </div>
+          </div>
+        </div>
+        <!-- SELEÇÃO DO IMÓVEL -->
+        <div
+          v-else
+          class="full-width column flex-center q-gutter-x-lg"
+          style="margin-top: 100px"
+        >
+          <div class="full-width text-center text-primary text-bold q-mb-md">
+            <div class="q-mb-md">
+              <q-btn
+                style="font-size: 0.8rem; background-color: #0070a0"
+                class="q-px-md"
+                dense
+                rounded
+                push
+                text-color="white"
+                label="Selecionar outro bloco"
+                @click="
+                  selecionarBloco = true;
+                  blocoSelecionado = 0;
+                "
+              />
+            </div>
+            <span class="text-h4 text-bold">Bloco {{ blocoSelecionado }}</span>
+          </div>
+          <div
+            class="full-width shadow-3 row q-my-md q-px-md bg-grey-3"
+            style="border-radius: 20px; height: 180px; max-width: 900px"
+            v-for="(imovel, index) in imoveisFiltred"
+            :key="index"
+            @click="$router.push(imovel.link)"
+          >
+            <div class="col-4">
+              <q-img
+                :src="getImage(imovel.foto)"
+                contain
+                spinner-color="primary"
+                style="max-width: 180px"
+              />
+            </div>
+            <div class="col-8 column items-center justify-around">
+              <span style="font-size: 1.2rem" class="text-primary">{{
+                imovel.nome
+              }}</span>
+              <div style="font-size: 0.9rem">
+                <span>{{ imovel.endereco }}</span>
+                <span class="text-bold"> - {{ imovel.complemento }}</span>
               </div>
             </div>
           </div>
@@ -256,11 +340,63 @@ export default {
           ],
         },
       ],
+      imoveis: [],
     };
+  },
+  created() {
+    this.carregarImoveis();
+  },
+  computed: {
+    imoveisFiltred() {
+      const imoveis = this.imoveis.filter((item) => {
+        return item.bloco && item.bloco == this.blocoSelecionado;
+      });
+      imoveis.sort((a, b) => {
+        return a.andar - b.andar;
+      });
+      return imoveis;
+    },
   },
   methods: {
     openLink(url, target) {
       window.open(url, target);
+    },
+    getImage(image) {
+      if (image && image.indexOf("https://") > -1) return image;
+      else if (image)
+        return `${process.env.VUE_APP_API_URL}/StorageContainer/fotoImovel/download/${image}`;
+      else return "default_room.png";
+    },
+    async carregarImoveis() {
+      const response = await this.executeMethod({
+        url: "Imoveis/retornarImoveisAgendamento",
+        method: "get",
+        params: {
+          entidadeId: "5ee6bd904639f5bb55915447",
+        },
+      });
+      if (response.status == 200) {
+        const imoveis = response.data;
+        for (const imovel of imoveis) {
+          const complemento = imovel.complemento
+            ? imovel.complemento.split(" - ")
+            : undefined;
+          if (complemento) {
+            let bloco = complemento[0];
+            let andar = complemento[1];
+            if (bloco) {
+              bloco = parseInt(bloco.replace(/\D/g, ""));
+              imovel.bloco = bloco;
+            }
+            if (andar) {
+              andar = parseInt(andar.replace(/\D/g, ""));
+              imovel.andar = andar;
+            }
+          } else console.log("Verificar complemento - ", imovel.nome);
+          imovel.link = `/${imovel.entidadeId}/${imovel.nome}`;
+        }
+        this.imoveis = imoveis;
+      }
     },
   },
 };
