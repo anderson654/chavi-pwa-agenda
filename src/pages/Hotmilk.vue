@@ -364,7 +364,7 @@ export default {
     getImage(image) {
       if (image && image.indexOf("https://") > -1) return image;
       else if (image)
-        return `${process.env.VUE_APP_API_URL}/StorageContainer/fotoImovel/download/${image}`;
+        return `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/${image}`;
       else return "default_room.png";
     },
     async carregarImoveis() {
