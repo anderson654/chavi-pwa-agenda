@@ -207,12 +207,11 @@
             :key="index"
             @click="$router.push(imovel.link)"
           >
-            <div class="col-4">
+            <div class="col-4" style="max-width: 180px; max-height: 180px">
               <q-img
                 :src="getImage(imovel.foto)"
                 contain
                 spinner-color="primary"
-                style="max-width: 180px; max-height: 180px"
               />
             </div>
             <div class="col-8 column items-center justify-around">
