@@ -142,7 +142,7 @@
       <q-page padding>
         <!-- SELEÇÃO DO BLOCO -->
         <div
-          v-if="selecionarBloco"
+          v-if="selecionarBloco && imoveis && imoveis.length > 0"
           class="full-width text-h5 text-center"
           style="margin-top: 100px"
         >
