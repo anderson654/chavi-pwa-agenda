@@ -30,115 +30,6 @@
     </q-header>
 
     <q-page-container>
-      <q-page padding v-if="imoveis && imoveis.length == 0">
-        <div class="full-width text-center text-black text-h5 q-mt-lg">
-          <span
-            >Agendamento para reuniões. Para realizá-lo, selecione a sala
-            desejada.</span
-          >
-        </div>
-        <div
-          v-if="selecionarBloco"
-          class="full-width text-h5 text-center"
-          style="margin-top: 100px"
-        >
-          <div>
-            <span>Em qual bloco você esta?</span>
-          </div>
-          <div class="flex justify-around q-mt-md">
-            <div
-              v-for="(bloco, index) in blocos"
-              :key="index"
-              class="q-my-sm column flex content-center"
-              style="width: 48%"
-            >
-              <q-btn
-                push
-                rounded
-                color="primary"
-                class="text-bold q-mb-md"
-                style="max-width: 300px; width: 100%"
-                :label="'Bloco ' + bloco.num"
-                @click="
-                  selecionarBloco = false;
-                  blocoSelecionado = bloco.num;
-                "
-              />
-              <q-img :src="bloco.foto" fit="contain" style="max-width: 300px" />
-            </div>
-          </div>
-        </div>
-        <div
-          v-else-if="!selecionarBloco && blocoSelecionado > 0"
-          class="full-width flex flex-center q-gutter-x-lg"
-          style="margin-top: 100px"
-        >
-          <div class="full-width text-center text-primary text-bold q-mb-md">
-            <div class="q-mb-md">
-              <q-btn
-                style="font-size: 0.8rem; background-color: #0070a0"
-                class="q-px-md"
-                dense
-                rounded
-                push
-                text-color="white"
-                label="Selecionar outro bloco"
-                @click="
-                  selecionarBloco = true;
-                  blocoSelecionado = 0;
-                "
-              />
-            </div>
-            <span class="text-h4 text-bold">Bloco {{ blocoSelecionado }}</span>
-          </div>
-          <div
-            v-for="(andar, index2) in blocos[blocoSelecionado - 1].andares"
-            :key="index2"
-            class="full-width row flex-center q-gutter-x-md q-mb-md bg-grey-3 q-py-md"
-            style="border-radius: 20px"
-          >
-            <div class="full-width text-center q-mb-xl">
-              <span class="text-black text-h5 text-bold">
-                Andar {{ andar.num }}</span
-              >
-            </div>
-            <div
-              class="q-gutter-y-sm"
-              v-for="(sala, index3) in andar.salas"
-              :key="index3"
-            >
-              <div
-                class="text-center column shadow-1 q-gutter-y-lg q-py-xs q-pb-xl bg-white"
-                style="border-radius: 20px; width: 300px; margin-bottom: 50px"
-              >
-                <div class="text-center q-px-lg" style="max-width: 300px">
-                  <q-btn
-                    rounded
-                    push
-                    class="text-bold"
-                    color="primary"
-                    text-color="white"
-                    :label="sala.ref"
-                    @click="$router.push(sala.link)"
-                  />
-                </div>
-                <div>
-                  <q-img
-                    :src="sala.foto"
-                    @click="$router.push(sala.link)"
-                    spinner-color="white"
-                    style="
-                      height: 200px;
-                      max-width: 250px;
-                      object-fit: contain !important;
-                    "
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </q-page>
       <q-page padding>
         <!-- SELEÇÃO DO BLOCO -->
         <div
@@ -165,7 +56,7 @@
                 :label="'Bloco ' + bloco.num"
                 @click="
                   selecionarBloco = false;
-                  blocoSelecionado = bloco.num;
+                  blocoSelecionado = bloco;
                 "
               />
               <q-img
@@ -179,7 +70,7 @@
         <!-- SELEÇÃO DO IMÓVEL -->
         <div
           v-else
-          class="full-width column flex-center q-gutter-x-lg"
+          class="full-width column flex-center"
           style="margin-top: 100px"
         >
           <div class="full-width text-center text-primary text-bold q-mb-md">
@@ -194,35 +85,82 @@
                 label="Selecionar outro bloco"
                 @click="
                   selecionarBloco = true;
-                  blocoSelecionado = 0;
+                  blocoSelecionado = undefined;
                 "
               />
             </div>
-            <span class="text-h4 text-bold">Bloco {{ blocoSelecionado }}</span>
-          </div>
-          <div
-            class="full-width shadow-3 row q-my-md q-px-md bg-grey-3"
-            style="border-radius: 20px; height: 180px; max-width: 900px"
-            v-for="(imovel, index) in imoveisFiltred"
-            :key="index"
-            @click="$router.push(imovel.link)"
-          >
-            <div class="col-4 row content-center justify-center">
-              <q-img
-                :src="getImage(imovel.foto)"
-                fit="contain"
-                height="150px"
-                width="180px"
-                spinner-color="primary"
+            <div class="q-mb-md" v-if="andarSelecionado">
+              <q-btn
+                style="font-size: 0.8rem; background-color: #0070a0"
+                class="q-px-md"
+                dense
+                rounded
+                push
+                text-color="white"
+                label="Selecionar outro andar"
+                @click="
+                  selecionarAndar = true;
+                  andarSelecionado = undefined;
+                "
               />
             </div>
-            <div class="col-8 column items-center justify-around">
-              <span style="font-size: 1.2rem" class="text-primary">{{
-                imovel.nome
-              }}</span>
-              <div style="font-size: 0.9rem">
-                <span>{{ imovel.endereco }}</span>
-                <span class="text-bold"> - {{ imovel.complemento }}</span>
+            <span class="text-h4 text-bold">
+              Bloco {{ blocoSelecionado ? blocoSelecionado.num : 0 }}
+            </span>
+          </div>
+          <div
+            v-if="blocoSelecionado && selecionarAndar"
+            class="column justify-center text-center q-gutter-y-md"
+          >
+            <span style="font-size: 1rem">Selecione um andar</span>
+            <div v-for="andar in blocoSelecionado.andares" :key="andar">
+              <q-btn
+                push
+                rounded
+                dense
+                color="primary"
+                :label="`Andar ${andar}`"
+                style="width: 100%; max-width: 200px"
+                @click="
+                  andarSelecionado = andar;
+                  selecionarAndar = false;
+                "
+              />
+            </div>
+          </div>
+          <div
+            v-if="blocoSelecionado && !selecionarAndar"
+            class="full-width column shadow-3 text-center items-center"
+          >
+            <div
+              class="full-width shadow-3 row q-my-md q-px-md bg-grey-3"
+              style="
+                border-radius: 20px;
+                height: 180px;
+                max-width: 900px;
+                cursor: pointer;
+              "
+              v-for="(imovel, index) in imoveisFiltred"
+              :key="index"
+              @click="$router.push(imovel.link)"
+            >
+              <div class="col-4 row content-center justify-center">
+                <q-img
+                  :src="getImage(imovel.foto)"
+                  fit="contain"
+                  height="150px"
+                  width="180px"
+                  spinner-color="primary"
+                />
+              </div>
+              <div class="col-8 column items-center justify-around">
+                <span style="font-size: 1.2rem" class="text-primary">{{
+                  imovel.nome
+                }}</span>
+                <div style="font-size: 0.9rem">
+                  <span>{{ imovel.endereco }}</span>
+                  <span class="text-bold"> - {{ imovel.complemento }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -255,94 +193,19 @@ export default {
   data() {
     return {
       selecionarBloco: true,
-      blocoSelecionado: 0,
+      selecionarAndar: true,
+      andarSelecionado: undefined,
+      blocoSelecionado: undefined,
       blocos: [
         {
           foto: "bloco_1.png",
           num: 1,
-          andares: [
-            {
-              num: 1,
-              salas: [
-                {
-                  ref: "Sala 01 Tarumã",
-                  link: "/5ee6bd904639f5bb55915447/Sala 01 Tarumã",
-                  foto: "sala_reuniao_01_b1a1.png",
-                },
-                {
-                  ref: "Meeting Point 01",
-                  link: "/5ee6bd904639f5bb55915447/Meeting Point 01",
-                  foto: "mini_sala_01_b1a1.png",
-                },
-                {
-                  ref: "Meeting Point 02",
-                  link: "/5ee6bd904639f5bb55915447/Meeting Point 02",
-                  foto: "mini_sala_02_b1a1.png",
-                },
-              ],
-            },
-            {
-              num: 2,
-              salas: [
-                {
-                  ref: "Auditório 01",
-                  link: "/5ee6bd904639f5bb55915447/Auditório 01",
-                  foto: "auditorio_b1a2.png",
-                },
-                {
-                  ref: "Sala 01 Rebouças",
-                  link: "/5ee6bd904639f5bb55915447/Sala 01 Rebouças",
-                  foto: "sala_reuniao_01_b1a2.png",
-                },
-                {
-                  ref: "Sala 02 Ópera de Arame",
-                  link: "/5ee6bd904639f5bb55915447/Sala 02 Ópera de Arame",
-                  foto: "sala_reuniao_02_b1a2.png",
-                },
-                {
-                  ref: "Sala 03 Rua das Flores",
-                  link: "/5ee6bd904639f5bb55915447/Sala 03 Rua das Flores",
-                  foto: "sala_reuniao_03_b1a2.png",
-                },
-              ],
-            },
-          ],
+          andares: {},
         },
         {
           foto: "bloco_2.png",
           num: 2,
-          andares: [
-            {
-              num: 3,
-              salas: [
-                {
-                  ref: "Auditório Margareth Hamilton",
-                  link: "/5ee6bd904639f5bb55915447/Auditório Margareth Hamilton",
-                  foto: "auditorio_margareth_hamilton.png",
-                },
-                {
-                  ref: "Aceleradora Hotmilk",
-                  link: "/5ee6bd904639f5bb55915447/Aceleradora Hotmilk",
-                  foto: "sala_hotmilk_aceleradora.png",
-                },
-                {
-                  ref: "Lean Startup",
-                  link: "/5ee6bd904639f5bb55915447/Lean Startup",
-                  foto: "sala_lean_startup.png",
-                },
-              ],
-            },
-            {
-              num: 4,
-              salas: [
-                {
-                  ref: "Sala Henry Chesbrough",
-                  link: "/5ee6bd904639f5bb55915447/Sala Henry Chesbrough",
-                  foto: "sala_henry_chesbrough.png",
-                },
-              ],
-            },
-          ],
+          andares: {},
         },
       ],
       imoveis: [],
@@ -354,7 +217,14 @@ export default {
   computed: {
     imoveisFiltred() {
       const imoveis = this.imoveis.filter((item) => {
-        return item.bloco && item.bloco == this.blocoSelecionado;
+        return (
+          this.blocoSelecionado &&
+          this.andarSelecionado &&
+          item.bloco &&
+          item.andar &&
+          item.bloco == this.blocoSelecionado.num &&
+          item.andar == this.andarSelecionado
+        );
       });
       imoveis.sort((a, b) => {
         return a.andar - b.andar;
@@ -394,8 +264,13 @@ export default {
               imovel.bloco = bloco;
             }
             if (andar) {
-              andar = parseInt(andar.replace(/\D/g, ""));
+              andar = /(Térreo)+/gi.test(andar)
+                ? "Térreo"
+                : parseInt(andar.replace(/\D/g, ""));
               imovel.andar = andar;
+              const index = this.blocos.findIndex((b) => b.num == bloco);
+              if (index > -1 && !this.blocos[index].andares[andar])
+                this.blocos[index].andares[andar] = andar;
             }
           } else console.log("Verificar complemento - ", imovel.nome);
           imovel.link = `/${imovel.entidadeId}/${imovel.nome}`;
