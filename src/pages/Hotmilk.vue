@@ -130,7 +130,7 @@
           </div>
           <div
             v-if="blocoSelecionado && !selecionarAndar"
-            class="full-width column text-center"
+            class="full-width column shadow-3 text-center items-center"
           >
             <div
               class="full-width shadow-3 row q-my-md q-px-md bg-grey-3"

@@ -1454,9 +1454,9 @@ export default defineComponent({
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
             this.semImovel = true;
-            if (response.data && response.data.url)
-              this.openURL(response.data.url, "_self");
-            else this.openURL("https://agenda.chavi.com.br", "_self");
+            this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+            // if (response.data && response.data.url)
+            //   this.openURL(response.data.url, "_self");
           })
           .onCancel(async () => {
             const ics = response.data.ics;
