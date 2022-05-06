@@ -158,6 +158,18 @@
                   imovel.nome
                 }}</span>
                 <div style="font-size: 0.9rem">
+                  <span
+                    v-if="
+                      imovel.opcoesAgendamentoIndividual &&
+                      imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas &&
+                      imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas > 0
+                    "
+                    class="text-bold"
+                  >
+                    Limite de pessoas:
+                    {{ imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas }}
+                  </span>
+                  <br />
                   <span>{{ imovel.endereco }}</span>
                   <span class="text-bold"> - {{ imovel.complemento }}</span>
                 </div>
