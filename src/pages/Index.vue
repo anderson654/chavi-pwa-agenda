@@ -910,8 +910,6 @@ export default defineComponent({
       this.selectedDate = today();
       if (this.login && this.login.user) {
         const vetor = this.login.user.nome.split("-");
-        console.log("vetor", vetor);
-        console.log("vetor", this.login.user.nome);
         const nome = vetor[0].trim();
         const empresa = vetor.length > 1 ? vetor[1].trim() : "";
         this.user = {
@@ -1072,18 +1070,20 @@ export default defineComponent({
     },
     async nextStep() {
       if (!this.$refs.forms.validate()) return;
+      const nome = this.isCoworking
+        ? this.user.name + " - " + this.user.empresa
+        : this.user.name;
       if (
         this.login &&
         this.login.user &&
-        (this.user.email != this.login.user.email ||
+        (this.login.user.nome != nome ||
+          this.user.email != this.login.user.email ||
           this.user.cpf != this.login.user.cpf ||
           this.user.name != this.login.user.nome)
       ) {
-        console.log(this.isCoworking);
         const nome = this.isCoworking
           ? this.user.name + " - " + this.user.empresa
           : this.user.name;
-        console.log(nome);
         let dados = {
           id: this.login.userId,
           email: this.user.email,
@@ -1316,7 +1316,10 @@ export default defineComponent({
                   if (
                     !this.utilizarEmail &&
                     !this.utilizarDocumentos &&
-                    !this.utilizarCPF
+                    !this.utilizarCPF &&
+                    (this.isCoworking
+                      ? this.user.empresa && this.user.empresa != ""
+                      : true)
                   )
                     this.parte = 4;
                   else this.parte = 2;
@@ -1651,7 +1654,20 @@ export default defineComponent({
           );
           const duracao = horario.intervalo / 60000;
           const titleBusy = horario.usuario
-            ? "Ocupado<br/>" + horario.usuario
+            ? `
+              <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
+                <div class="full-width text-center">Ocupado</div>
+                <div class="full-width text-center">${
+                  horario.usuario.indexOf("-") == -1
+                    ? horario.usuario.trim()
+                    : `${horario.usuario.split("-")[0].trim()}<br/>${
+                        horario.usuario.split("-")[1]
+                          ? horario.usuario.split("-")[1].trim()
+                          : ""
+                      }`
+                }</div>
+              </div>
+            `
             : "Ocupado";
           optionsOff.push({
             title: horario.paraAprovar ? "Pendente" : titleBusy,
