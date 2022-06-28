@@ -1152,21 +1152,31 @@ export default defineComponent({
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
       const dia = scope.timestamp.day;
-      const now = moment().format("DD HH mm").split(" ");
-      if (
-        scope.timestamp.past ||
-        (parseInt(now[1]) == hora &&
-          minutos < parseInt(now[2] && parseInt(now[0] == dia)))
-      ) {
-        Dialog.create({
-          title:
-            "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-          message:
-            "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
-          html: true,
-          ok: "Ok",
-        });
-        return;
+      const now = moment();
+
+      const now_vector = now.format("DD HH mm").split(" ");
+      const minutes_base_ref = now
+        .subtract(this.timeStepMin, "minutes")
+        .format("mm");
+      if (scope.timestamp.past) {
+        if (
+          !(
+            dia == parseInt(now_vector[0]) &&
+            hora == parseInt(now_vector[1]) &&
+            minutos < parseInt(now_vector[2]) &&
+            minutos > parseInt(minutes_base_ref)
+          )
+        ) {
+          Dialog.create({
+            title:
+              "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+            message:
+              "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
+            html: true,
+            ok: "Ok",
+          });
+          return;
+        }
       }
       let diaFuturo = parseInt(now[0]) + this.liberarAgendamento;
       if (this.liberarAgendamento > -1 && diaFuturo < dia) {
@@ -1200,10 +1210,6 @@ export default defineComponent({
         ).toString();
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const date = scope.timestamp.date;
-      const dateTime = new Date(
-        (date + " " + horario).replace(/\-/g, "/")
-      ).getTime();
       const options = [
         { label: "30 minutos", value: "30" },
         { label: "45 minutos", value: "45" },
@@ -1223,15 +1229,19 @@ export default defineComponent({
       const filter = options.filter((item) => {
         return parseInt(item.value) <= this.tempoMaximo;
       });
+      const date = scope.timestamp.date;
+      const dateTime = new Date(
+        (date + " " + horario).replace(/\-/g, "/")
+      ).getTime();
       for (const opt of filter) {
         const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
         const ms = parseInt(opt.value) * 60 * 1000;
-        const filter = this.events.find((item) => {
+        const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
         });
-        if (filter) {
+        if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
-          if (filter.timestampInicial >= dateTimeFinal && inteiro)
+          if (eventFilter.timestampInicial >= dateTimeFinal && inteiro)
             itens.push(opt);
         } else if (inteiro) itens.push(opt);
       }
@@ -1645,6 +1655,9 @@ export default defineComponent({
     },
     formatData() {
       if (this.events && this.events.length > 0) {
+        this.events.sort((a, b) => {
+          return a.timestampInicial < b.timestampInicial ? -1 : 1;
+        });
         let optionsOff = [];
         for (let horario of this.events) {
           const inicio = parseTimestamp(
