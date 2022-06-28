@@ -229,17 +229,19 @@ export default {
   computed: {
     imoveisFiltred() {
       const imoveis = this.imoveis.filter((item) => {
+        const andar =
+          item.andar != undefined && item.andar == 0 ? "Térreo" : item.andar;
         return (
           this.blocoSelecionado &&
           this.andarSelecionado &&
           item.bloco &&
-          item.andar &&
+          andar &&
           item.bloco == this.blocoSelecionado.num &&
-          item.andar == this.andarSelecionado
+          andar == this.andarSelecionado
         );
       });
       imoveis.sort((a, b) => {
-        return a.andar - b.andar;
+        return a.nome < b.nome ? -1 : 1;
       });
       return imoveis;
     },
@@ -277,12 +279,13 @@ export default {
             }
             if (andar) {
               andar = /(Térreo)+/gi.test(andar)
-                ? "Térreo"
+                ? 0
                 : parseInt(andar.replace(/\D/g, ""));
+              const label = andar == 0 ? "Térreo" : andar;
               imovel.andar = andar;
               const index = this.blocos.findIndex((b) => b.num == bloco);
               if (index > -1 && !this.blocos[index].andares[andar])
-                this.blocos[index].andares[andar] = andar;
+                this.blocos[index].andares[andar] = label;
             }
           } else console.log("Verificar complemento - ", imovel.nome);
           imovel.link = `/${imovel.entidadeId}/${imovel.nome}`;
