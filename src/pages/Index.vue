@@ -578,6 +578,7 @@
             </div>
             <div class="row" v-if="getEndereco">
               <div class="col-5">Local:</div>
+
               <div
                 class="col-7 text-bold"
                 v-html="getEndereco.replace('\n', '<br/>')"
@@ -636,13 +637,46 @@
                   : (parte -= 2)
               "
             />
+
+            <q-btn
+              class="col-6 q-ml-xs"
+              label="Solicitar"
+              @click="small = true"
+              color="positive"
+              v-if="salasHotMilkValidarEntrada"
+            />
+
             <q-btn
               class="col-6 q-ml-xs"
               label="Enviar"
               type="submit"
               color="positive"
+              v-if="!salasHotMilkValidarEntrada"
             />
           </q-btn-group>
+          <q-dialog v-model="small">
+            <q-card style="width: 300px">
+              <q-card-section>
+                <div class="text-h6 title-modal" color="primary">
+                  Agendamento Solicitado
+                </div>
+              </q-card-section>
+
+              <q-card-section class="q-pt-none content-modal">
+                Essa sala necessita de confirmação.
+              </q-card-section>
+
+              <q-card-actions align="right" class="bg-white text-teal">
+                <q-btn
+                  flat
+                  label="Aguardar o retorno."
+                  v-close-popup
+                  @click="onSubmit"
+                  class="btn-modal"
+                />
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
         </div>
       </q-form>
       <q-footer
@@ -686,6 +720,7 @@ import "@quasar/quasar-ui-qcalendar/dist/QCalendarVariables.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarTransitions.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
 import { Dialog } from "quasar";
+
 export default defineComponent({
   name: "PageIndex",
   components: {
@@ -695,6 +730,9 @@ export default defineComponent({
   },
   data() {
     return {
+      seMesmoDia: "",
+      salasHotMilkValidarEntrada: false,
+      small: false,
       inForms: false,
       codeSent: false,
       semImovel: false,
@@ -773,12 +811,28 @@ export default defineComponent({
         : false;
     },
     getEndereco() {
-      return this.cliente && this.cliente.enderecoImovel
-        ? this.user.imovelRef + " - " + this.cliente.enderecoImovel
-        : this.user.imovelRef
-        ? this.user.imovelRef
-        : "";
+      let resultado = "";
+      if (this.cliente && this.cliente.enderecoImovel) {
+        resultado = this.user.imovelRef + " - " + this.cliente.enderecoImovel;
+      } else if (this.user.imovelRef) {
+        resultado = this.user.imovelRef;
+      }
+
+      //Atribuição das Salas da Hotmilk para que a Suellen valide entrada das pessoas.
+      this.salasHotMilkValidarEntrada =
+        resultado.split("-")[0].includes("Aceleradora Paiol") ||
+        resultado.split("-")[0].includes("Auditório Prado Velho") ||
+        resultado.split("-")[0].includes("Sala MON");
+
+      return resultado;
+      //Antes das alterações
+      // return this.cliente && this.cliente.enderecoImovel
+      //   ? this.user.imovelRef + " - " + this.cliente.enderecoImovel
+      //   : this.user.imovelRef
+      //   ? this.user.imovelRef
+      //   : "";
     },
+
     tituloCalendario() {
       return !this.isCoworking
         ? "Clique no melhor <strong>dia e hora</strong> para visitar o imóvel " +
@@ -1069,6 +1123,7 @@ export default defineComponent({
       console.log("onMoved", JSON.stringify(data));
     },
     async nextStep() {
+      //onsole.log(getSalasHotMilk());
       if (!this.$refs.forms.validate()) return;
       const nome = this.isCoworking
         ? this.user.name + " - " + this.user.empresa
@@ -1111,14 +1166,19 @@ export default defineComponent({
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial));
         const final = moment(new Date(this.user.validadeFinal));
-        const seMesmoDia =
+        this.seMesmoDia =
           inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
 
-        return seMesmoDia
-          ? inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm")
-          : inicial.format("DD/MM/YYYY HH:mm") +
-              " - " +
-              final.format("DD/MM/YYYY HH:mm");
+        if (this.seMesmoDia) {
+          this.seMesmoDia =
+            inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm");
+        } else {
+          this.seMesmoDia =
+            inicial.format("DD/MM/YYYY HH:mm") +
+            " - " +
+            final.format("DD/MM/YYYY HH:mm");
+        }
+        return this.seMesmoDia;
       }
       return "";
     },
@@ -1140,6 +1200,9 @@ export default defineComponent({
       }
       s["align-items"] = "flex-start";
       return s;
+    },
+    testeFunction() {
+      console.log("teste");
     },
     getEvents(dt) {
       const events = this.eventsMap[dt] || [];
@@ -1403,11 +1466,20 @@ export default defineComponent({
       this.user.numeroVisitantesExternos = parseInt(
         this.numeroVisitantesExternos
       );
+
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
         data: this.user,
       };
+
+      // if (this.salasHotMilkValidarEntrada) {
+      //   console.log("eu atendo a condição");
+      //   const response = await this.executeMethod(request, false);
+      //   Loading.hide();
+      //   return;
+      // }
+
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
       if (!this.user.hasDocs) {
@@ -1430,6 +1502,13 @@ export default defineComponent({
         let d = {
           ...this.user,
         };
+        if (this.salasHotMilkValidarEntrada) {
+          console.log(
+            "Esse é o salasHotMilkValidarEntrada",
+            this.salasHotMilkValidarEntrada
+          );
+          d.paraAprovar = true;
+        }
         let formData = new FormData();
         Object.keys(d).forEach((key) => formData.append(key, d[key]));
         formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
@@ -1443,6 +1522,7 @@ export default defineComponent({
       Loading.hide();
       if (response && response.status == 200) {
         const message = response.data.text;
+
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
@@ -1515,6 +1595,52 @@ export default defineComponent({
         });
       }
     },
+
+    async modalConfirmacaoSuellen() {
+      // const userInfo = {
+      //   sala: this.getEndereco, //.split("-")[0]
+      //   nome: this.user.name,
+      //   empresa: this.user.empresa,
+      //   telefone: this.user.phone,
+      //   dia: this.seMesmoDia,
+      // };
+
+      // console.log(this.user.imovelRef);
+      // console.log("entidade id: ", this.entidadeId);
+      // console.log("cliente: ", this.cliente);
+      // console.log("usuário: ", this.user);
+
+      // this.user.paraAprovar = true;
+
+      // let req = {
+      //   url: "Visitas/validarVisita",
+      //   method: "post",
+      //   data: userInfo,
+      // };
+
+      // // let request = {
+      // //   url: "Convite/paraAprovar",
+      // //   method: "post",
+      // //   data: this.user,
+      // // };
+
+      // const response = await this.executeMethod(req, false);
+
+      Notify.create({
+        message: "Seu agendamendo será avaliado, aguarde o retorno.",
+      });
+      Dialog.create({
+        title:
+          '<span class="text-primary" style="font-size:1.2rem">Sua reserva necessitará confirmação!</span>',
+        message:
+          '<span style="font-size:1.0rem"> ' +
+          message +
+          "<br/> Revise os dados e tente novamente. </span>",
+        ok: "Entendido",
+        html: true,
+      });
+    },
+
     openURL(link, target) {
       window.open(link, target);
     },
@@ -1928,6 +2054,20 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.title-modal {
+  color: #e86628;
+}
+
+.btn-modal {
+  color: #21ba45;
+  border: 1px solid #21ba45;
+  border-radius: 4px;
+}
+
+.content-modal {
+  font-weight: bold;
+}
+
 .my-event {
   position: absolute;
   font-size: 12px;
