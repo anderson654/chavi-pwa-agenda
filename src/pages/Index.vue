@@ -1467,18 +1467,21 @@ export default defineComponent({
         this.numeroVisitantesExternos
       );
 
+      let d = {
+        ...this.user,
+      };
+
+      if (this.salasHotMilkValidarEntrada) {
+        console.log("Eu atendi a condição", d.paraAprovar);
+        d.paraAprovar = true;
+        console.log("Eu atendi a condição", d.paraAprovar);
+      }
+
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
-        data: this.user,
+        data: d,
       };
-
-      // if (this.salasHotMilkValidarEntrada) {
-      //   console.log("eu atendo a condição");
-      //   const response = await this.executeMethod(request, false);
-      //   Loading.hide();
-      //   return;
-      // }
 
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
@@ -1499,16 +1502,7 @@ export default defineComponent({
           blob: new Blob([this.user.fotoSelfie]),
           name: this.user.fotoSelfie.name,
         };
-        let d = {
-          ...this.user,
-        };
-        if (this.salasHotMilkValidarEntrada) {
-          console.log(
-            "Esse é o salasHotMilkValidarEntrada",
-            this.salasHotMilkValidarEntrada
-          );
-          d.paraAprovar = true;
-        }
+
         let formData = new FormData();
         Object.keys(d).forEach((key) => formData.append(key, d[key]));
         formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
