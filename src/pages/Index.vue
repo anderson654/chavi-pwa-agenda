@@ -821,16 +821,10 @@ export default defineComponent({
       //Atribuição das Salas da Hotmilk para que a Suellen valide entrada das pessoas.
       this.salasHotMilkValidarEntrada =
         resultado.split("-")[0].includes("Aceleradora Paiol") ||
-        resultado.split("-")[0].includes("Auditório Prado Velho") ||
+        //resultado.split("-")[0].includes("Auditório Prado Velho") ||
         resultado.split("-")[0].includes("Sala MON");
 
       return resultado;
-      //Antes das alterações
-      // return this.cliente && this.cliente.enderecoImovel
-      //   ? this.user.imovelRef + " - " + this.cliente.enderecoImovel
-      //   : this.user.imovelRef
-      //   ? this.user.imovelRef
-      //   : "";
     },
 
     tituloCalendario() {
@@ -1547,7 +1541,9 @@ export default defineComponent({
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
             this.semImovel = true;
-            this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+            //this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+            this.openURL("http://localhost:8081/hotmilk", "_self");
+
             // if (response.data && response.data.url)
             //   this.openURL(response.data.url, "_self");
           })
@@ -1574,7 +1570,8 @@ export default defineComponent({
               this.semImovel = true;
               if (response.data && response.data.url)
                 this.openURL(response.data.url, "_self");
-              else this.openURL("https://agenda.chavi.com.br", "_self");
+              else this.openURL("http://localhost:8081/hotmilk", "_self");
+              //this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
             });
           });
       } else if (response && response.status) {
