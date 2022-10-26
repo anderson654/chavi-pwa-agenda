@@ -818,12 +818,7 @@ export default defineComponent({
         resultado = this.user.imovelRef;
       }
 
-      //Atribuição das Salas da Hotmilk para que a Suellen valide entrada das pessoas.
-      this.salasHotMilkValidarEntrada =
-        resultado.split("-")[0].includes("Aceleradora Paiol") ||
-        //resultado.split("-")[0].includes("Auditório Prado Velho") ||
-        resultado.split("-")[0].includes("Sala MON");
-
+      console.log("valor da SalasHotMilk é ?", this.salasHotMilkValidarEntrada);
       return resultado;
     },
 
@@ -1117,7 +1112,6 @@ export default defineComponent({
       console.log("onMoved", JSON.stringify(data));
     },
     async nextStep() {
-      //onsole.log(getSalasHotMilk());
       if (!this.$refs.forms.validate()) return;
       const nome = this.isCoworking
         ? this.user.name + " - " + this.user.empresa
@@ -1461,18 +1455,18 @@ export default defineComponent({
         this.numeroVisitantesExternos
       );
 
+      let d = {
+        ...this.user,
+      };
+      if (this.salasHotMilkValidarEntrada) {
+        d.visitaParaConfirmar = true;
+      }
+
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
-        data: this.user,
+        data: d,
       };
-
-      // if (this.salasHotMilkValidarEntrada) {
-      //   console.log("eu atendo a condição");
-      //   const response = await this.executeMethod(request, false);
-      //   Loading.hide();
-      //   return;
-      // }
 
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
@@ -1493,16 +1487,7 @@ export default defineComponent({
           blob: new Blob([this.user.fotoSelfie]),
           name: this.user.fotoSelfie.name,
         };
-        let d = {
-          ...this.user,
-        };
-        if (this.salasHotMilkValidarEntrada) {
-          console.log(
-            "Esse é o salasHotMilkValidarEntrada",
-            this.salasHotMilkValidarEntrada
-          );
-          d.paraAprovar = true;
-        }
+
         let formData = new FormData();
         Object.keys(d).forEach((key) => formData.append(key, d[key]));
         formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
@@ -1696,12 +1681,14 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
+
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
             this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
             });
+
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
               this.utilizarDocumentos =
@@ -1713,6 +1700,7 @@ export default defineComponent({
               this.loginEmail = this.cliente.preferenciaUsuario.loginEmail;
               this.aprovarVisita =
                 this.cliente.preferenciaUsuario.aprovarVisita;
+              this.salasHotMilkValidarEntrada = true;
             }
             if (this.cliente && this.cliente.preferenciaVisita) {
               this.tempoMinimoAprovacao = this.cliente.preferenciaVisita
@@ -1758,8 +1746,8 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            this.events = response.data.horarios;
-            this.formatData();
+            console.log("essses são os eventos", this.events);
+            (this.events = response.data.horarios), this.formatData();
           } else {
             Notify.create({
               message:
@@ -1783,39 +1771,42 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-          const inicio = parseTimestamp(
-            moment(parseInt(horario.timestampInicial)).format(
-              "YYYY-MM-DD HH:mm"
-            )
-          );
-          const duracao = horario.intervalo / 60000;
-          const titleBusy = horario.usuario
-            ? `
-              <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
-                <div class="full-width text-center">Ocupado</div>
-                <div class="full-width text-center">${
-                  horario.usuario.indexOf("-") == -1
-                    ? horario.usuario.trim()
-                    : `${horario.usuario.split("-")[0].trim()}<br/>${
-                        horario.usuario.split("-")[1]
-                          ? horario.usuario.split("-")[1].trim()
-                          : ""
-                      }`
-                }</div>
-              </div>
-            `
-            : "Ocupado";
-          optionsOff.push({
-            title: horario.paraAprovar ? "Pendente" : titleBusy,
-            date: inicio.date,
-            time: inicio.time,
-            duration: duracao,
-            bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
-            textColor: "text-white",
-            timestampInicial: horario.timestampInicial,
-          });
+          console.log(horario);
+          if (!horario.paraAprovar) {
+            const inicio = parseTimestamp(
+              moment(parseInt(horario.timestampInicial)).format(
+                "YYYY-MM-DD HH:mm"
+              )
+            );
+            const duracao = horario.intervalo / 60000;
+            const titleBusy = horario.usuario
+              ? `
+                <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
+                  <div class="full-width text-center">Ocupado</div>
+                  <div class="full-width text-center">${
+                    horario.usuario.indexOf("-") == -1
+                      ? horario.usuario.trim()
+                      : `${horario.usuario.split("-")[0].trim()}<br/>${
+                          horario.usuario.split("-")[1]
+                            ? horario.usuario.split("-")[1].trim()
+                            : ""
+                        }`
+                  }</div>
+                </div>
+              `
+              : "Ocupado";
+            optionsOff.push({
+              title: horario.paraAprovar ? "Pendente" : titleBusy,
+              date: inicio.date,
+              time: inicio.time,
+              duration: duracao,
+              bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
+              textColor: "text-white",
+              timestampInicial: horario.timestampInicial,
+            });
+          }
+          this.events = optionsOff;
         }
-        this.events = optionsOff;
       }
     },
     async sendCode() {
