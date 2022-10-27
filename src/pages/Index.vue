@@ -818,19 +818,8 @@ export default defineComponent({
         resultado = this.user.imovelRef;
       }
 
-      //Atribuição das Salas da Hotmilk para que a Suellen valide entrada das pessoas.
-      this.salasHotMilkValidarEntrada =
-        resultado.split("-")[0].includes("Aceleradora Paiol") ||
-        resultado.split("-")[0].includes("Auditório Prado Velho") ||
-        resultado.split("-")[0].includes("Sala MON");
-
+      console.log("valor da SalasHotMilk é ?", this.salasHotMilkValidarEntrada);
       return resultado;
-      //Antes das alterações
-      // return this.cliente && this.cliente.enderecoImovel
-      //   ? this.user.imovelRef + " - " + this.cliente.enderecoImovel
-      //   : this.user.imovelRef
-      //   ? this.user.imovelRef
-      //   : "";
     },
 
     tituloCalendario() {
@@ -1123,7 +1112,6 @@ export default defineComponent({
       console.log("onMoved", JSON.stringify(data));
     },
     async nextStep() {
-      //onsole.log(getSalasHotMilk());
       if (!this.$refs.forms.validate()) return;
       const nome = this.isCoworking
         ? this.user.name + " - " + this.user.empresa
@@ -1541,7 +1529,9 @@ export default defineComponent({
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
             this.semImovel = true;
-            this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+            //this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+            this.openURL("http://localhost:8081/hotmilk", "_self");
+
             // if (response.data && response.data.url)
             //   this.openURL(response.data.url, "_self");
           })
@@ -1568,7 +1558,8 @@ export default defineComponent({
               this.semImovel = true;
               if (response.data && response.data.url)
                 this.openURL(response.data.url, "_self");
-              else this.openURL("https://agenda.chavi.com.br", "_self");
+              else this.openURL("http://localhost:8081/hotmilk", "_self");
+              //this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
             });
           });
       } else if (response && response.status) {
@@ -1693,12 +1684,14 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
+
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
             this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
             });
+
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
               this.utilizarDocumentos =
@@ -1710,6 +1703,7 @@ export default defineComponent({
               this.loginEmail = this.cliente.preferenciaUsuario.loginEmail;
               this.aprovarVisita =
                 this.cliente.preferenciaUsuario.aprovarVisita;
+              this.salasHotMilkValidarEntrada = true;
             }
             if (this.cliente && this.cliente.preferenciaVisita) {
               this.tempoMinimoAprovacao = this.cliente.preferenciaVisita
@@ -1755,8 +1749,8 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            this.events = response.data.horarios;
-            this.formatData();
+            console.log("essses são os eventos", this.events);
+            (this.events = response.data.horarios), this.formatData();
           } else {
             Notify.create({
               message:
@@ -1780,39 +1774,42 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-          const inicio = parseTimestamp(
-            moment(parseInt(horario.timestampInicial)).format(
-              "YYYY-MM-DD HH:mm"
-            )
-          );
-          const duracao = horario.intervalo / 60000;
-          const titleBusy = horario.usuario
-            ? `
-              <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
-                <div class="full-width text-center">Ocupado</div>
-                <div class="full-width text-center">${
-                  horario.usuario.indexOf("-") == -1
-                    ? horario.usuario.trim()
-                    : `${horario.usuario.split("-")[0].trim()}<br/>${
-                        horario.usuario.split("-")[1]
-                          ? horario.usuario.split("-")[1].trim()
-                          : ""
-                      }`
-                }</div>
-              </div>
-            `
-            : "Ocupado";
-          optionsOff.push({
-            title: horario.paraAprovar ? "Pendente" : titleBusy,
-            date: inicio.date,
-            time: inicio.time,
-            duration: duracao,
-            bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
-            textColor: "text-white",
-            timestampInicial: horario.timestampInicial,
-          });
+          console.log(horario);
+          if (!horario.paraAprovar) {
+            const inicio = parseTimestamp(
+              moment(parseInt(horario.timestampInicial)).format(
+                "YYYY-MM-DD HH:mm"
+              )
+            );
+            const duracao = horario.intervalo / 60000;
+            const titleBusy = horario.usuario
+              ? `
+                <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
+                  <div class="full-width text-center">Ocupado</div>
+                  <div class="full-width text-center">${
+                    horario.usuario.indexOf("-") == -1
+                      ? horario.usuario.trim()
+                      : `${horario.usuario.split("-")[0].trim()}<br/>${
+                          horario.usuario.split("-")[1]
+                            ? horario.usuario.split("-")[1].trim()
+                            : ""
+                        }`
+                  }</div>
+                </div>
+              `
+              : "Ocupado";
+            optionsOff.push({
+              title: horario.paraAprovar ? "Pendente" : titleBusy,
+              date: inicio.date,
+              time: inicio.time,
+              duration: duracao,
+              bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
+              textColor: "text-white",
+              timestampInicial: horario.timestampInicial,
+            });
+          }
+          this.events = optionsOff;
         }
-        this.events = optionsOff;
       }
     },
     async sendCode() {
