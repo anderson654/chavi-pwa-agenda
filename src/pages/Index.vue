@@ -641,9 +641,9 @@
             <q-btn
               class="col-6 q-ml-xs"
               label="Solicitar"
-              @click="small = true"
               color="positive"
-              v-if="salasHotMilkValidarEntrada"
+              type="submit"
+              v-if="salasHotMilkValidarEntrada && !redirecionarPagamento"
             />
 
             <q-btn
@@ -651,32 +651,18 @@
               label="Enviar"
               type="submit"
               color="positive"
-              v-if="!salasHotMilkValidarEntrada"
+              v-if="!salasHotMilkValidarEntrada && !redirecionarPagamento"
+            />
+            <div class="cho-container"></div>
+
+            <q-btn
+              class="col-6 q-ml-xs"
+              label="Pagamento"
+              @click="checkoutPagamento"
+              color="positive"
+              v-if="redirecionarPagamento"
             />
           </q-btn-group>
-          <q-dialog v-model="small">
-            <q-card style="width: 300px">
-              <q-card-section>
-                <div class="text-h6 title-modal" color="primary">
-                  Agendamento Solicitado
-                </div>
-              </q-card-section>
-
-              <q-card-section class="q-pt-none content-modal">
-                Essa sala necessita de confirmação.
-              </q-card-section>
-
-              <q-card-actions align="right" class="bg-white text-teal">
-                <q-btn
-                  flat
-                  label="Aguardar o retorno."
-                  v-close-popup
-                  @click="onSubmit"
-                  class="btn-modal"
-                />
-              </q-card-actions>
-            </q-card>
-          </q-dialog>
         </div>
       </q-form>
       <q-footer
@@ -708,6 +694,7 @@ import * as moment from "moment";
 import { QCalendarDay } from "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.esm.js";
 import { QCalendarMonth } from "@quasar/quasar-ui-qcalendar/dist/QCalendarMonth.esm.js";
 import NavigatioBar from "components/NavigationBar.vue";
+import axios from "axios";
 import {
   addToDate,
   parseTimestamp,
@@ -777,6 +764,7 @@ export default defineComponent({
       tempoMaximo: 60,
       tempoMinimoAprovacao: 0,
       numeroVisitantesExternos: 0,
+      redirecionarPagamento: true,
     };
   },
   computed: {
@@ -818,7 +806,6 @@ export default defineComponent({
         resultado = this.user.imovelRef;
       }
 
-      console.log("valor da SalasHotMilk é ?", this.salasHotMilkValidarEntrada);
       return resultado;
     },
 
@@ -1189,9 +1176,7 @@ export default defineComponent({
       s["align-items"] = "flex-start";
       return s;
     },
-    testeFunction() {
-      console.log("teste");
-    },
+
     getEvents(dt) {
       const events = this.eventsMap[dt] || [];
       if (events.length === 1) {
@@ -1460,9 +1445,7 @@ export default defineComponent({
       };
 
       if (this.salasHotMilkValidarEntrada) {
-        console.log("Eu atendi a condição", d.paraAprovar);
         d.paraAprovar = true;
-        console.log("Eu atendi a condição", d.paraAprovar);
       }
 
       let request = {
@@ -1581,48 +1564,36 @@ export default defineComponent({
       }
     },
 
-    async modalConfirmacaoSuellen() {
-      // const userInfo = {
-      //   sala: this.getEndereco, //.split("-")[0]
-      //   nome: this.user.name,
-      //   empresa: this.user.empresa,
-      //   telefone: this.user.phone,
-      //   dia: this.seMesmoDia,
-      // };
+    async checkoutPagamento() {
+      const data = { sala: "Hotmilk - sala 3", tempoDeUso: 60, preco: "15" };
 
-      // console.log(this.user.imovelRef);
-      // console.log("entidade id: ", this.entidadeId);
-      // console.log("cliente: ", this.cliente);
-      // console.log("usuário: ", this.user);
+      let request = {
+        url: "Entidades/checkoutPagamento",
+        method: "post",
+        data: data,
+      };
 
-      // this.user.paraAprovar = true;
+      // const preference = [];
 
-      // let req = {
-      //   url: "Visitas/validarVisita",
-      //   method: "post",
-      //   data: userInfo,
-      // };
+      // axios
+      //   .post("http://localhost:3000/api/Entidades/checkoutPagamento", data)
+      //   .then((res) => console.log(res));
 
-      // // let request = {
-      // //   url: "Convite/paraAprovar",
-      // //   method: "post",
-      // //   data: this.user,
-      // // };
+      const response = await this.executeMethod(request, false);
+      console.log("essa é a response", response);
 
-      // const response = await this.executeMethod(req, false);
-
-      Notify.create({
-        message: "Seu agendamendo será avaliado, aguarde o retorno.",
+      const mp = new MercadoPago("TEST-046d4756-bfee-4057-b2d8-6c59ef688424", {
+        locale: "pt-BR",
       });
-      Dialog.create({
-        title:
-          '<span class="text-primary" style="font-size:1.2rem">Sua reserva necessitará confirmação!</span>',
-        message:
-          '<span style="font-size:1.0rem"> ' +
-          message +
-          "<br/> Revise os dados e tente novamente. </span>",
-        ok: "Entendido",
-        html: true,
+      mp.checkout({
+        preference: {
+          id: response,
+        },
+        render: {
+          container: ".cho-container",
+          label: "Pagar",
+        },
+        theme: {},
       });
     },
 
@@ -1749,7 +1720,6 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            console.log("essses são os eventos", this.events);
             (this.events = response.data.horarios), this.formatData();
           } else {
             Notify.create({
@@ -1758,7 +1728,6 @@ export default defineComponent({
               type: "warning",
             });
             this.semImovel = true;
-            console.log("deu ruim ", response);
           }
         }
       } catch (e) {
@@ -1774,7 +1743,6 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-          console.log(horario);
           if (!horario.paraAprovar) {
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
