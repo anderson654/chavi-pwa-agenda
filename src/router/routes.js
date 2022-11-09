@@ -13,6 +13,18 @@ const routes = [
     component: () => import("layouts/Galvao.vue"),
     children: [{ path: "", component: () => import("pages/Index.vue") }],
   },
+  {
+    path: "/checkout",
+    component: () => import("layouts/Checkout.vue"),
+    children: [{ path: "", component: () => import("pages/CheckoutPage.vue") }],
+  },
+  {
+    path: "/erro/checkout",
+    component: () => import("layouts/Checkout/falha.vue"),
+    children: [
+      { path: "", component: () => import("pages/errorCheckout.vue") },
+    ],
+  },
   // {
   //   path: "/dormakaba",
   //   component: () => import("pages/Dormakaba.vue"),
