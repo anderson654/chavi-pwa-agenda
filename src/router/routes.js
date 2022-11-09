@@ -20,7 +20,7 @@ const routes = [
   },
   {
     path: "/erro/checkout",
-    component: () => import("layouts/Checkout/falha.vue"),
+    component: () => import("layouts/CheckoutPage.vue"),
     children: [
       { path: "", component: () => import("pages/errorCheckout.vue") },
     ],
