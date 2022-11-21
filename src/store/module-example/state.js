@@ -3,5 +3,6 @@ export default function () {
     params: undefined,
     login: {},
     logo: "",
+    convite: {},
   };
 }
