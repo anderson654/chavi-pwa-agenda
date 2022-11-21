@@ -7,3 +7,6 @@ export function setLogin(state, login) {
 export function setLogo(state, logo) {
   state.logo = logo;
 }
+export function setConvite(state, convite) {
+  state.convite = convite;
+}

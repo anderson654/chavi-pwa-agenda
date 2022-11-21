@@ -576,6 +576,7 @@
               <div class="col-5">Horário:</div>
               <div class="col-7 text-bold">{{ parseData() }}</div>
             </div>
+
             <div class="row" v-if="getEndereco">
               <div class="col-5">Local:</div>
 
@@ -583,6 +584,21 @@
                 class="col-7 text-bold"
                 v-html="getEndereco.replace('\n', '<br/>')"
               ></div>
+            </div>
+            <div v-if="necessitaPagamento">
+              <div class="row">
+                <div class="col-5">Preço 15 minutos:</div>
+                <div class="col-7 text-bold">
+                  R$ {{ filtraValor(valorDaSala) }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-5">Preço total:</div>
+                <div class="col-7 text-bold">
+                  R$
+                  {{ filtraValor() }}
+                </div>
+              </div>
             </div>
             <div v-if="!user.hasDocs && utilizarDocumentos" class="row q-mt-md">
               <div class="col-5">Foto Frente:</div>
@@ -643,7 +659,7 @@
               label="Solicitar"
               color="positive"
               type="submit"
-              v-if="salasHotMilkValidarEntrada && !redirecionarPagamento"
+              v-if="necessitaAprovacao && !necessitaPagamento"
             />
 
             <q-btn
@@ -651,18 +667,18 @@
               label="Enviar"
               type="submit"
               color="positive"
-              v-if="!salasHotMilkValidarEntrada && !redirecionarPagamento"
+              v-if="!necessitaAprovacao && !necessitaPagamento"
             />
-            <div class="cho-container"></div>
 
             <q-btn
               class="col-6 q-ml-xs"
               label="Pagamento"
               @click="checkoutPagamento"
               color="positive"
-              v-if="redirecionarPagamento"
+              v-if="necessitaPagamento"
             />
           </q-btn-group>
+          <div class="cho-container"></div>
         </div>
       </q-form>
       <q-footer
@@ -719,12 +735,12 @@ export default defineComponent({
     return {
       seMesmoDia: "",
       salasHotMilkValidarEntrada: false,
-      small: false,
       inForms: false,
       codeSent: false,
       semImovel: false,
       parte: 1,
       selectedDate: "",
+      valorDoAgendamento: 0,
       duracao: "",
       type: "",
       cliente: {},
@@ -759,6 +775,8 @@ export default defineComponent({
       horaFinal: 24,
       horaInicial: 0,
       timeStepMin: 15,
+      necessitaAprovacao: false,
+      chaveAgendamento: "",
       liberarAgendamento: -1,
       sabado: false,
       tempoMaximo: 60,
@@ -805,7 +823,6 @@ export default defineComponent({
       } else if (this.user.imovelRef) {
         resultado = this.user.imovelRef;
       }
-
       return resultado;
     },
 
@@ -1394,7 +1411,35 @@ export default defineComponent({
         }
       });
     },
+    filtraValor(valorDaSala) {
+      if (valorDaSala) {
+        let filtroValorDaSala = valorDaSala.toString();
+        if (filtroValorDaSala.length == 1 || filtroValorDaSala.length == 2) {
+          return `${valorDaSala}.00`;
+        }
+      }
+
+      let valor =
+        this.valorDaSala *
+        (this.diferencaEmMinutos(
+          this.user.validadeInicial,
+          this.user.validadeFinal
+        ) /
+          15);
+      let filtro = valor.toString();
+
+      if (filtro.length == 1 || filtro.length == 2) {
+        filtro = `${filtro}.00`;
+      }
+
+      if (filtro.length == 3 && filtro[2] !== ".") {
+        filtro = `${filtro}.00`;
+      }
+      console.log(filtro);
+      return filtro;
+    },
     async onSubmit() {
+      this.necessitaPagamento ? await this.checkoutPagamento : null;
       if (
         this.fotoFrente &&
         this.fotoFrente.length &&
@@ -1440,18 +1485,18 @@ export default defineComponent({
         this.numeroVisitantesExternos
       );
 
-      let d = {
+      let user = {
         ...this.user,
       };
 
       if (this.salasHotMilkValidarEntrada) {
-        d.paraAprovar = true;
+        user.visitaParaConfirmar = true;
       }
 
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
-        data: d,
+        data: user,
       };
 
       this.user.paraAprovar =
@@ -1475,7 +1520,7 @@ export default defineComponent({
         };
 
         let formData = new FormData();
-        Object.keys(d).forEach((key) => formData.append(key, d[key]));
+        Object.keys(user).forEach((key) => formData.append(key, user[key]));
         formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
         formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
@@ -1512,11 +1557,9 @@ export default defineComponent({
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
             this.semImovel = true;
-            //this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
-            this.openURL("http://localhost:8081/hotmilk", "_self");
-
-            // if (response.data && response.data.url)
-            //   this.openURL(response.data.url, "_self");
+            this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+            if (response.data && response.data.url)
+              this.openURL(response.data.url, "_self");
           })
           .onCancel(async () => {
             const ics = response.data.ics;
@@ -1541,8 +1584,7 @@ export default defineComponent({
               this.semImovel = true;
               if (response.data && response.data.url)
                 this.openURL(response.data.url, "_self");
-              else this.openURL("http://localhost:8081/hotmilk", "_self");
-              //this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+              else this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
             });
           });
       } else if (response && response.status) {
@@ -1565,7 +1607,20 @@ export default defineComponent({
     },
 
     async checkoutPagamento() {
-      const data = { sala: "Hotmilk - sala 3", tempoDeUso: 60, preco: "15" };
+      const data = {
+        sala: this.user.imovelRef,
+        tempoDeUso: this.diferencaEmMinutos(
+          this.user.validadeInicial,
+          this.user.validadeFinal
+        ),
+        preco:
+          this.valorDaSala *
+          (this.diferencaEmMinutos(
+            this.user.validadeInicial,
+            this.user.validadeFinal
+          ) /
+            15),
+      };
 
       let request = {
         url: "Entidades/checkoutPagamento",
@@ -1573,28 +1628,36 @@ export default defineComponent({
         data: data,
       };
 
-      // const preference = [];
-
-      // axios
-      //   .post("http://localhost:3000/api/Entidades/checkoutPagamento", data)
-      //   .then((res) => console.log(res));
-
       const response = await this.executeMethod(request, false);
-      console.log("essa é a response", response);
 
-      const mp = new MercadoPago("TEST-046d4756-bfee-4057-b2d8-6c59ef688424", {
+      this.$store.dispatch("setarDados", {
+        key: "setConvite",
+        value: this.user,
+      });
+
+      //const mp = new MercadoPago("TEST-948ecfba-0eda-4100-8f8c-bb4ef5e20c12", {
+
+      const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
       mp.checkout({
         preference: {
-          id: response,
+          id: response.data,
         },
         render: {
           container: ".cho-container",
-          label: "Pagar",
+          label: "Efetuar pagamento",
         },
-        theme: {},
+        autoOpen: true,
       });
+    },
+    diferencaEmMinutos(inicial, final) {
+      const dataInicio = moment(inicial);
+      const dataFim = moment(final);
+
+      const calcula = dataFim.diff(dataInicio, "minutes");
+
+      return calcula;
     },
 
     openURL(link, target) {
@@ -1655,13 +1718,34 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
-
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
+
             this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
             });
+
+            console.log(response.data.entidade.preferenciaVisita);
+
+            //Verifica se a sala necessita aprovacao ou pagamento
+            response.data.entidade.preferenciaVisita.necessitaAprovacao
+              ? (this.necessitaAprovacao = true)
+              : (this.necessitaAprovacao = false);
+
+            response.data.entidade.preferenciaVisita.necessitaPagamento
+              ? (this.necessitaPagamento = true)
+              : (this.necessitaPagamento = false);
+
+            response.data.entidade.preferenciaVisita.chaveAgendamento
+              ? (this.chaveAgendamento =
+                  response.data.entidade.preferenciaVisita.chaveAgendamento)
+              : (this.chaveAgendamento = "");
+
+            response.data.entidade.preferenciaVisita.valorDaSala
+              ? (this.valorDaSala =
+                  response.data.entidade.preferenciaVisita.valorDaSala)
+              : (this.valorDaSala = 0);
 
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
@@ -1674,7 +1758,6 @@ export default defineComponent({
               this.loginEmail = this.cliente.preferenciaUsuario.loginEmail;
               this.aprovarVisita =
                 this.cliente.preferenciaUsuario.aprovarVisita;
-              this.salasHotMilkValidarEntrada = true;
             }
             if (this.cliente && this.cliente.preferenciaVisita) {
               this.tempoMinimoAprovacao = this.cliente.preferenciaVisita
@@ -1694,6 +1777,7 @@ export default defineComponent({
               this.domingo = this.cliente.preferenciaVisita.domingo
                 ? true
                 : false;
+
               if (this.cliente.preferenciaVisita.intervaloMin) {
                 this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin;
                 this.duracao =
@@ -1903,6 +1987,42 @@ export default defineComponent({
         });
       }
     },
+    async criarVisita() {
+      let user = {
+        ...this.user,
+      };
+
+      if (!this.user.hasDocs) {
+        this.user.fotoFrente = await this.compressImage(this.fotoFrente);
+        this.user.fotoAtras = await this.compressImage(this.fotoVerso);
+        this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
+
+        const blobFrente = {
+          blob: new Blob([this.user.fotoFrente]),
+          name: this.user.fotoFrente.name,
+        };
+        const blobAtras = {
+          blob: new Blob([this.user.fotoAtras]),
+          name: this.user.fotoAtras.name,
+        };
+        const blobSelfie = {
+          blob: new Blob([this.user.fotoSelfie]),
+          name: this.user.fotoSelfie.name,
+        };
+
+        let formData = new FormData();
+        Object.keys(user).forEach((key) => formData.append(key, user[key]));
+        formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
+        formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
+        formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
+
+        // request.headers = { "Content-Type": "multipart/form-data" };
+        // request.data = formData;
+      }
+
+      return user;
+    },
+
     getDayOfWeek(dow) {
       switch (dow) {
         case 0:
