@@ -735,6 +735,8 @@ export default defineComponent({
     return {
       seMesmoDia: "",
       salasHotMilkValidarEntrada: false,
+      emailAvisoAgendamento: "",
+      whatsappAvisoAgendamento: "",
       inForms: false,
       codeSent: false,
       semImovel: false,
@@ -1435,11 +1437,14 @@ export default defineComponent({
       if (filtro.length == 3 && filtro[2] !== ".") {
         filtro = `${filtro}.00`;
       }
-      console.log(filtro);
       return filtro;
     },
     async onSubmit() {
-      this.necessitaPagamento ? await this.checkoutPagamento : null;
+      if (this.necessitaPagamento) {
+        this.checkoutPagamento();
+        return;
+      }
+
       if (
         this.fotoFrente &&
         this.fotoFrente.length &&
@@ -1489,8 +1494,18 @@ export default defineComponent({
         ...this.user,
       };
 
-      if (this.salasHotMilkValidarEntrada) {
-        user.visitaParaConfirmar = true;
+      if (this.necessitaAprovacao) {
+        user.necessitaAprovacao = true;
+      }
+
+      console.log("seu log", this.whatsappAvisoAgendamento);
+
+      if (this.whatsappAvisoAgendamento) {
+        user.whatsappAvisoAgendamento = this.whatsappAvisoAgendamento;
+      }
+
+      if (this.emailAvisoAgendamento) {
+        user.emailAvisoAgendamento = this.emailAvisoAgendamento;
       }
 
       let request = {
@@ -1528,6 +1543,7 @@ export default defineComponent({
         request.headers = { "Content-Type": "multipart/form-data" };
         request.data = formData;
       }
+
       const response = await this.executeMethod(request, false);
       Loading.hide();
       if (response && response.status == 200) {
@@ -1622,6 +1638,8 @@ export default defineComponent({
             15),
       };
 
+      console.log(data);
+
       let request = {
         url: "Entidades/checkoutPagamento",
         method: "post",
@@ -1636,7 +1654,7 @@ export default defineComponent({
       });
 
       //const mp = new MercadoPago("TEST-948ecfba-0eda-4100-8f8c-bb4ef5e20c12", {
-
+      console.log(this.chaveAgendamento);
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
@@ -1650,6 +1668,7 @@ export default defineComponent({
         },
         autoOpen: true,
       });
+      return;
     },
     diferencaEmMinutos(inicial, final) {
       const dataInicio = moment(inicial);
@@ -1726,8 +1745,6 @@ export default defineComponent({
               value: this.cliente.logo,
             });
 
-            console.log(response.data.entidade.preferenciaVisita);
-
             //Verifica se a sala necessita aprovacao ou pagamento
             response.data.entidade.preferenciaVisita.necessitaAprovacao
               ? (this.necessitaAprovacao = true)
@@ -1736,6 +1753,16 @@ export default defineComponent({
             response.data.entidade.preferenciaVisita.necessitaPagamento
               ? (this.necessitaPagamento = true)
               : (this.necessitaPagamento = false);
+
+            response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento
+              ? (this.whatsappAvisoAgendamento =
+                  response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento)
+              : (this.whatsappAvisoAgendamento = "");
+
+            response.data.entidade.preferenciaVisita.emailAvisoAgendamento
+              ? (this.emailAvisoAgendamento =
+                  response.data.entidade.preferenciaVisita.emailAvisoAgendamento)
+              : (this.emailAvisoAgendamento = "");
 
             response.data.entidade.preferenciaVisita.chaveAgendamento
               ? (this.chaveAgendamento =
