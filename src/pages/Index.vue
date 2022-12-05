@@ -576,12 +576,29 @@
               <div class="col-5">Horário:</div>
               <div class="col-7 text-bold">{{ parseData() }}</div>
             </div>
+
             <div class="row" v-if="getEndereco">
               <div class="col-5">Local:</div>
+
               <div
                 class="col-7 text-bold"
                 v-html="getEndereco.replace('\n', '<br/>')"
               ></div>
+            </div>
+            <div v-if="necessitaPagamento">
+              <div class="row">
+                <div class="col-5">Preço 15 minutos:</div>
+                <div class="col-7 text-bold">
+                  R$ {{ filtraValor(valorDaSala) }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-5">Preço total:</div>
+                <div class="col-7 text-bold">
+                  R$
+                  {{ filtraValor() }}
+                </div>
+              </div>
             </div>
             <div v-if="!user.hasDocs && utilizarDocumentos" class="row q-mt-md">
               <div class="col-5">Foto Frente:</div>
@@ -636,13 +653,32 @@
                   : (parte -= 2)
               "
             />
+
+            <q-btn
+              class="col-6 q-ml-xs"
+              label="Solicitar"
+              color="positive"
+              type="submit"
+              v-if="necessitaAprovacao && !necessitaPagamento"
+            />
+
             <q-btn
               class="col-6 q-ml-xs"
               label="Enviar"
               type="submit"
               color="positive"
+              v-if="!necessitaAprovacao && !necessitaPagamento"
+            />
+
+            <q-btn
+              class="col-6 q-ml-xs"
+              label="Pagamento"
+              @click="checkoutPagamento"
+              color="positive"
+              v-if="necessitaPagamento"
             />
           </q-btn-group>
+          <div class="cho-container"></div>
         </div>
       </q-form>
       <q-footer
@@ -674,6 +710,7 @@ import * as moment from "moment";
 import { QCalendarDay } from "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.esm.js";
 import { QCalendarMonth } from "@quasar/quasar-ui-qcalendar/dist/QCalendarMonth.esm.js";
 import NavigatioBar from "components/NavigationBar.vue";
+import axios from "axios";
 import {
   addToDate,
   parseTimestamp,
@@ -686,6 +723,7 @@ import "@quasar/quasar-ui-qcalendar/dist/QCalendarVariables.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarTransitions.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
 import { Dialog } from "quasar";
+
 export default defineComponent({
   name: "PageIndex",
   components: {
@@ -695,11 +733,16 @@ export default defineComponent({
   },
   data() {
     return {
+      seMesmoDia: "",
+      salasHotMilkValidarEntrada: false,
+      emailAvisoAgendamento: "",
+      whatsappAvisoAgendamento: "",
       inForms: false,
       codeSent: false,
       semImovel: false,
       parte: 1,
       selectedDate: "",
+      valorDoAgendamento: 0,
       duracao: "",
       type: "",
       cliente: {},
@@ -734,11 +777,14 @@ export default defineComponent({
       horaFinal: 24,
       horaInicial: 0,
       timeStepMin: 15,
+      necessitaAprovacao: false,
+      chaveAgendamento: "",
       liberarAgendamento: -1,
       sabado: false,
       tempoMaximo: 60,
       tempoMinimoAprovacao: 0,
       numeroVisitantesExternos: 0,
+      redirecionarPagamento: true,
     };
   },
   computed: {
@@ -773,12 +819,15 @@ export default defineComponent({
         : false;
     },
     getEndereco() {
-      return this.cliente && this.cliente.enderecoImovel
-        ? this.user.imovelRef + " - " + this.cliente.enderecoImovel
-        : this.user.imovelRef
-        ? this.user.imovelRef
-        : "";
+      let resultado = "";
+      if (this.cliente && this.cliente.enderecoImovel) {
+        resultado = this.user.imovelRef + " - " + this.cliente.enderecoImovel;
+      } else if (this.user.imovelRef) {
+        resultado = this.user.imovelRef;
+      }
+      return resultado;
     },
+
     tituloCalendario() {
       return !this.isCoworking
         ? "Clique no melhor <strong>dia e hora</strong> para visitar o imóvel " +
@@ -1111,14 +1160,19 @@ export default defineComponent({
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial));
         const final = moment(new Date(this.user.validadeFinal));
-        const seMesmoDia =
+        this.seMesmoDia =
           inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
 
-        return seMesmoDia
-          ? inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm")
-          : inicial.format("DD/MM/YYYY HH:mm") +
-              " - " +
-              final.format("DD/MM/YYYY HH:mm");
+        if (this.seMesmoDia) {
+          this.seMesmoDia =
+            inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm");
+        } else {
+          this.seMesmoDia =
+            inicial.format("DD/MM/YYYY HH:mm") +
+            " - " +
+            final.format("DD/MM/YYYY HH:mm");
+        }
+        return this.seMesmoDia;
       }
       return "";
     },
@@ -1141,6 +1195,7 @@ export default defineComponent({
       s["align-items"] = "flex-start";
       return s;
     },
+
     getEvents(dt) {
       const events = this.eventsMap[dt] || [];
       if (events.length === 1) {
@@ -1358,7 +1413,38 @@ export default defineComponent({
         }
       });
     },
+    filtraValor(valorDaSala) {
+      if (valorDaSala) {
+        let filtroValorDaSala = valorDaSala.toString();
+        if (filtroValorDaSala.length == 1 || filtroValorDaSala.length == 2) {
+          return `${valorDaSala}.00`;
+        }
+      }
+
+      let valor =
+        this.valorDaSala *
+        (this.diferencaEmMinutos(
+          this.user.validadeInicial,
+          this.user.validadeFinal
+        ) /
+          15);
+      let filtro = valor.toString();
+
+      if (filtro.length == 1 || filtro.length == 2) {
+        filtro = `${filtro}.00`;
+      }
+
+      if (filtro.length == 3 && filtro[2] !== ".") {
+        filtro = `${filtro}.00`;
+      }
+      return filtro;
+    },
     async onSubmit() {
+      if (this.necessitaPagamento) {
+        this.checkoutPagamento();
+        return;
+      }
+
       if (
         this.fotoFrente &&
         this.fotoFrente.length &&
@@ -1403,11 +1489,31 @@ export default defineComponent({
       this.user.numeroVisitantesExternos = parseInt(
         this.numeroVisitantesExternos
       );
+
+      let user = {
+        ...this.user,
+      };
+
+      if (this.necessitaAprovacao) {
+        user.necessitaAprovacao = true;
+      }
+
+      console.log("seu log", this.whatsappAvisoAgendamento);
+
+      if (this.whatsappAvisoAgendamento) {
+        user.whatsappAvisoAgendamento = this.whatsappAvisoAgendamento;
+      }
+
+      if (this.emailAvisoAgendamento) {
+        user.emailAvisoAgendamento = this.emailAvisoAgendamento;
+      }
+
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
-        data: this.user,
+        data: user,
       };
+
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
       if (!this.user.hasDocs) {
@@ -1427,11 +1533,9 @@ export default defineComponent({
           blob: new Blob([this.user.fotoSelfie]),
           name: this.user.fotoSelfie.name,
         };
-        let d = {
-          ...this.user,
-        };
+
         let formData = new FormData();
-        Object.keys(d).forEach((key) => formData.append(key, d[key]));
+        Object.keys(user).forEach((key) => formData.append(key, user[key]));
         formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
         formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
@@ -1439,10 +1543,12 @@ export default defineComponent({
         request.headers = { "Content-Type": "multipart/form-data" };
         request.data = formData;
       }
+
       const response = await this.executeMethod(request, false);
       Loading.hide();
       if (response && response.status == 200) {
         const message = response.data.text;
+
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
@@ -1468,8 +1574,8 @@ export default defineComponent({
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
             this.semImovel = true;
             this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
-            // if (response.data && response.data.url)
-            //   this.openURL(response.data.url, "_self");
+            if (response.data && response.data.url)
+              this.openURL(response.data.url, "_self");
           })
           .onCancel(async () => {
             const ics = response.data.ics;
@@ -1494,7 +1600,7 @@ export default defineComponent({
               this.semImovel = true;
               if (response.data && response.data.url)
                 this.openURL(response.data.url, "_self");
-              else this.openURL("https://agenda.chavi.com.br", "_self");
+              else this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
             });
           });
       } else if (response && response.status) {
@@ -1515,6 +1621,64 @@ export default defineComponent({
         });
       }
     },
+
+    async checkoutPagamento() {
+      const data = {
+        sala: this.user.imovelRef,
+        tempoDeUso: this.diferencaEmMinutos(
+          this.user.validadeInicial,
+          this.user.validadeFinal
+        ),
+        preco:
+          this.valorDaSala *
+          (this.diferencaEmMinutos(
+            this.user.validadeInicial,
+            this.user.validadeFinal
+          ) /
+            15),
+      };
+
+      console.log(data);
+
+      let request = {
+        url: "Entidades/checkoutPagamento",
+        method: "post",
+        data: data,
+      };
+
+      const response = await this.executeMethod(request, false);
+
+      this.$store.dispatch("setarDados", {
+        key: "setConvite",
+        value: this.user,
+      });
+
+      //const mp = new MercadoPago("TEST-948ecfba-0eda-4100-8f8c-bb4ef5e20c12", {
+      console.log(this.chaveAgendamento);
+      const mp = new MercadoPago(this.chaveAgendamento, {
+        locale: "pt-BR",
+      });
+      mp.checkout({
+        preference: {
+          id: response.data,
+        },
+        render: {
+          container: ".cho-container",
+          label: "Efetuar pagamento",
+        },
+        autoOpen: true,
+      });
+      return;
+    },
+    diferencaEmMinutos(inicial, final) {
+      const dataInicio = moment(inicial);
+      const dataFim = moment(final);
+
+      const calcula = dataFim.diff(dataInicio, "minutes");
+
+      return calcula;
+    },
+
     openURL(link, target) {
       window.open(link, target);
     },
@@ -1575,10 +1739,45 @@ export default defineComponent({
           });
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
+
             this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
             });
+            //Verifica se a sala necessita aprovacao
+            response.data.entidade.preferenciaVisita.necessitaAprovacao
+              ? (this.necessitaAprovacao = true)
+              : (this.necessitaAprovacao = false);
+
+            //Verifica se a sala necessita aprovacao ou pagamento
+            response.data.entidade.preferenciaVisita.necessitaAprovacao
+              ? (this.necessitaAprovacao = true)
+              : (this.necessitaAprovacao = false);
+
+            response.data.entidade.preferenciaVisita.necessitaPagamento
+              ? (this.necessitaPagamento = true)
+              : (this.necessitaPagamento = false);
+
+            response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento
+              ? (this.whatsappAvisoAgendamento =
+                  response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento)
+              : (this.whatsappAvisoAgendamento = "");
+
+            response.data.entidade.preferenciaVisita.emailAvisoAgendamento
+              ? (this.emailAvisoAgendamento =
+                  response.data.entidade.preferenciaVisita.emailAvisoAgendamento)
+              : (this.emailAvisoAgendamento = "");
+
+            response.data.entidade.preferenciaVisita.chaveAgendamento
+              ? (this.chaveAgendamento =
+                  response.data.entidade.preferenciaVisita.chaveAgendamento)
+              : (this.chaveAgendamento = "");
+
+            response.data.entidade.preferenciaVisita.valorDaSala
+              ? (this.valorDaSala =
+                  response.data.entidade.preferenciaVisita.valorDaSala)
+              : (this.valorDaSala = 0);
+
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
               this.utilizarDocumentos =
@@ -1609,6 +1808,7 @@ export default defineComponent({
               this.domingo = this.cliente.preferenciaVisita.domingo
                 ? true
                 : false;
+
               if (this.cliente.preferenciaVisita.intervaloMin) {
                 this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin;
                 this.duracao =
@@ -1635,8 +1835,7 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            this.events = response.data.horarios;
-            this.formatData();
+            (this.events = response.data.horarios), this.formatData();
           } else {
             Notify.create({
               message:
@@ -1644,7 +1843,6 @@ export default defineComponent({
               type: "warning",
             });
             this.semImovel = true;
-            console.log("deu ruim ", response);
           }
         }
       } catch (e) {
@@ -1660,39 +1858,41 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-          const inicio = parseTimestamp(
-            moment(parseInt(horario.timestampInicial)).format(
-              "YYYY-MM-DD HH:mm"
-            )
-          );
-          const duracao = horario.intervalo / 60000;
-          const titleBusy = horario.usuario
-            ? `
-              <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
-                <div class="full-width text-center">Ocupado</div>
-                <div class="full-width text-center">${
-                  horario.usuario.indexOf("-") == -1
-                    ? horario.usuario.trim()
-                    : `${horario.usuario.split("-")[0].trim()}<br/>${
-                        horario.usuario.split("-")[1]
-                          ? horario.usuario.split("-")[1].trim()
-                          : ""
-                      }`
-                }</div>
-              </div>
-            `
-            : "Ocupado";
-          optionsOff.push({
-            title: horario.paraAprovar ? "Pendente" : titleBusy,
-            date: inicio.date,
-            time: inicio.time,
-            duration: duracao,
-            bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
-            textColor: "text-white",
-            timestampInicial: horario.timestampInicial,
-          });
+          if (!horario.paraAprovar) {
+            const inicio = parseTimestamp(
+              moment(parseInt(horario.timestampInicial)).format(
+                "YYYY-MM-DD HH:mm"
+              )
+            );
+            const duracao = horario.intervalo / 60000;
+            const titleBusy = horario.usuario
+              ? `
+                <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
+                  <div class="full-width text-center">Ocupado</div>
+                  <div class="full-width text-center">${
+                    horario.usuario.indexOf("-") == -1
+                      ? horario.usuario.trim()
+                      : `${horario.usuario.split("-")[0].trim()}<br/>${
+                          horario.usuario.split("-")[1]
+                            ? horario.usuario.split("-")[1].trim()
+                            : ""
+                        }`
+                  }</div>
+                </div>
+              `
+              : "Ocupado";
+            optionsOff.push({
+              title: horario.paraAprovar ? "Pendente" : titleBusy,
+              date: inicio.date,
+              time: inicio.time,
+              duration: duracao,
+              bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
+              textColor: "text-white",
+              timestampInicial: horario.timestampInicial,
+            });
+          }
+          this.events = optionsOff;
         }
-        this.events = optionsOff;
       }
     },
     async sendCode() {
@@ -1818,6 +2018,42 @@ export default defineComponent({
         });
       }
     },
+    async criarVisita() {
+      let user = {
+        ...this.user,
+      };
+
+      if (!this.user.hasDocs) {
+        this.user.fotoFrente = await this.compressImage(this.fotoFrente);
+        this.user.fotoAtras = await this.compressImage(this.fotoVerso);
+        this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
+
+        const blobFrente = {
+          blob: new Blob([this.user.fotoFrente]),
+          name: this.user.fotoFrente.name,
+        };
+        const blobAtras = {
+          blob: new Blob([this.user.fotoAtras]),
+          name: this.user.fotoAtras.name,
+        };
+        const blobSelfie = {
+          blob: new Blob([this.user.fotoSelfie]),
+          name: this.user.fotoSelfie.name,
+        };
+
+        let formData = new FormData();
+        Object.keys(user).forEach((key) => formData.append(key, user[key]));
+        formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
+        formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
+        formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
+
+        // request.headers = { "Content-Type": "multipart/form-data" };
+        // request.data = formData;
+      }
+
+      return user;
+    },
+
     getDayOfWeek(dow) {
       switch (dow) {
         case 0:
@@ -1928,6 +2164,20 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.title-modal {
+  color: #e86628;
+}
+
+.btn-modal {
+  color: #21ba45;
+  border: 1px solid #21ba45;
+  border-radius: 4px;
+}
+
+.content-modal {
+  font-weight: bold;
+}
+
 .my-event {
   position: absolute;
   font-size: 12px;

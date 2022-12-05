@@ -17,6 +17,7 @@
     "core-js": "^3.6.5",
     "easy-js-camera": "^2.1.0",
     "easy-vue-camera": "^1.0.5",
+    "mercadopago": "^1.5.14",
     "moment": "^2.29.1",
     "qrcode": "^1.4.4",
     "quasar": "^2.0.0",

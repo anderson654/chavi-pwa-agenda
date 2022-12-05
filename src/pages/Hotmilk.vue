@@ -132,6 +132,7 @@
             v-if="blocoSelecionado && !selecionarAndar"
             class="full-width column shadow-3 text-center items-center"
           >
+            <!-- Card de cada imóvel   -->
             <div
               class="full-width shadow-3 row q-my-md q-px-md bg-grey-3"
               style="
@@ -154,9 +155,14 @@
                 />
               </div>
               <div class="col-8 column items-center justify-around">
-                <span style="font-size: 1.2rem" class="text-primary">{{
-                  imovel.nome
-                }}</span>
+                <span style="font-size: 1.2rem" class="text-primary"
+                  >{{ imovel.nome }}
+                  <!-- --
+                  {{
+                    imovel.link.split("/")[2].includes("Aceleradora Paiol")
+                  }}
+                  -- -->
+                </span>
                 <div style="font-size: 0.9rem">
                   <span
                     v-if="
