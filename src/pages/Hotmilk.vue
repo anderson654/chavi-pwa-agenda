@@ -2,30 +2,32 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <q-img
-          src="hotmilk.png"
-          fit="contain"
-          width="150px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          class="q-my-sm"
-        />
-        <q-img
-          src="chavi_marca.png"
-          fit="contain"
-          width="150px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          class="q-my-sm"
-        />
+        <div class="header" @click="$router.push('/')">
+          <q-img
+            src="hotmilk.png"
+            fit="contain"
+            width="150px"
+            :style="
+              $q.platform.is.desktop
+                ? 'min-width: 50px; max-width: 150px'
+                : 'min-width: 70px; max-width: 130px'
+            "
+            no-spinner
+            class="q-my-sm"
+          />
+          <q-img
+            src="chavi_marca.png"
+            fit="contain"
+            width="150px"
+            :style="
+              $q.platform.is.desktop
+                ? 'min-width: 50px; max-width: 150px'
+                : 'min-width: 70px; max-width: 130px'
+            "
+            no-spinner
+            class="q-my-sm"
+          />
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -157,11 +159,6 @@
               <div class="col-8 column items-center justify-around">
                 <span style="font-size: 1.2rem" class="text-primary"
                   >{{ imovel.nome }}
-                  <!-- --
-                  {{
-                    imovel.link.split("/")[2].includes("Aceleradora Paiol")
-                  }}
-                  -- -->
                 </span>
                 <div style="font-size: 0.9rem">
                   <span
@@ -303,4 +300,12 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+.header:hover {
+  cursor: pointer;
+}
+</style>

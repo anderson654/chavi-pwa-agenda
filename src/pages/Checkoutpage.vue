@@ -96,8 +96,6 @@
 </template>
 
 <script>
-import moment from "moment";
-import axios from "src/boot/axios";
 export default {
   data() {
     return {

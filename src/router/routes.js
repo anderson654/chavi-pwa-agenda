@@ -1,9 +1,15 @@
 const routes = [
   {
-    path: "/",
+    path: "/home",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Index.vue") }],
   },
+
+  {
+    path: "/",
+    component: () => import("pages/landingpage.vue"),
+  },
+
   {
     path: "/hotmilk",
     component: () => import("pages/Hotmilk.vue"),
@@ -23,6 +29,11 @@ const routes = [
   //   path: "/dormakaba",
   //   component: () => import("pages/Dormakaba.vue"),
   // },
+
+  {
+    path: "/agora",
+    component: () => import("pages/Agora.vue"),
+  },
   {
     path: "/:entidadeId/:imovelRef",
     component: () => import("layouts/Registro.vue"),

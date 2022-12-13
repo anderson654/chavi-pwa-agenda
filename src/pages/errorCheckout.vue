@@ -17,9 +17,7 @@
                 color="primary"
                 text-color="white"
                 label="Acesse o link da sua visita"
-                @click="
-                  $router.push('/618ec1c37ec86fa253e9d3ab/Sala de Reunião 01')
-                "
+                @click="$router.push('/')"
               />
             </div>
           </div>
