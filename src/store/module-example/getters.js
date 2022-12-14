@@ -7,3 +7,6 @@ export function getLogin(state) {
 export function getLogo(state) {
   return state.logo;
 }
+export function getConvite(state) {
+  return state.convite;
+}

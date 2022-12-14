@@ -2,11 +2,11 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <div class="header" @click="$router.push('/')">
+        <div class="header-logo" @click="$router.push('/')">
           <q-img
-            src="hotmilk.png"
+            src="agora_logo.png"
             fit="contain"
-            width="150px"
+            width="100px"
             :style="
               $q.platform.is.desktop
                 ? 'min-width: 50px; max-width: 150px'
@@ -52,10 +52,10 @@
               <q-btn
                 push
                 rounded
-                color="primary"
+                color="teal"
                 class="text-bold q-mb-md"
                 style="max-width: 300px; width: 100%"
-                :label="'Bloco ' + bloco.num"
+                :label="'Bloco ' + bloco.nome"
                 @click="
                   selecionarBloco = false;
                   blocoSelecionado = bloco;
@@ -106,11 +106,11 @@
                 "
               />
             </div>
-            <span class="text-h4 text-bold">
-              Bloco {{ blocoSelecionado ? blocoSelecionado.num : 0 }}
+            <span class="text-h4 text-bold" style="color: teal">
+              Bloco {{ blocoSelecionado ? blocoSelecionado.nome : 0 }}
             </span>
           </div>
-          <div
+          <!-- <div
             v-if="blocoSelecionado && selecionarAndar"
             class="column justify-center text-center q-gutter-y-md"
           >
@@ -129,9 +129,9 @@
                 "
               />
             </div>
-          </div>
+          </div> -->
           <div
-            v-if="blocoSelecionado && !selecionarAndar"
+            v-if="true"
             class="full-width column shadow-3 text-center items-center"
           >
             <!-- Card de cada imóvel   -->
@@ -149,15 +149,19 @@
             >
               <div class="col-4 row content-center justify-center">
                 <q-img
-                  :src="getImage(imovel.foto)"
+                  :src="
+                    getImage(
+                      'https://ecovilleportasejanelas.com.br/wp-content/uploads/2021/06/DSC_0130.jpg'
+                    )
+                  "
                   fit="contain"
                   height="150px"
                   width="180px"
-                  spinner-color="primary"
+                  spinner-color="teal"
                 />
               </div>
               <div class="col-8 column items-center justify-around">
-                <span style="font-size: 1.2rem" class="text-primary"
+                <span style="font-size: 1.2rem; color: teal"
                   >{{ imovel.nome }}
                 </span>
                 <div style="font-size: 0.9rem">
@@ -190,7 +194,7 @@
       >
         <div>
           <span
-            @click="openLink('https://chavi.com.br', '_blank')"
+            @click="openLink('https://chavi.com.br/', '_blank')"
             class="text-black text-h6"
             style="cursor: pointer; text-decoration: underline"
           >
@@ -214,12 +218,12 @@ export default {
       blocos: [
         {
           foto: "bloco_1.png",
-          num: 1,
+          nome: "teste",
           andares: {},
         },
         {
           foto: "bloco_2.png",
-          num: 2,
+          nome: "dois",
           andares: {},
         },
       ],
@@ -231,21 +235,23 @@ export default {
   },
   computed: {
     imoveisFiltred() {
-      const imoveis = this.imoveis.filter((item) => {
-        const andar =
-          item.andar != undefined && item.andar == 0 ? "Térreo" : item.andar;
-        return (
-          this.blocoSelecionado &&
-          this.andarSelecionado &&
-          item.bloco &&
-          andar &&
-          item.bloco == this.blocoSelecionado.num &&
-          andar == this.andarSelecionado
-        );
-      });
-      imoveis.sort((a, b) => {
-        return a.nome < b.nome ? -1 : 1;
-      });
+      const imoveis = this.imoveis;
+      // .filter((item) => {
+      //   const andar =
+      //     item.andar != undefined && item.andar == 0 ? "Térreo" : item.andar;
+      //   return (
+      //     this.blocoSelecionado &&
+      //     this.andarSelecionado &&
+      //     item.bloco &&
+      //     andar &&
+      //     item.bloco == this.blocoSelecionado.nome &&
+      //     andar == this.andarSelecionado
+      //   );
+      // });
+      // imoveis.sort((a, b) => {
+      //   return a.nome < b.nome ? -1 : 1;
+      // });
+      console.log("aoba", this.imoveis);
       return imoveis;
     },
   },
@@ -264,7 +270,7 @@ export default {
         url: "Imoveis/retornarImoveisAgendamento",
         method: "get",
         params: {
-          entidadeId: "5ee6bd904639f5bb55915447",
+          entidadeId: "618ec1c37ec86fa253e9d3ab",
         },
       });
       if (response.status == 200) {
@@ -276,6 +282,8 @@ export default {
           if (complemento) {
             let bloco = complemento[0];
             let andar = complemento[1];
+            console.log(bloco, "bloco");
+            console.log(andar, "andar");
             if (bloco) {
               bloco = parseInt(bloco.replace(/\D/g, ""));
               imovel.bloco = bloco;
@@ -286,13 +294,14 @@ export default {
                 : parseInt(andar.replace(/\D/g, ""));
               const label = andar == 0 ? "Térreo" : andar;
               imovel.andar = andar;
-              const index = this.blocos.findIndex((b) => b.num == bloco);
+              const index = this.blocos.findIndex((b) => b.nome == bloco);
               if (index > -1 && !this.blocos[index].andares[andar])
                 this.blocos[index].andares[andar] = label;
             }
           } else console.log("Verificar complemento - ", imovel.nome);
           imovel.link = `/${imovel.entidadeId}/${imovel.nome}`;
         }
+        console.log("imoveis", imoveis);
         this.imoveis = imoveis;
       }
     },

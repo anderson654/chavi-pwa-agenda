@@ -25,7 +25,7 @@ export default {
     Loading.hide();
     const refGalvao = myParams.entidadeId == "5ee6bdc54639f5bb5591544b";
     if (refGalvao) this.$router.push("/galvao");
-    else this.$router.push("/");
+    else this.$router.push("/home");
   },
 };
 </script>

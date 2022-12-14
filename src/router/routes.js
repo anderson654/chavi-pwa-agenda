@@ -1,9 +1,15 @@
 const routes = [
   {
-    path: "/",
+    path: "/home",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Index.vue") }],
   },
+
+  {
+    path: "/",
+    component: () => import("pages/Landingpage.vue"),
+  },
+
   {
     path: "/hotmilk",
     component: () => import("pages/Hotmilk.vue"),
@@ -13,10 +19,21 @@ const routes = [
     component: () => import("layouts/Galvao.vue"),
     children: [{ path: "", component: () => import("pages/Index.vue") }],
   },
+  {
+    path: "/feedback",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Checkoutpage.vue") }],
+  },
+
   // {
   //   path: "/dormakaba",
   //   component: () => import("pages/Dormakaba.vue"),
   // },
+
+  {
+    path: "/agora",
+    component: () => import("pages/Agora.vue"),
+  },
   {
     path: "/:entidadeId/:imovelRef",
     component: () => import("layouts/Registro.vue"),
