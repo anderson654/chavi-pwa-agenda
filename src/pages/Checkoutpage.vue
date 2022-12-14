@@ -67,7 +67,9 @@
                   color="primary"
                   text-color="white"
                   label="Acesse sua chave digital"
-                  type="submit"
+                  @click="
+                    openLink(`https://app.chavi.com.br/r${codigo}`, '_blank')
+                  "
                 />
               </form>
             </div>
@@ -104,6 +106,7 @@ export default {
       convite: [],
       status: {},
       nome: "",
+      codigo: "",
     };
   },
   async mounted() {
@@ -121,16 +124,12 @@ export default {
         },
       };
       const response = await this.executeMethod(request, false);
-      console.log(response);
+      this.codigo = response.data.codigo;
     }
   },
   methods: {
     openLink(url, target) {
       window.open(url, target);
-    },
-
-    async teste() {
-      console.log(this.visita);
     },
 
     catalogoMensagens(param) {
