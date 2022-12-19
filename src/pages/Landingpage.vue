@@ -37,7 +37,7 @@
 
       <div class="chavi">
         <q-img
-          src="chavi_marca.png"
+          src="hotmilk.png"
           fit="contain"
           height="100px"
           width="150px"
