@@ -574,16 +574,13 @@
             </div>
             <div class="row">
               <div class="col-5">Horário:</div>
-              <div class="col-7 text-bold">{{ parseData() }}</div>
+              <div class="col-7 text-bold">{{ parseData }}</div>
             </div>
 
             <div class="row" v-if="getEndereco">
               <div class="col-5">Local:</div>
 
-              <div
-                class="col-7 text-bold"
-                v-html="getEndereco.replace('\n', '<br/>')"
-              ></div>
+              <div class="col-7 text-bold" v-html="getEnderecoHtml"></div>
             </div>
             <div v-if="necessitaPagamento">
               <div class="row">
@@ -788,6 +785,26 @@ export default defineComponent({
     };
   },
   computed: {
+    parseData() {
+      if (this.user.validadeInicial && this.user.validadeFinal) {
+        const inicial = moment(new Date(this.user.validadeInicial));
+        const final = moment(new Date(this.user.validadeFinal));
+        this.seMesmoDia =
+          inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
+
+        if (this.seMesmoDia) {
+          this.seMesmoDia =
+            inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm");
+        } else {
+          this.seMesmoDia =
+            inicial.format("DD/MM/YYYY HH:mm") +
+            " - " +
+            final.format("DD/MM/YYYY HH:mm");
+        }
+        return this.seMesmoDia;
+      }
+      return "";
+    },
     tempoMinimoAprovacaoLabel() {
       const aux = [
         { value: 15, label: "15 minutos" },
@@ -826,6 +843,15 @@ export default defineComponent({
         resultado = this.user.imovelRef;
       }
       return resultado;
+    },
+    getEnderecoHtml() {
+      let resultado = "";
+      if (this.cliente && this.cliente.enderecoImovel) {
+        resultado = this.user.imovelRef + " - " + this.cliente.enderecoImovel;
+      } else if (this.user.imovelRef) {
+        resultado = this.user.imovelRef;
+      }
+      return resultado.replace("\n", "<br/>");
     },
 
     tituloCalendario() {
@@ -1156,26 +1182,6 @@ export default defineComponent({
         ? (this.parte += 1)
         : (this.parte += 2);
     },
-    parseData() {
-      if (this.user.validadeInicial && this.user.validadeFinal) {
-        const inicial = moment(new Date(this.user.validadeInicial));
-        const final = moment(new Date(this.user.validadeFinal));
-        this.seMesmoDia =
-          inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
-
-        if (this.seMesmoDia) {
-          this.seMesmoDia =
-            inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm");
-        } else {
-          this.seMesmoDia =
-            inicial.format("DD/MM/YYYY HH:mm") +
-            " - " +
-            final.format("DD/MM/YYYY HH:mm");
-        }
-        return this.seMesmoDia;
-      }
-      return "";
-    },
     badgeClasses(event, type) {
       const isHeader = type === "header";
       return {
@@ -1378,6 +1384,12 @@ export default defineComponent({
                 this.inForms = true;
                 this.numeroVisitantesExternos = res;
                 if (this.login && this.login.id && this.login.user) {
+                  console.log(
+                    "Login",
+                    this.login,
+                    this.login.id,
+                    this.login.user
+                  );
                   if (
                     !this.utilizarEmail &&
                     !this.utilizarDocumentos &&
