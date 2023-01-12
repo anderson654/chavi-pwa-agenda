@@ -213,8 +213,8 @@ export default {
       blocoSelecionado: undefined,
       blocos: [
         {
-          foto: "https://lh3.googleusercontent.com/p/AF1QipP8ztDKoqbh1I73351TvijI1B8PwBaHpnAJKACT=s680-w680-h510g",
-          nome: "teste",
+          foto: "https://lh3.googleusercontent.com/p/AF1QipP8ztDKoqbh1I73351TvijI1B8PwBaHpnAJKACT=s680-w680-h510",
+          nome: "um",
           andares: {},
         },
         {
