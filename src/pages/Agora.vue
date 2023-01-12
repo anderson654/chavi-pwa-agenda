@@ -40,7 +40,7 @@
           style="margin-top: 100px"
         >
           <div>
-            <span>Em qual bloco você esta?</span>
+            <span>Em qual bloco você está?</span>
           </div>
           <div class="flex justify-around q-mt-md">
             <div
