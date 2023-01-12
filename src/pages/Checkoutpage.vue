@@ -68,7 +68,7 @@
                   text-color="white"
                   label="Acesse sua chave digital"
                   @click="
-                    openLink(`https://app.chavi.com.br/r${codigo}`, '_blank')
+                    openLink(`https://app.chavi.com.br/r/${codigo}`, '_blank')
                   "
                 />
               </form>
