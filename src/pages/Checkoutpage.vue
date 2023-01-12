@@ -34,7 +34,7 @@
         <div class="container">
           <div class="box-text">
             <span
-              >Agradecemos o seu agendamento! Acesse sua chave digital no
+              >Agradecemos o seu agendamento! Acesse sua chavi digital no
               <span class="text">botão abaixo</span>.
             </span>
           </div>
@@ -66,7 +66,7 @@
                   class="q-pa-sm text-bold"
                   color="primary"
                   text-color="white"
-                  label="Acesse sua chave digital"
+                  label="Acesse sua chavi digital"
                   @click="
                     openLink(`https://app.chavi.com.br/r/${codigo}`, '_blank')
                   "
