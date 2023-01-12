@@ -149,11 +149,7 @@
             >
               <div class="col-4 row content-center justify-center">
                 <q-img
-                  :src="
-                    getImage(
-                      'https://ecovilleportasejanelas.com.br/wp-content/uploads/2021/06/DSC_0130.jpg'
-                    )
-                  "
+                  :src="getImage(imovel.foto)"
                   fit="contain"
                   height="150px"
                   width="180px"
@@ -217,12 +213,12 @@ export default {
       blocoSelecionado: undefined,
       blocos: [
         {
-          foto: "bloco_1.png",
+          foto: "https://lh3.googleusercontent.com/p/AF1QipP8ztDKoqbh1I73351TvijI1B8PwBaHpnAJKACT=s680-w680-h510g",
           nome: "teste",
           andares: {},
         },
         {
-          foto: "bloco_2.png",
+          foto: "https://lh3.googleusercontent.com/p/AF1QipPWu3yqxrg8rOIBY5X52V2cEUTvYoGT83TFOJc0=s680-w680-h510",
           nome: "dois",
           andares: {},
         },
