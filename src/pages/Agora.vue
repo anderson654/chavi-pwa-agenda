@@ -231,26 +231,17 @@ export default {
   },
   computed: {
     imoveisFiltred() {
-      const imoveis = this.imoveis;
-      // .filter((item) => {
-      //   const andar =
-      //     item.andar != undefined && item.andar == 0 ? "Térreo" : item.andar;
-      //   return (
-      //     this.blocoSelecionado &&
-      //     this.andarSelecionado &&
-      //     item.bloco &&
-      //     andar &&
-      //     item.bloco == this.blocoSelecionado.nome &&
-      //     andar == this.andarSelecionado
-      //   );
-      // });
-      // imoveis.sort((a, b) => {
-      //   return a.nome < b.nome ? -1 : 1;
-      // });
-      console.log("aoba", this.imoveis);
-      return imoveis;
+      const filtered = this.imoveis.filter((imovel) => {
+        let imovelMob = imovel.nome.split(" ")[0];
+        if (this.blocoSelecionado.nome == "um") {
+          return imovelMob == "MOB";
+        } else {
+          return imovelMob != "MOB";
+        }
+      });
+
+      return filtered;
     },
-  },
   methods: {
     openLink(url, target) {
       window.open(url, target);
