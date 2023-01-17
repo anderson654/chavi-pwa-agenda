@@ -214,12 +214,12 @@ export default {
       blocos: [
         {
           foto: "https://lh3.googleusercontent.com/p/AF1QipP8ztDKoqbh1I73351TvijI1B8PwBaHpnAJKACT=s680-w680-h510",
-          nome: "um",
+          nome: "MOB",
           andares: {},
         },
         {
           foto: "https://lh3.googleusercontent.com/p/AF1QipPWu3yqxrg8rOIBY5X52V2cEUTvYoGT83TFOJc0=s680-w680-h510",
-          nome: "dois",
+          nome: "HUB",
           andares: {},
         },
       ],
@@ -233,7 +233,7 @@ export default {
     imoveisFiltred() {
       const filtered = this.imoveis.filter((imovel) => {
         let imovelMob = imovel.nome.split(" ")[0];
-        if (this.blocoSelecionado.nome == "um") {
+        if (this.blocoSelecionado.nome == "MOB") {
           return imovelMob == "MOB";
         } else {
           return imovelMob != "MOB";
