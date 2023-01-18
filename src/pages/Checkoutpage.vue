@@ -32,7 +32,7 @@
     <q-page-container style="padding-top: 10px">
       <q-page padding>
         <div class="container">
-          <div class="box-text">
+          <div class="box-text" style="padding-left: 8px; padding-right: 8px">
             <span
               >Agradecemos o seu agendamento! Acesse sua chavi digital no
               <span class="text">botão abaixo</span>.
@@ -49,15 +49,22 @@
             <div class="container">
               <div class="box">
                 <h1>Olá, {{ nome }}.</h1>
-                <span> O agendamento da sua sala {{ mensagem }}. </span>
+                <div
+                  style="width: 300px; padding-left: 8px; padding-right: 8px"
+                >
+                  <p>O agendamento da sua sala {{ mensagem }}.</p>
 
-                <p>
-                  Você foi convidado a acessar um imóvel usando a tecnologia da
-                  Chavi. Para iniciar, acessa a página abaixo para fazer o
-                  download do nosso <span class="text">app</span>:
-                </p>
+                  <p>
+                    Sua <span class="text">chavi digital</span> estará
+                    disponível no horário reservado.
+                  </p>
 
-                <p>Atenciosamente, Equipe Chavi.</p>
+                  <p>
+                    Atenciosamente,
+                    <br />
+                    Equipe Chavi.
+                  </p>
+                </div>
               </div>
             </div>
             <div>
@@ -196,8 +203,8 @@ h1 {
     line-height: 3;
   }
 
-  .box {
-    width: 100%;
+  .box > div > p {
+    line-height: 15px;
   }
 }
 </style>
