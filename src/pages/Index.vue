@@ -1,4 +1,15 @@
 <template>
+  <div v-if="isHotmilk || this.isAgora">
+    <q-btn
+      style="font-size: 0.7rem"
+      icon="home"
+      flat
+      dense
+      color="secondary"
+      class="home-icon"
+      @click="$router.push('/')"
+    />
+  </div>
   <q-page class="flex-center column">
     <!-- SEM IMÓVEL -->
     <div
@@ -867,6 +878,10 @@ export default defineComponent({
           this.cliente.nome.toString().toLowerCase() == "dormakaba")
       );
     },
+    isAgora() {
+      return this.cliente.nome == "Ágora Tech Park";
+    },
+
     getMonth() {
       const mes = [
         "",
@@ -1787,7 +1802,6 @@ export default defineComponent({
               ? (this.valorDaSala =
                   response.data.entidade.preferenciaVisita.valorDaSala)
               : (this.valorDaSala = 0);
-            console.log("esse é o valor", this.valorDaSala);
 
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
@@ -2175,6 +2189,20 @@ export default defineComponent({
 </script>
 
 <style scoped>
+@media (max-width: 450px) {
+  .home-icon {
+    display: none;
+  }
+}
+
+.home-icon {
+  position: relative;
+  transform: scale(1.6);
+  z-index: 9999999;
+  left: 20px;
+  top: -50px;
+}
+
 .title-modal {
   color: #e86628;
 }

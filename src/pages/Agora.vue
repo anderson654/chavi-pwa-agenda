@@ -2,6 +2,16 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
+        <q-btn
+          style="font-size: 0.7rem"
+          icon="home"
+          flat
+          dense
+          color="secondary"
+          class="home-icon"
+          @click="$router.push('/')"
+        />
+
         <div class="header-logo" @click="$router.push('/')">
           <q-img
             src="agora_logo.png"
@@ -298,7 +308,20 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+@media (max-width: 450px) {
+  .home-icon {
+    display: none;
+  }
+}
+
+.home-icon {
+  position: absolute;
+  transform: scale(1.6);
+  z-index: 9999999;
+  left: 20px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
