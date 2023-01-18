@@ -645,7 +645,7 @@
               @click="
                 utilizarDocumentos && !user.hasDocs
                   ? (parte -= 1)
-                  : (parte -= 2)
+                  : this.$router.back()
               "
             />
 
