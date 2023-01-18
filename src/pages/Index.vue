@@ -585,15 +585,13 @@
             <div v-if="necessitaPagamento">
               <div class="row">
                 <div class="col-5">Preço 15 minutos:</div>
-                <div class="col-7 text-bold">
-                  R$ {{ filtraValor(valorDaSala) }}
-                </div>
+                <div class="col-7 text-bold">R$ {{ valorDaSala }}</div>
               </div>
               <div class="row">
                 <div class="col-5">Preço total:</div>
                 <div class="col-7 text-bold">
                   R$
-                  {{ filtraValor() }}
+                  {{ filtraValor(valorDaSala) }}
                 </div>
               </div>
             </div>
@@ -1789,6 +1787,7 @@ export default defineComponent({
               ? (this.valorDaSala =
                   response.data.entidade.preferenciaVisita.valorDaSala)
               : (this.valorDaSala = 0);
+            console.log("esse é o valor", this.valorDaSala);
 
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
