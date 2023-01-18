@@ -242,56 +242,57 @@ export default {
 
       return filtered;
     },
-  methods: {
-    openLink(url, target) {
-      window.open(url, target);
-    },
-    getImage(image) {
-      if (image && image.indexOf("https://") > -1) return image;
-      else if (image)
-        return `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/${image}`;
-      else return "default_room.png";
-    },
-    async carregarImoveis() {
-      const response = await this.executeMethod({
-        url: "Imoveis/retornarImoveisAgendamento",
-        method: "get",
-        params: {
-          entidadeId: "618ec1c37ec86fa253e9d3ab",
-        },
-      });
-      if (response.status == 200) {
-        const imoveis = response.data;
+    methods: {
+      openLink(url, target) {
+        window.open(url, target);
+      },
+      getImage(image) {
+        if (image && image.indexOf("https://") > -1) return image;
+        else if (image)
+          return `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/${image}`;
+        else return "default_room.png";
+      },
+      async carregarImoveis() {
+        const response = await this.executeMethod({
+          url: "Imoveis/retornarImoveisAgendamento",
+          method: "get",
+          params: {
+            entidadeId: "618ec1c37ec86fa253e9d3ab",
+          },
+        });
+        if (response.status == 200) {
+          const imoveis = response.data;
 
-        for (const imovel of imoveis) {
-          // const complemento = imovel.complemento
-          //   ? imovel.complemento.split(" - ")
-          //   : undefined;
-          // if (complemento) {
-          //   let bloco = complemento[0];
-          //   console.log("bloco", bloco);
-          //   let andar = complemento[1];
-          //   console.log(bloco, "bloco");
-          //   console.log(andar, "andar");
-          //   if (bloco) {
-          //     bloco = parseInt(bloco.replace(/\D/g, ""));
-          //     imovel.bloco = bloco;
-          //   }
-          //   if (andar) {
-          //     andar = /(Térreo)+/gi.test(andar)
-          //       ? 0
-          //       : parseInt(andar.replace(/\D/g, ""));
-          //     const label = andar == 0 ? "Térreo" : andar;
-          //     imovel.andar = andar;
-          //     const index = this.blocos.findIndex((b) => b.nome == bloco);
-          //     if (index > -1 && !this.blocos[index].andares[andar])
-          //       this.blocos[index].andares[andar] = label;
-          //   }
-          // } else console.log("Verificar complemento - ", imovel.nome);
-          imovel.link = `/${imovel.entidadeId}/${imovel.nome}`;
+          for (const imovel of imoveis) {
+            // const complemento = imovel.complemento
+            //   ? imovel.complemento.split(" - ")
+            //   : undefined;
+            // if (complemento) {
+            //   let bloco = complemento[0];
+            //   console.log("bloco", bloco);
+            //   let andar = complemento[1];
+            //   console.log(bloco, "bloco");
+            //   console.log(andar, "andar");
+            //   if (bloco) {
+            //     bloco = parseInt(bloco.replace(/\D/g, ""));
+            //     imovel.bloco = bloco;
+            //   }
+            //   if (andar) {
+            //     andar = /(Térreo)+/gi.test(andar)
+            //       ? 0
+            //       : parseInt(andar.replace(/\D/g, ""));
+            //     const label = andar == 0 ? "Térreo" : andar;
+            //     imovel.andar = andar;
+            //     const index = this.blocos.findIndex((b) => b.nome == bloco);
+            //     if (index > -1 && !this.blocos[index].andares[andar])
+            //       this.blocos[index].andares[andar] = label;
+            //   }
+            // } else console.log("Verificar complemento - ", imovel.nome);
+            imovel.link = `/${imovel.entidadeId}/${imovel.nome}`;
+          }
+          this.imoveis = imoveis;
         }
-        this.imoveis = imoveis;
-      }
+      },
     },
   },
 };
