@@ -7,7 +7,7 @@
       dense
       color="secondary"
       class="home-icon"
-      @click="$router.push('/')"
+      @click="$router.push(`${routeCoworking}`)"
     />
   </div>
   <q-page class="flex-center column">
@@ -880,6 +880,9 @@ export default defineComponent({
     },
     isAgora() {
       return this.cliente.nome == "Ágora Tech Park";
+    },
+    routeCoworking() {
+      return this.cliente.nome == "Ágora Tech Park" ? "agora" : "hotmilk";
     },
 
     getMonth() {
@@ -2196,11 +2199,11 @@ export default defineComponent({
 }
 
 .home-icon {
-  position: relative;
+  position: fixed;
   transform: scale(1.6);
   z-index: 9999999;
   left: 20px;
-  top: -50px;
+  top: 20px;
 }
 
 .title-modal {

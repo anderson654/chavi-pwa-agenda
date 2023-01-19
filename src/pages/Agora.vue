@@ -9,7 +9,10 @@
           dense
           color="secondary"
           class="home-icon"
-          @click="$router.push('/')"
+          @click="
+            selecionarBloco = true;
+            blocoSelecionado = null;
+          "
         />
 
         <div class="header-logo" @click="$router.push('/')">
