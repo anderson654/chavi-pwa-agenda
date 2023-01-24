@@ -596,13 +596,15 @@
             <div v-if="necessitaPagamento">
               <div class="row">
                 <div class="col-5">Preço 15 minutos:</div>
-                <div class="col-7 text-bold">R$ {{ valorDaSala }}</div>
+                <div class="col-7 text-bold">
+                  R$ {{ filtraValor(valorDaSala) }}
+                </div>
               </div>
               <div class="row">
                 <div class="col-5">Preço total:</div>
                 <div class="col-7 text-bold">
                   R$
-                  {{ filtraValor(valorDaSala) }}
+                  {{ filtraValor() }}
                 </div>
               </div>
             </div>
@@ -688,7 +690,6 @@
         </div>
       </q-form>
       <q-footer
-        v-if="isCoworking && isHotmilk"
         class="full-width fixed-bottom q-py-xs flex justify-center bg-grey-3"
         elevated
       >
@@ -791,6 +792,7 @@ export default defineComponent({
       tempoMinimoAprovacao: 0,
       numeroVisitantesExternos: 0,
       redirecionarPagamento: true,
+      idEntidade: "",
     };
   },
   computed: {
@@ -1068,7 +1070,7 @@ export default defineComponent({
       await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
       await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
       this.semImovel = true;
-      this.$router.push("/hotmilk");
+      this.$router.push(`/${this.routeCoworking}`);
     },
     async logout(force) {
       if (force) {
@@ -1400,12 +1402,7 @@ export default defineComponent({
                 this.inForms = true;
                 this.numeroVisitantesExternos = res;
                 if (this.login && this.login.id && this.login.user) {
-                  console.log(
-                    "Login",
-                    this.login,
-                    this.login.id,
-                    this.login.user
-                  );
+                  this.idEntidade = this.login.user.entidade.id;
                   if (
                     !this.utilizarEmail &&
                     !this.utilizarDocumentos &&
@@ -1525,8 +1522,6 @@ export default defineComponent({
       if (this.necessitaAprovacao) {
         user.necessitaAprovacao = true;
       }
-
-      console.log("seu log", this.whatsappAvisoAgendamento);
 
       if (this.whatsappAvisoAgendamento) {
         user.whatsappAvisoAgendamento = this.whatsappAvisoAgendamento;
@@ -1675,7 +1670,7 @@ export default defineComponent({
       };
 
       const response = await this.executeMethod(request, false);
-
+      this.user.idEntidade = this.idEntidade;
       this.$store.dispatch("setarDados", {
         key: "setConvite",
         value: this.user,
@@ -1777,10 +1772,7 @@ export default defineComponent({
               ? (this.necessitaAprovacao = true)
               : (this.necessitaAprovacao = false);
 
-            //Verifica se a sala necessita aprovacao ou pagamento
-            response.data.entidade.preferenciaVisita.necessitaAprovacao
-              ? (this.necessitaAprovacao = true)
-              : (this.necessitaAprovacao = false);
+            console.log(response.data);
 
             response.data.entidade.preferenciaVisita.necessitaPagamento
               ? (this.necessitaPagamento = true)
@@ -2235,5 +2227,12 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+.bar {
+  height: 40px;
+  width: 2px;
+  margin: 5px;
+  background-color: black;
 }
 </style>

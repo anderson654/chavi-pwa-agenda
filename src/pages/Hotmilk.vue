@@ -19,23 +19,16 @@
             src="hotmilk.png"
             fit="contain"
             width="150px"
-            :style="
-              $q.platform.is.desktop
-                ? 'min-width: 50px; max-width: 150px'
-                : 'min-width: 70px; max-width: 130px'
-            "
+            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
             no-spinner
             class="q-my-sm"
           />
+          <div class="bar"></div>
           <q-img
             src="chavi_marca.png"
             fit="contain"
             width="150px"
-            :style="
-              $q.platform.is.desktop
-                ? 'min-width: 50px; max-width: 150px'
-                : 'min-width: 70px; max-width: 130px'
-            "
+            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
             no-spinner
             class="q-my-sm"
           />
@@ -329,8 +322,16 @@ export default {
 .header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 .header:hover {
   cursor: pointer;
+}
+
+.bar {
+  height: 40px;
+  width: 2px;
+  margin: 5px;
+  background-color: black;
 }
 </style>
