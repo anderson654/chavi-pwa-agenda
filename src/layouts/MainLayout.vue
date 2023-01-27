@@ -61,6 +61,7 @@ export default defineComponent({
 .bar {
   height: 40px;
   width: 2px;
+  margin: 20px;
   background-color: black;
 }
 </style>

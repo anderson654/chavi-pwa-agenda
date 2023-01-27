@@ -792,7 +792,7 @@ export default defineComponent({
       tempoMinimoAprovacao: 0,
       numeroVisitantesExternos: 0,
       redirecionarPagamento: true,
-      idEntidade: "",
+      entidadeUsuario: "",
     };
   },
   computed: {
@@ -1233,6 +1233,9 @@ export default defineComponent({
       const dia = scope.timestamp.day;
       const now = moment();
 
+      this.entidadeUsuario = this.login.user.entidade.id;
+      console.log("teste", this.entidadeUsuario);
+
       const now_vector = now.format("DD HH mm").split(" ");
       const minutes_base_ref = now
         .subtract(this.timeStepMin, "minutes")
@@ -1402,7 +1405,7 @@ export default defineComponent({
                 this.inForms = true;
                 this.numeroVisitantesExternos = res;
                 if (this.login && this.login.id && this.login.user) {
-                  this.idEntidade = this.login.user.entidade.id;
+                  this.entidadeUsuario = this.login.user.entidade.id;
                   if (
                     !this.utilizarEmail &&
                     !this.utilizarDocumentos &&
@@ -1670,7 +1673,9 @@ export default defineComponent({
       };
 
       const response = await this.executeMethod(request, false);
-      this.user.idEntidade = this.idEntidade;
+      this.user.entidadeUsuario = this.entidadeUsuario;
+
+      console.log("esse é o this user id", this.entidadeUsuario);
       this.$store.dispatch("setarDados", {
         key: "setConvite",
         value: this.user,
