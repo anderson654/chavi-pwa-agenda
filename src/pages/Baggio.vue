@@ -195,7 +195,7 @@ export default {
       blocos: [
         {
           foto: "https://baggioimoveis.com.br/baggio-master/assets/images/baggio-imoveis-fachada.jpg",
-          nome: "Um",
+          nome: "Campo Comprido",
           andares: {},
         },
       ],
