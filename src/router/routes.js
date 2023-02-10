@@ -35,6 +35,10 @@ const routes = [
     component: () => import("pages/Agora.vue"),
   },
   {
+    path: "/baggio",
+    component: () => import("pages/Baggio.vue"),
+  },
+  {
     path: "/:entidadeId/:imovelRef",
     component: () => import("layouts/Registro.vue"),
   },
