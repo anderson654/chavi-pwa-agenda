@@ -10,3 +10,6 @@ export function setLogo(state, logo) {
 export function setConvite(state, convite) {
   state.convite = convite;
 }
+export function setEstadoInicial(state, estadoInicial) {
+  state.estadoInicial = estadoInicial;
+}

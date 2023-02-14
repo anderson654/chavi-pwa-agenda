@@ -11,6 +11,7 @@ export default ({ app, router, store }) => {
       ...mapGetters({
         getParams: "getParams",
         getLogin: "getLogin",
+        getEstadoInicial: "getEstadoInicial",
       }),
     },
     methods: {

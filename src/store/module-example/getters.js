@@ -10,3 +10,6 @@ export function getLogo(state) {
 export function getConvite(state) {
   return state.convite;
 }
+export function getEstadoInicial(state) {
+  return state.estadoInicial;
+}

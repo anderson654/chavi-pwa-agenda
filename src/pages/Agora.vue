@@ -31,6 +31,10 @@
             width="150px"
             :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
             no-spinner
+            style="
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
             class="q-my-sm"
           />
         </div>
@@ -188,23 +192,18 @@
         </div>
       </q-page>
     </q-page-container>
-
     <q-footer v-model="footer" reveal elevated>
-      <div
-        class="full-width bg-grey-2 text-center justify-center"
-        style="height: 60px"
-      >
+      <div class="full-width text-center justify-center" style="height: 30px">
         <div>
           <span
-            @click="openLink('https://chavi.com.br/', '_blank')"
+            @click="openLink('https://chavi.com.br', '_blank')"
             class="text-black text-h6"
-            style="cursor: pointer; text-decoration: underline"
+            style="cursor: pointer"
           >
             Visite nosso site
           </span>
         </div>
       </div>
-      <div class="full-width bg-grey-8" style="height: 15px" />
     </q-footer>
   </q-layout>
 </template>
@@ -319,7 +318,7 @@ export default {
   height: 40px;
   width: 2px;
   margin: 5px;
-  background-color: black;
+  background-color: #505050;
 }
 
 .home-icon {

@@ -26,6 +26,8 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+@import "./css/global.css";
+
 @font-face {
   font-family: poppins;
   src: url("../public/fonts/Poppins/Poppins-Medium.ttf");

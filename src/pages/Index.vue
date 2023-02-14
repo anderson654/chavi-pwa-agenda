@@ -22,7 +22,13 @@
         style="width: 200px; min-width: 150px; height: 125px"
         @click="$router.push('/hotmilk')"
       >
-        <q-img src="hotmilk.png" />
+        <q-img
+          src="hotmilk.png"
+          style="
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
+          "
+        />
       </q-btn>
     </div>
     <!-- CALENDÁRIO -->
@@ -67,18 +73,34 @@
           </div>
         </div>
         <div v-else class="text-center column">
-          <span style="font-size: 1.4rem" v-html="tituloCalendario"> </span>
-          <div class="full-width flex justify-center q-mt-sm">
-            <q-img
-              v-if="logo"
-              :src="logo"
-              spinner-color="primary"
-              fit="contain"
-              style="max-width: 300px"
-            />
-          </div>
+          <span
+            style="font-size: 1.4rem; color: #505050"
+            v-html="botaoCalendario"
+            @click="logout(true)"
+          >
+          </span>
+          <span
+            style="font-size: 1.4rem; color: #505050"
+            v-html="tituloCalendario"
+          >
+          </span>
         </div>
+
+        <img
+          :src="logo"
+          spinner-color="#9654ff"
+          class="img-salas"
+          style="
+            width: 100vw;
+            height: 60vh;
+            position: absolute;
+            left: 0;
+            -o-object-fit: contain;
+          "
+        />
+        <div class="img-salas" style="width: 100vw; height: 60vh"></div>
       </div>
+
       <!-- CALENDÁRIO -->
       <div class="full-width" v-if="!inForms">
         <div class="row justify-center items-center">
@@ -132,7 +154,6 @@
               cell-height="100px"
               :weekdays="getWeekDisplay"
               :hoverable="true"
-              :interval-minutes="timeStepMin"
               :interval-start="intervalStart"
               :interval-count="intervalCount"
               :disabled-before="disabledBefore"
@@ -689,23 +710,6 @@
           <div class="cho-container"></div>
         </div>
       </q-form>
-      <q-footer
-        class="full-width fixed-bottom q-py-xs flex justify-center bg-grey-3"
-        elevated
-      >
-        <q-btn
-          style="max-width: 200px"
-          class="full-width"
-          outline
-          rounded
-          push
-          no-caps
-          color="primary"
-          icon="home"
-          label="Início"
-          @click="telaInicial()"
-        />
-      </q-footer>
     </div>
   </q-page>
 </template>
@@ -730,6 +734,7 @@ import "@quasar/quasar-ui-qcalendar/dist/QCalendarVariables.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarTransitions.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
 import { Dialog } from "quasar";
+import StyleBloco from "src/components/styleBloco.vue";
 
 export default defineComponent({
   name: "PageIndex",
@@ -737,9 +742,11 @@ export default defineComponent({
     "q-calendar": QCalendarDay,
     "navigation-bar": NavigatioBar,
     "q-calendar-month": QCalendarMonth,
+    "style-bloco": StyleBloco,
   },
   data() {
     return {
+      idImovel: "",
       seMesmoDia: "",
       salasHotMilkValidarEntrada: false,
       emailAvisoAgendamento: "",
@@ -816,6 +823,7 @@ export default defineComponent({
       }
       return "";
     },
+
     tempoMinimoAprovacaoLabel() {
       const aux = [
         { value: 15, label: "15 minutos" },
@@ -864,13 +872,22 @@ export default defineComponent({
       }
       return resultado.replace("\n", "<br/>");
     },
+    botaoCalendario() {
+      return `<button
+      class="red-button"style="max-width: 100px; border: none; border-radius: 8px; cursor: pointer; height: 40px;">
+          <span class="material-icons" style="scale: 2.2;">arrow_left</span>
+          Voltar
+        </button>
+        <br>`;
+    },
 
     tituloCalendario() {
       return !this.isCoworking
         ? "Clique no melhor <strong>dia e hora</strong> para visitar o imóvel " +
             this.user.imovelRef +
             "."
-        : `Agende o melhor <strong>dia e hora</strong> para utilizar ${this.user.imovelRef}`;
+        : `
+        Agende o melhor <strong>dia e hora</strong> para utilizar<br> <strong>${this.user.imovelRef}</strong> `;
     },
     isHotmilk() {
       return (
@@ -1072,6 +1089,7 @@ export default defineComponent({
       this.semImovel = true;
       this.$router.push(`/${this.routeCoworking}`);
     },
+
     async logout(force) {
       if (force) {
         this.user.name = "";
@@ -1083,7 +1101,14 @@ export default defineComponent({
           key: "setLogin",
           value: [],
         });
+
+        this.$store.dispatch("setarDados", {
+          key: "setEstadoInicial",
+          value: true,
+        });
+
         this.parte = 1;
+        this.$router.go(-2);
         return;
       }
       Dialog.create({
@@ -1227,14 +1252,31 @@ export default defineComponent({
       }
       return events;
     },
-    onTimeClick({ event, scope }) {
+    async onTimeClick({ event, scope }) {
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
       const dia = scope.timestamp.day;
       const now = moment();
+      const storageInfo = JSON.parse(localStorage.getItem("chavi"));
+      this.entidadeUsuario = storageInfo.dados.login.user.entidadeId || false;
+      let horasDisponiveis = 0;
+      let horasExtras = 0;
+      let consumoDeCreditos = 1;
 
-      this.entidadeUsuario = this.login.user.entidade.id;
-      console.log("teste", this.entidadeUsuario);
+      if (this.entidadeUsuario) {
+        let request = {
+          url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
+          method: "get",
+        };
+        console.log(request.data);
+        const response = await this.executeMethod(request, false);
+        console.log("this.idImovel", this.idImovel);
+        console.log("this.this.entidadeUsuario", this.entidadeUsuario);
+
+        horasDisponiveis = response.data.horasDisponiveis;
+        horasExtras = response.data.horasExtras;
+        consumoDeCreditos = response.data.consumoCreditos;
+      }
 
       const now_vector = now.format("DD HH mm").split(" ");
       const minutes_base_ref = now
@@ -1327,10 +1369,37 @@ export default defineComponent({
             itens.push(opt);
         } else if (inteiro) itens.push(opt);
       }
+      console.log("itens", itens);
+
+      itens.forEach((element) => {
+        let value = element.label.split(" ")[0];
+        const time = element.label.split(" ")[1];
+        if (!consumoDeCreditos) {
+          return;
+        }
+        if (time == "hora") {
+          value = value * 60;
+          element.label = `${element.label} (${
+            Number(value) * Number(consumoDeCreditos)
+          } créditos serão consumidos. )`;
+        } else {
+          element.label = `${element.label} (${
+            Number(value) * Number(consumoDeCreditos)
+          } créditos serão consumidos. )`;
+        }
+      });
+
       Dialog.create({
         title: `<span class='text-primary text-bold'>Agendamento</span>`,
         message: `<span class='text-black' style='font-size: 1rem'>
-            Selecione a duração da sua utilização:
+            Selecione a duração da sua utilização
+            <p style="margin-top: 10px; text-align: center">Seu saldo de <strong>créditos:</strong></p>
+            <div style="display: flex; gap: 20px;">
+            <p>Créditos normais: <strong>${
+              horasDisponiveis || 0
+            } min</strong></p>
+            <p>Créditos extras: <strong>${horasExtras || 0} min</strong></p>
+            </div>
           </span>
           ${
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
@@ -1767,7 +1836,11 @@ export default defineComponent({
           });
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
-
+            console.log(
+              "eesse é o data",
+              this.cliente.preferenciaVisita.intervaloMin
+            );
+            this.idImovel = response.data.idImovel;
             this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
@@ -1776,8 +1849,6 @@ export default defineComponent({
             response.data.entidade.preferenciaVisita.necessitaAprovacao
               ? (this.necessitaAprovacao = true)
               : (this.necessitaAprovacao = false);
-
-            console.log(response.data);
 
             response.data.entidade.preferenciaVisita.necessitaPagamento
               ? (this.necessitaPagamento = true)
@@ -2239,5 +2310,10 @@ export default defineComponent({
   width: 2px;
   margin: 5px;
   background-color: black;
+}
+@media (min-width: 500px) {
+  .img-salas {
+    height: 20vh;
+  }
 }
 </style>

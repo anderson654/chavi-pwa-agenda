@@ -24,6 +24,10 @@
               : 'min-width: 70px; max-width: 130px'
           "
           no-spinner
+          style="
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
+          "
           class="q-my-sm"
         />
       </q-toolbar>
@@ -39,14 +43,7 @@
         </div>
         <div class="full-width flex flex-center" style="margin-top: 100px">
           <div
-            class="
-              text-center
-              column
-              q-gutter-lg
-              shadow-1
-              full-width
-              q-py-xs q-pb-xl
-            "
+            class="text-center column q-gutter-lg shadow-1 full-width q-py-xs q-pb-xl"
             style="border-radius: 20px"
           >
             <span class="text-black text-h5">Bloco 1 Andar 1</span>

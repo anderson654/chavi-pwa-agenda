@@ -3,24 +3,24 @@
     <div class="q-pa-md q-gutter-sm row">
       <q-btn
         no-caps
-        class="button"
-        style="margin: 2px; font-size: 1rem"
+        class="purple-button"
+        style="max-width: 150px"
         @click="$emit('today')"
       >
         Hoje
       </q-btn>
       <q-btn
         no-caps
-        class="button"
-        style="margin: 2px; font-size: 1rem"
+        class="purple-button"
+        style="max-width: 150px"
         @click="$emit('prev')"
       >
         &lt; Anterior
       </q-btn>
       <q-btn
         no-caps
-        class="button"
-        style="margin: 2px; font-size: 1rem"
+        class="purple-button"
+        style="max-width: 150px"
         @click="$emit('next')"
       >
         Próximo &gt;
