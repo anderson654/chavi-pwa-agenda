@@ -4,26 +4,27 @@
       <q-btn
         no-caps
         class="purple-button"
-        style="max-width: 150px"
-        @click="$emit('today')"
-      >
-        Hoje
-      </q-btn>
-      <q-btn
-        no-caps
-        class="purple-button"
-        style="max-width: 150px"
+        style="max-width: 128px; border-radius: 16px"
         @click="$emit('prev')"
       >
-        &lt; Anterior
+        anterior
       </q-btn>
       <q-btn
         no-caps
         class="purple-button"
-        style="max-width: 150px"
+        style="max-width: 128px; border-radius: 16px"
+        @click="$emit('today')"
+      >
+        hoje
+      </q-btn>
+
+      <q-btn
+        no-caps
+        class="purple-button"
+        style="max-width: 128px; border-radius: 16px"
         @click="$emit('next')"
       >
-        Próximo &gt;
+        próximo
       </q-btn>
     </div>
   </div>

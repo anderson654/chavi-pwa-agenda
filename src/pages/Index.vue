@@ -31,6 +31,10 @@
         />
       </q-btn>
     </div>
+    <div v-if="parte == 4">
+      <button @click="this.parte = 5">Próxima</button>
+    </div>
+
     <!-- CALENDÁRIO -->
     <div v-else class="flex-center column">
       <!-- TÍTULOS/HEADES -->
@@ -80,7 +84,7 @@
           >
           </span>
           <span
-            style="font-size: 1.4rem; color: #505050"
+            style="font-size: 1.2rem; color: #505050"
             v-html="tituloCalendario"
           >
           </span>
@@ -106,6 +110,30 @@
         <div class="row justify-center items-center">
           <div class="col-12 row justify-center items-center">
             <!-- BTN NAVEGAÇÃO -->
+            <div
+              v-if="
+                imovel.opcoesDeCredito.descritivo &&
+                imovel.opcoesDeCredito.descritivo.length > 0
+              "
+            >
+              <div class="descritivo">
+                <div class="descritivo-title">
+                  <p>Descritivo do imóvel:</p>
+                </div>
+
+                <div
+                  v-for="descritivo in imovel.opcoesDeCredito.descritivo"
+                  :key="descritivo"
+                  class="q-py-xs"
+                >
+                  <li>
+                    <span class="descrt">
+                      {{ descritivo }}
+                    </span>
+                  </li>
+                </div>
+              </div>
+            </div>
             <div class="col-12">
               <navigation-bar
                 @today="onTodayMonth"
@@ -117,7 +145,11 @@
               class="row justify-center items-center full-width"
               style="font-size: 1rem"
             >
-              <span> {{ getMonth }} </span>
+              <span
+                style="color: #505050; font-size: 1.6rem; font-weight: bold"
+              >
+                {{ getMonth.toUpperCase() }}
+              </span>
             </div>
             <!-- NAVEGAÇÃO (MESES) VERSÃO MOBILE -->
             <div style="width: 80%" v-if="!$q.platform.is.desktop">
@@ -430,11 +462,9 @@
               class="row full-width justify-center q-mb-xs"
             >
               <q-btn
-                class="col-10"
+                class="col-10 red-button"
                 style="font-size: 0.7rem"
                 label="Escolher outro horário"
-                outline
-                color="primary"
                 @click="
                   inForms = false;
                   events.pop();
@@ -443,16 +473,13 @@
             </q-btn-group>
             <q-btn-group push flat unelevated class="full-width row">
               <q-btn
-                outline
                 label="Limpar"
                 type="reset"
-                color="secondary"
-                class="q-mr-xs col-6"
+                class="q-mr-xs col-6 red-button"
               />
               <q-btn
-                class="col-6 q-ml-xs"
+                class="col-6 q-ml-xs purple-button"
                 label="Próximo"
-                color="positive"
                 @click="nextStep()"
               />
             </q-btn-group>
@@ -746,6 +773,7 @@ export default defineComponent({
   },
   data() {
     return {
+      contador: 0,
       idImovel: "",
       seMesmoDia: "",
       salasHotMilkValidarEntrada: false,
@@ -800,6 +828,13 @@ export default defineComponent({
       numeroVisitantesExternos: 0,
       redirecionarPagamento: true,
       entidadeUsuario: "",
+      imovel: {
+        opcoesDeCredito: {
+          descritivo: [],
+          tipoEvento: {},
+        },
+      },
+      eventoOutros: [],
     };
   },
   computed: {
@@ -874,18 +909,22 @@ export default defineComponent({
     },
     botaoCalendario() {
       return `<button
-      class="red-button"style="max-width: 100px; border: none; border-radius: 8px; cursor: pointer; height: 40px;">
-          <span class="material-icons" style="scale: 2.2;">arrow_left</span>
-          Voltar
+      class="red-button"style="max-width: 120px; border: none; border-radius: 16px; cursor: pointer; height: 40px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      ;">
+          <span class="material-icons" style="scale: 2.8;">arrow_left</span>
+          voltar
         </button>
         <br>`;
     },
 
     tituloCalendario() {
+      let ref = this.user.imovelRef;
       return !this.isCoworking
-        ? "Clique no melhor <strong>dia e hora</strong> para visitar o imóvel " +
-            this.user.imovelRef +
-            "."
+        ? "Agende o melhor  dia<br> e hora para utilizar:<br> <strong> <p style='font-size: 1.8rem; margin-bottom: 16px;'>" +
+            ref +
+            ". </strong> </p>"
         : `
         Agende o melhor <strong>dia e hora</strong> para utilizar<br> <strong>${this.user.imovelRef}</strong> `;
     },
@@ -1187,7 +1226,10 @@ export default defineComponent({
       console.log("onMoved", JSON.stringify(data));
     },
     async nextStep() {
-      if (!this.$refs.forms.validate()) return;
+      if (!this.$refs.forms.validate()) {
+        console.log("cai aqui");
+        return;
+      }
       const nome = this.isCoworking
         ? this.user.name + " - " + this.user.empresa
         : this.user.name;
@@ -1221,6 +1263,9 @@ export default defineComponent({
         }
       }
       this.montarQrcode();
+      console.log("montar qrcode");
+      console.log(this.utilizarDocumentos, this.user.hasDocs);
+
       this.utilizarDocumentos && !this.user.hasDocs
         ? (this.parte += 1)
         : (this.parte += 2);
@@ -1268,14 +1313,59 @@ export default defineComponent({
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
-        console.log(request.data);
         const response = await this.executeMethod(request, false);
-        console.log("this.idImovel", this.idImovel);
-        console.log("this.this.entidadeUsuario", this.entidadeUsuario);
 
         horasDisponiveis = response.data.horasDisponiveis;
         horasExtras = response.data.horasExtras;
         consumoDeCreditos = response.data.consumoCreditos;
+      }
+
+      if (this.contador == 0) {
+        let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
+        const trueKeys = [];
+        for (const key in obj) {
+          if (obj[key]) {
+            trueKeys.push({ label: key.toString(), value: `${key}` });
+          }
+        }
+
+        Dialog.create({
+          title: "Tipo de evento",
+          message: "Escolha o tipo de evento:",
+          options: {
+            type: "checkbox",
+            model: [],
+            // inline: true
+            items: trueKeys,
+          },
+          cancel: true,
+          persistent: true,
+        })
+          .onOk((data) => {
+            const filtrado = data.filter((el) => el == "outros");
+            if (filtrado) {
+              Dialog.create({
+                title: "Outro tipo de evento",
+                message: "Qual o tipo de evento?",
+                prompt: {
+                  model: "",
+                  type: "text", // optional
+                },
+                cancel: true,
+                persistent: true,
+              }).onOk((data) => {
+                this.eventoOutros.push(data);
+              });
+            }
+            this.eventoOutros.push(data);
+          })
+          .onCancel(() => {
+            this.contador = 0;
+          })
+          .onDismiss(() => {
+            // console.log('I am triggered on both OK and Cancel')
+          });
+        return;
       }
 
       const now_vector = now.format("DD HH mm").split(" ");
@@ -1405,7 +1495,7 @@ export default defineComponent({
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
               ? `<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel} os agendamentos estão sugeitos a aprovação. </span>`
               : !this.aprovarVisita
-              ? "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à serem aprovados. </span>"
+              ? "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>"
               : ""
           }
           `,
@@ -1601,6 +1691,10 @@ export default defineComponent({
 
       if (this.emailAvisoAgendamento) {
         user.emailAvisoAgendamento = this.emailAvisoAgendamento;
+      }
+
+      if (this.eventoOutros) {
+        user.eventoOutros = this.eventoOutros;
       }
 
       let request = {
@@ -1836,12 +1930,10 @@ export default defineComponent({
           });
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
-            console.log(
-              "eesse é o data",
-              this.cliente.preferenciaVisita.intervaloMin
-            );
+
             this.idImovel = response.data.idImovel;
-            this.$store.dispatch("setarDados", {
+            this.imovel = response.data.imovel;
+            this.this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
             });
@@ -2274,6 +2366,55 @@ export default defineComponent({
   top: 20px;
 }
 
+.descritivo {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  width: 400px;
+  max-height: 130px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  color: #505050;
+  justify-content: center;
+}
+
+.descritivo-title {
+  width: 100%;
+  padding-top: 4px;
+  padding-bottom: -4px;
+  height: 40px;
+  text-align: center;
+  align-items: center;
+}
+
+.descritivo-title > p {
+  margin: 0;
+}
+.descritivo > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.new-div {
+  display: flex;
+  justify-content: center;
+}
+.descritivo > div > li {
+  padding-left: 10px;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.descrt {
+  position: relative;
+  left: -10px;
+}
 .title-modal {
   color: #e86628;
 }
