@@ -1877,10 +1877,13 @@ export default defineComponent({
               )
             );
             const duracao = horario.intervalo / 60000;
-            const titleBusy = horario.usuario
+            const titleBusy = horario.usuario;
+            let formated = titleBusy.split(" ");
+
+            console.log(titleBusy, "tittle busy");
+            console.log(formated[formated.length - 1], "tittle busy")
               ? `
                 <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
-                  <div class="full-width text-center">Ocupado</div>
                   <div class="full-width text-center">${
                     horario.usuario.indexOf("-") == -1
                       ? horario.usuario.trim()
@@ -1894,7 +1897,9 @@ export default defineComponent({
               `
               : "Ocupado";
             optionsOff.push({
-              title: horario.paraAprovar ? "Pendente" : titleBusy,
+              title: horario.paraAprovar
+                ? "Pendente"
+                : `${formated[0]} - ${formated[formated.length - 1]}`,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
