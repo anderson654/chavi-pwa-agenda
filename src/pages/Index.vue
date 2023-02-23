@@ -2273,7 +2273,9 @@ export default defineComponent({
             }         
            
             optionsOff.push({
-              title: horario.paraAprovar ? "Pendente" : titleBusy,
+              title: horario.paraAprovar
+                ? "Pendente"
+                : `${formated[0]} - ${formated[formated.length - 1]}`,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
