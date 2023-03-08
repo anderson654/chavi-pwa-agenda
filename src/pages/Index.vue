@@ -1303,7 +1303,7 @@ export default defineComponent({
       const dia = scope.timestamp.day;
       const now = moment();
       const storageInfo = JSON.parse(localStorage.getItem("chavi"));
-      this.entidadeUsuario = storageInfo.dados.login.user.entidadeId || false;
+      this.entidadeUsuario = storageInfo?.dados.login.user.entidadeId || false;
       let horasDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 1;
@@ -1329,43 +1329,47 @@ export default defineComponent({
           }
         }
 
-        Dialog.create({
-          title: "Tipo de evento",
-          message: "Escolha o tipo de evento:",
-          options: {
-            type: "checkbox",
-            model: [],
-            // inline: true
-            items: trueKeys,
-          },
-          cancel: true,
-          persistent: true,
-        })
-          .onOk((data) => {
-            const filtrado = data.filter((el) => el == "outros");
-            if (filtrado) {
-              Dialog.create({
-                title: "Outro tipo de evento",
-                message: "Qual o tipo de evento?",
-                prompt: {
-                  model: "",
-                  type: "text", // optional
-                },
-                cancel: true,
-                persistent: true,
-              }).onOk((data) => {
-                this.eventoOutros.push(data);
-              });
-            }
-            this.eventoOutros.push(data);
+        await new Promise((resolve, reject) => {
+          Dialog.create({
+            title: "Tipo de evento",
+            message: "Escolha o tipo de evento:",
+            options: {
+              type: "checkbox",
+              model: [],
+              // inline: true
+              items: trueKeys,
+            },
+            cancel: true,
+            persistent: true,
           })
-          .onCancel(() => {
-            this.contador = 0;
-          })
-          .onDismiss(() => {
-            // console.log('I am triggered on both OK and Cancel')
-          });
-        return;
+            .onOk((data) => {
+              const filtrado = data.filter((el) => el == "outros");
+              // if (filtrado && filtrado.length) {
+              //   Dialog.create({
+              //     title: "Outro tipo de evento",
+              //     message: "Qual o tipo de evento?",
+              //     prompt: {
+              //       model: "",
+              //       type: "text", // optional
+              //     },
+              //     cancel: true,
+              //     persistent: true,
+              //   }).onOk((data) => {
+              //     this.eventoOutros.push(data);
+              //   });
+              // }
+              this.eventoOutros.push(data);
+              resolve();
+            })
+            .onCancel(() => {
+              this.contador = 0;
+              reject();
+            })
+            .onDismiss(() => {
+              reject();
+              // console.log('I am triggered on both OK and Cancel')
+            });
+        });
       }
 
       const now_vector = now.format("DD HH mm").split(" ");
@@ -2023,7 +2027,6 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            console.log("BBB", response.data.horarios);
             this.events = response.data.horarios;
             this.formatData();
           } else {
@@ -2081,8 +2084,8 @@ export default defineComponent({
               timestampInicial: horario.timestampInicial,
             });
           }
-          this.events = optionsOff;
         }
+        this.events = optionsOff;
       }
     },
     async sendCode() {
