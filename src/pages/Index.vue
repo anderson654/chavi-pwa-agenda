@@ -1933,7 +1933,7 @@ export default defineComponent({
 
             this.idImovel = response.data.idImovel;
             this.imovel = response.data.imovel;
-            this.this.$store.dispatch("setarDados", {
+            this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
             });
@@ -2023,7 +2023,9 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            (this.events = response.data.horarios), this.formatData();
+            console.log("BBB", response.data.horarios);
+            this.events = response.data.horarios;
+            this.formatData();
           } else {
             Notify.create({
               message:
