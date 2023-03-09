@@ -31,9 +31,9 @@
         />
       </q-btn>
     </div>
-    <div v-if="parte == 4">
+    <!-- <div v-if="parte == 4">
       <button @click="this.parte = 5">Próxima</button>
-    </div>
+    </div> -->
 
     <!-- CALENDÁRIO -->
     <div v-else class="flex-center column">
@@ -1269,6 +1269,8 @@ export default defineComponent({
       this.utilizarDocumentos && !this.user.hasDocs
         ? (this.parte += 1)
         : (this.parte += 2);
+
+      console.log("Parte:", this.parte);
     },
     badgeClasses(event, type) {
       const isHeader = type === "header";
