@@ -186,6 +186,7 @@
               cell-height="100px"
               :weekdays="getWeekDisplay"
               :hoverable="true"
+              :interval-minutes="timeStepMin"
               :interval-start="intervalStart"
               :interval-count="intervalCount"
               :disabled-before="disabledBefore"
@@ -486,8 +487,7 @@
           </div>
         </div>
         <!-- AQUISIÇÃO DAS FOTOS DOS DOCUMENTOS -->
-        <div
-          v-show="parte == 3 && utilizarDocumentos"
+        <div v-show="parte == 3 && utilizarDocumentos"
           class="full-width q-mt-lg"
         >
           <div v-if="isDesktop" class="full-width text-center">
@@ -1014,6 +1014,7 @@ export default defineComponent({
           } while (--days > 0);
         }
       });
+      console.log("ERRO map", map)
       return map;
     },
     intervalStart() {
@@ -1103,6 +1104,7 @@ export default defineComponent({
           };
           this.events.push(visita);
           // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
+          console.log("ERRO ValidadeInicial-Final", validadeFinal, " ", validadeFinal)
           delete this.login.validadeInicial;
           delete this.login.validadeFinal;
           this.$store.dispatch("setarDados", {
@@ -1148,6 +1150,7 @@ export default defineComponent({
 
         this.parte = 1;
         this.$router.go(-2);
+        console.log("ERRO logout")
         return;
       }
       Dialog.create({
@@ -1172,6 +1175,7 @@ export default defineComponent({
           value: [],
         });
         this.parte = 1;
+        console.log("ERRO login")
       });
     },
     montarQrcode() {
@@ -1304,18 +1308,19 @@ export default defineComponent({
       let minutos = scope.timestamp.minute;
       const dia = scope.timestamp.day;
       const now = moment();
-      const storageInfo = JSON.parse(localStorage.getItem("chavi"));
-      this.entidadeUsuario = storageInfo?.dados.login.user.entidadeId || false;
+      this.entidadeUsuario = this.getParams.entidadeId || false;
       let horasDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 1;
 
       if (this.entidadeUsuario) {
+        console.log("ERRO ver servidor")
         let request = {
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
         const response = await this.executeMethod(request, false);
+        console.log("ERRO request", request)
 
         horasDisponiveis = response.data.horasDisponiveis;
         horasExtras = response.data.horasExtras;
@@ -1329,6 +1334,7 @@ export default defineComponent({
           if (obj[key]) {
             trueKeys.push({ label: key.toString(), value: `${key}` });
           }
+          console.log("ERRO trueKeys", trueKeys)
         }
 
         await new Promise((resolve, reject) => {
@@ -1346,20 +1352,20 @@ export default defineComponent({
           })
             .onOk((data) => {
               const filtrado = data.filter((el) => el == "outros");
-              // if (filtrado && filtrado.length) {
-              //   Dialog.create({
-              //     title: "Outro tipo de evento",
-              //     message: "Qual o tipo de evento?",
-              //     prompt: {
-              //       model: "",
-              //       type: "text", // optional
-              //     },
-              //     cancel: true,
-              //     persistent: true,
-              //   }).onOk((data) => {
-              //     this.eventoOutros.push(data);
-              //   });
-              // }
+              if (filtrado && filtrado.length) {
+                Dialog.create({
+                  title: "Outro tipo de evento",
+                  message: "Qual o tipo de evento?",
+                  prompt: {
+                    model: "",
+                    type: "text", // optional
+                  },
+                  cancel: true,
+                  persistent: true,
+                }).onOk((data) => {
+                  this.eventoOutros.push(data);
+                });
+              }
               this.eventoOutros.push(data);
               resolve();
             })
@@ -1410,17 +1416,21 @@ export default defineComponent({
         });
         return;
       }
+
       if (this.timeStepMin == 15) {
         if (minutos > 45) minutos = 60;
         else if (minutos > 30) minutos = 45;
         else if (minutos > 15) minutos = 30;
         else minutos = 15;
       }
+
       if (this.timeStepMin == 30) {
         if (minutos > 30) minutos = 60;
         else minutos = 30;
       }
+
       if (this.timeStepMin == 60) minutos = 60;
+
       const horario =
         hora.toString() +
         ":" +
@@ -1428,6 +1438,7 @@ export default defineComponent({
           ? "00"
           : minutos - this.timeStepMin
         ).toString();
+
       if (minutos == 60) hora = parseInt(hora) + 1;
 
       const options = [
@@ -1442,30 +1453,46 @@ export default defineComponent({
         { label: "5 horas", value: "300" },
         { label: "6 horas", value: "360" },
       ];
+
+      console.log("ERRO options", options);
+
       const inicial = options.find((item) => {
         return item.value == this.timeStepMin;
       });
+
+      console.log("ERRO options-inicial", options);
+
       const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
+
       const filter = options.filter((item) => {
         return parseInt(item.value) <= this.tempoMaximo;
       });
+
+      console.log("ERRO options-filter", options);
       const date = scope.timestamp.date;
+
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
       ).getTime();
+
       for (const opt of filter) {
         const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
         const ms = parseInt(opt.value) * 60 * 1000;
+
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
         });
+
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
+
           if (eventFilter.timestampInicial >= dateTimeFinal && inteiro)
             itens.push(opt);
+
         } else if (inteiro) itens.push(opt);
       }
-      console.log("itens", itens);
+
+      console.log("ERRO itens", itens);
 
       itens.forEach((element) => {
         let value = element.label.split(" ")[0];
@@ -1473,8 +1500,17 @@ export default defineComponent({
         if (!consumoDeCreditos) {
           return;
         }
-        if (time == "hora") {
+        if (time == "hora" || time == "horas") {
+          if(value.charAt(1) == ":"){
+            value.split(":")
+            value = value[0] * 60 + 30;
+
+          element.label = `${element.label} (${
+            Number(value) * Number(consumoDeCreditos)
+          } créditos serão consumidos. )`;
+          }
           value = value * 60;
+
           element.label = `${element.label} (${
             Number(value) * Number(consumoDeCreditos)
           } créditos serão consumidos. )`;
@@ -1492,9 +1528,9 @@ export default defineComponent({
             <p style="margin-top: 10px; text-align: center">Seu saldo de <strong>créditos:</strong></p>
             <div style="display: flex; gap: 20px;">
             <p>Créditos normais: <strong>${
-              horasDisponiveis || 0
+              horasDisponiveis 
             } min</strong></p>
-            <p>Créditos extras: <strong>${horasExtras || 0} min</strong></p>
+            <p>Créditos extras: <strong>${horasExtras } min</strong></p>
             </div>
           </span>
           ${
@@ -1534,6 +1570,7 @@ export default defineComponent({
         const validadeInicial = new Date(
           (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
         ).getTime();
+        console.log(validadeInicial, "validade Inicial");
         this.user.validadeInicial = validadeInicial;
         this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
         this.montarQrcode();
@@ -2155,6 +2192,7 @@ export default defineComponent({
             },
             false
           );
+        
         else
           response = await this.executeMethod(
             {
@@ -2175,6 +2213,7 @@ export default defineComponent({
               "Não foi possível cadastrar o Usuário. Por favor, tente novamente.",
             type: "warning",
           });
+          inForms = false;
           return;
         } else if (response.status == 200) this.newUser = false;
       }
