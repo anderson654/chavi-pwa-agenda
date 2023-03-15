@@ -845,6 +845,7 @@ export default defineComponent({
           tipoEvento: {},
         },
       },
+      maximoPessoas:"",
       eventoOutros: [],
     };
   },
@@ -1085,6 +1086,7 @@ export default defineComponent({
           terms: false,
           use: false,
         };
+        this.maximoPessoas = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
       }
       const params = this.getParams;
@@ -1129,7 +1131,6 @@ export default defineComponent({
       this.setHoliday(new Date().getFullYear());
       if(!this.user.cpf) this.inForms = true
       else this.inForms = false
-      console.log("TAPIOCA Imovel Ref", params.imovelRef)
     } catch (e) {
       console.log("Erro ao carregar ", e);
       this.semImovel = true;
@@ -1607,7 +1608,11 @@ export default defineComponent({
             .onOk((res) => {
               Loading.show();
               setTimeout(() => {
-                  this.inForms = true;
+                if(res > this.maximoPessoas){
+                  Notify.create({message: "Mais pessoas que a capacidade da sala",
+                                type: "warning",
+                                });}
+                this.inForms = true;
                 //NÃO ESTÁ CONSIDERANDO O MAXIMO DE PESSOAS DA SALA
                 if(res > this.$store.imovelAgeda)
                 this.numeroVisitantesExternos = res;
