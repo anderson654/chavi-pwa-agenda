@@ -5,6 +5,9 @@ body {
     rgba(240, 240, 240, 1) 50%,
     rgba(150, 84, 255, 1) 100%
   );
+  background-attachment:fixed;
+  background-position:left bottom;
+  background-repeat: no-repeat; 
 }
 
 .gradient-hotmilk {

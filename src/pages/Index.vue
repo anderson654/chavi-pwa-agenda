@@ -697,6 +697,16 @@
               .
             </span>
           </div>
+          <div class="text-h8 q-mt-md text-justify">
+            <!-- TODO: Ajustar checkbox -->
+            <q-checkbox v-model="user.use" />
+            <span>
+              Declaro que li e concordo com os 
+              <strong @click="termosDeUso">termos de utilização da sala</strong>
+              
+              .
+            </span>
+          </div>
           <q-btn-group push flat unelevated class="full-width row q-my-md">
             <q-btn
               outline
@@ -800,6 +810,7 @@ export default defineComponent({
         cpf: "",
         email: "",
         terms: false,
+        use: false,
         hasDocs: false,
       },
       newUser: true,
@@ -1014,7 +1025,6 @@ export default defineComponent({
           } while (--days > 0);
         }
       });
-      console.log("ERRO map", map)
       return map;
     },
     intervalStart() {
@@ -1073,6 +1083,7 @@ export default defineComponent({
             this.login.user.fotoFrente &&
             this.login.user.fotoAtras,
           terms: false,
+          use: false,
         };
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
       }
@@ -1104,7 +1115,6 @@ export default defineComponent({
           };
           this.events.push(visita);
           // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
-          console.log("ERRO ValidadeInicial-Final", validadeFinal, " ", validadeFinal)
           delete this.login.validadeInicial;
           delete this.login.validadeFinal;
           this.$store.dispatch("setarDados", {
@@ -1117,6 +1127,9 @@ export default defineComponent({
       if (!params || !params.entidadeId || !params.imovelRef)
         this.semImovel = true;
       this.setHoliday(new Date().getFullYear());
+      if(!this.user.cpf) this.inForms = true
+      else this.inForms = false
+      console.log("TAPIOCA Imovel Ref", params.imovelRef)
     } catch (e) {
       console.log("Erro ao carregar ", e);
       this.semImovel = true;
@@ -1150,7 +1163,6 @@ export default defineComponent({
 
         this.parte = 1;
         this.$router.go(-2);
-        console.log("ERRO logout")
         return;
       }
       Dialog.create({
@@ -1175,7 +1187,6 @@ export default defineComponent({
           value: [],
         });
         this.parte = 1;
-        console.log("ERRO login")
       });
     },
     montarQrcode() {
@@ -1314,13 +1325,11 @@ export default defineComponent({
       let consumoDeCreditos = 1;
 
       if (this.entidadeUsuario) {
-        console.log("ERRO ver servidor")
         let request = {
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
         const response = await this.executeMethod(request, false);
-        console.log("ERRO request", request)
 
         horasDisponiveis = response.data.horasDisponiveis;
         horasExtras = response.data.horasExtras;
@@ -1334,7 +1343,6 @@ export default defineComponent({
           if (obj[key]) {
             trueKeys.push({ label: key.toString(), value: `${key}` });
           }
-          console.log("ERRO trueKeys", trueKeys)
         }
 
         await new Promise((resolve, reject) => {
@@ -1454,21 +1462,17 @@ export default defineComponent({
         { label: "6 horas", value: "360" },
       ];
 
-      console.log("ERRO options", options);
 
       const inicial = options.find((item) => {
         return item.value == this.timeStepMin;
       });
 
-      console.log("ERRO options-inicial", options);
 
       const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
 
       const filter = options.filter((item) => {
         return parseInt(item.value) <= this.tempoMaximo;
       });
-
-      console.log("ERRO options-filter", options);
       const date = scope.timestamp.date;
 
       const dateTime = new Date(
@@ -1492,7 +1496,6 @@ export default defineComponent({
         } else if (inteiro) itens.push(opt);
       }
 
-      console.log("ERRO itens", itens);
 
       itens.forEach((element) => {
         let value = element.label.split(" ")[0];
@@ -1604,7 +1607,9 @@ export default defineComponent({
             .onOk((res) => {
               Loading.show();
               setTimeout(() => {
-                this.inForms = true;
+                  this.inForms = true;
+                //NÃO ESTÁ CONSIDERANDO O MAXIMO DE PESSOAS DA SALA
+                if(res > this.$store.imovelAgeda)
                 this.numeroVisitantesExternos = res;
                 if (this.login && this.login.id && this.login.user) {
                   this.entidadeUsuario = this.login.user.entidade.id;
@@ -1617,8 +1622,7 @@ export default defineComponent({
                       : true)
                   )
                     this.parte = 4;
-                  else this.parte = 2;
-                }
+                  else this.parte = 2;}
                 Loading.hide();
               }, 1500);
             })
@@ -1671,7 +1675,7 @@ export default defineComponent({
     },
     async onSubmit() {
       if (this.necessitaPagamento) {
-        this.checkoutPagamento();
+        this.checkoutPagamento();onSubmit
         return;
       }
 
@@ -1711,6 +1715,13 @@ export default defineComponent({
       if (!this.user.terms) {
         Notify.create({
           message: "Para prosseguir, aceite os termos de uso e privacidade",
+          type: "warning",
+        });
+        return;
+      }
+      if (!this.user.use) {
+        Notify.create({
+          message: "Para prosseguir, aceite os termos de utilização da sala",
           type: "warning",
         });
         return;
@@ -2171,6 +2182,7 @@ export default defineComponent({
       Loading.hide();
     },
     async checkCode() {
+      this.inForms = false
       let response;
       const nome = this.isCoworking
         ? this.user.name + " - " + this.user.empresa
@@ -2213,7 +2225,6 @@ export default defineComponent({
               "Não foi possível cadastrar o Usuário. Por favor, tente novamente.",
             type: "warning",
           });
-          inForms = false;
           return;
         } else if (response.status == 200) this.newUser = false;
       }
@@ -2393,6 +2404,20 @@ export default defineComponent({
       });
       return filter;
     },
+    termosDeUso(){
+      Dialog.create({
+        title: "Termos",
+        message: "1ª regra - ningém fala sobre os termos de uso",
+        ok: {
+          label: "Sim",
+          color: "positive",
+        },
+        cancel: {
+          label: "Não",
+          color: "negative",
+        },
+      })
+    }
   },
 });
 </script>

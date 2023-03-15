@@ -13,3 +13,6 @@ export function setConvite(state, convite) {
 export function setEstadoInicial(state, estadoInicial) {
   state.estadoInicial = estadoInicial;
 }
+export function setImovelAgendamento(state, imovelAgendamento){
+  state.imovelAgendamento = imovelAgendamento;
+}
