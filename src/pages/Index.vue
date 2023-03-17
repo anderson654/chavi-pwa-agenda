@@ -1026,6 +1026,7 @@ export default defineComponent({
           } while (--days > 0);
         }
       });
+      console.log("ERRO map", map);
       return map;
     },
     intervalStart() {
@@ -1117,6 +1118,12 @@ export default defineComponent({
           };
           this.events.push(visita);
           // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
+          console.log(
+            "ERRO ValidadeInicial-Final",
+            validadeFinal,
+            " ",
+            validadeFinal
+          );
           delete this.login.validadeInicial;
           delete this.login.validadeFinal;
           this.$store.dispatch("setarDados", {
@@ -1166,6 +1173,7 @@ export default defineComponent({
 
         this.parte = 1;
         this.$router.go(-2);
+        console.log("ERRO logout");
         return;
       }
       Dialog.create({
@@ -1190,6 +1198,7 @@ export default defineComponent({
           value: [],
         });
         this.parte = 1;
+        console.log("ERRO login");
       });
     },
     montarQrcode() {
@@ -1326,17 +1335,19 @@ export default defineComponent({
       const mes = scope.timestamp.month;
       const ano = scope.timestamp.year;
       const now = moment();
-      this.entidadeUsuario = this.getParams.entidadeId || false;
+      this.entidadeUsuario = this.getLogin.user.entidadeId || false;
       let horasDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 1;
 
       if (this.entidadeUsuario) {
+        console.log("ERRO ver servidor");
         let request = {
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
         const response = await this.executeMethod(request, false);
+        console.log("ERRO request", request);
 
         horasDisponiveis = response.data.horasDisponiveis;
         horasExtras = response.data.horasExtras;
@@ -1353,6 +1364,7 @@ export default defineComponent({
             if(keyLabel == "Reuniao") keyLabel = "Reunião"
             trueKeys.push({ label: keyLabel, value: `${key}` });
           }
+          console.log("ERRO trueKeys", trueKeys);
         }
 
         //verifica se o horário esta certo para criar visita
@@ -1506,7 +1518,6 @@ export default defineComponent({
 
           if (eventFilter.timestampInicial >= dateTimeFinal && inteiro)
             itens.push(opt);
-
         } else if (inteiro) itens.push(opt);
       }
 
@@ -1522,15 +1533,15 @@ export default defineComponent({
             value.split(":");
             value = value[0] * 60 + 30;
 
-          element.label = `${element.label} (${
-            Number(value) * Number(consumoDeCreditos)
-          } créditos serão consumidos. )`;
+            element.label = `${element.label} (${
+              Number(value) * Number(consumoDeCreditos)
+            } créditos serão consumidos. )`;
           } else {
-          value = value * 60;
+            value = value * 60;
 
-          element.label = `${element.label} (${
-            Number(value) * Number(consumoDeCreditos)
-          } créditos serão consumidos. )`;
+            element.label = `${element.label} (${
+              Number(value) * Number(consumoDeCreditos)
+            } créditos serão consumidos. )`;
           }
         } else {
           element.label = `${element.label} (${
@@ -2225,7 +2236,6 @@ export default defineComponent({
             },
             false
           );
-        
         else
           response = await this.executeMethod(
             {
