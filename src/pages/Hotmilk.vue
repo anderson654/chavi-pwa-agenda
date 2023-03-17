@@ -297,10 +297,8 @@ export default {
       imoveis.sort((a, b) => {
         return a.nome < b.nome ? -1 : 1;
       });
-      console.log("TAPIOCA imoveis filtred", imoveis)
       return imoveis;      
     },
-
   },
   methods: {
     openLink(url, target) {
@@ -368,7 +366,6 @@ export default {
     },
     agendamento(imovel){
       this.$store.dispatch("setarDados",{key:"setImovelAgendamento", value:imovel});
-      console.log("TAPIOCA agendamento",this.imoveis);
       return
     },
   },

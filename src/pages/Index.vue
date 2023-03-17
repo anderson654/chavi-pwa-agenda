@@ -487,7 +487,8 @@
           </div>
         </div>
         <!-- AQUISIÇÃO DAS FOTOS DOS DOCUMENTOS -->
-        <div v-show="parte == 3 && utilizarDocumentos"
+        <div
+          v-show="parte == 3 && utilizarDocumentos"
           class="full-width q-mt-lg"
         >
           <div v-if="isDesktop" class="full-width text-center">
@@ -698,7 +699,6 @@
             </span>
           </div>
           <div class="text-h8 q-mt-md text-justify">
-            <!-- TODO: Ajustar checkbox -->
             <q-checkbox v-model="user.use" />
             <span>
               Declaro que li e concordo com os 
@@ -1124,13 +1124,15 @@ export default defineComponent({
             value: this.login,
           });
         }
+        if (!this.login || !this.login.user) {
+          this.parte = 1;
+          this.inForms = true;
+        }
       }
       this.semImovel = false;
       if (!params || !params.entidadeId || !params.imovelRef)
         this.semImovel = true;
       this.setHoliday(new Date().getFullYear());
-      if(!this.user.cpf) this.inForms = true
-      else this.inForms = false
     } catch (e) {
       console.log("Erro ao carregar ", e);
       this.semImovel = true;
@@ -1507,26 +1509,29 @@ export default defineComponent({
 
         } else if (inteiro) itens.push(opt);
       }
+
+      if (!consumoDeCreditos) consumoDeCreditos = 1;
       itens.forEach((element) => {
         let value = element.label.split(" ")[0];
         const time = element.label.split(" ")[1];
-        if (!consumoDeCreditos) {
-          return;
-        }
+        // if (!consumoDeCreditos) {
+        //   return;
+        // }
         if (time == "hora" || time == "horas") {
-          if(value.charAt(1) == ":"){
-            value.split(":")
+          if (value.charAt(1) == ":") {
+            value.split(":");
             value = value[0] * 60 + 30;
 
           element.label = `${element.label} (${
             Number(value) * Number(consumoDeCreditos)
           } créditos serão consumidos. )`;
-          }
+          } else {
           value = value * 60;
 
           element.label = `${element.label} (${
             Number(value) * Number(consumoDeCreditos)
           } créditos serão consumidos. )`;
+          }
         } else {
           element.label = `${element.label} (${
             Number(value) * Number(consumoDeCreditos)
@@ -1535,16 +1540,12 @@ export default defineComponent({
       });
 
       Dialog.create({
-        title: `<span class='text-primary text-bold'>Agendamento</span>`,
+        title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
         message: `<span class='text-black' style='font-size: 1rem'>
-            Selecione a duração da sua utilização
-            <p style="margin-top: 10px; text-align: center">Seu saldo de <strong>créditos:</strong></p>
-            <div style="display: flex; gap: 20px;">
-            <p>Créditos normais: <strong>${
-              horasDisponiveis 
-            } min</strong></p>
-            <p>Créditos extras: <strong>${horasExtras } min</strong></p>
-            </div>
+            <center>Selecione a duração da sua utilização</center>
+            <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>${
+              horasDisponiveis + horasExtras
+            }</strong></p>
           </span>
           ${
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
@@ -1636,7 +1637,8 @@ export default defineComponent({
                       : true)
                   )
                     this.parte = 4;
-                  else this.parte = 2;}
+                  else this.parte = 2;
+                }
                 Loading.hide();
               }, 1500);
             })
@@ -2197,7 +2199,6 @@ export default defineComponent({
       Loading.hide();
     },
     async checkCode() {
-      this.inForms = false
       let response;
       const nome = this.isCoworking
         ? this.user.name + " - " + this.user.empresa
@@ -2240,6 +2241,7 @@ export default defineComponent({
               "Não foi possível cadastrar o Usuário. Por favor, tente novamente.",
             type: "warning",
           });
+          inForms = false;
           return;
         } else if (response.status == 200) this.newUser = false;
       }
@@ -2269,7 +2271,8 @@ export default defineComponent({
           response.data.user.fotoAtras &&
           response.data.user.fotoSelfie;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
-        this.parte += 1;
+        if (this.user.validadeInicial) this.parte += 1;
+        else this.inForms = false;
         if (!this.utilizarEmail && !this.utilizarDocumentos) this.nextStep();
       } else {
         Notify.create({
