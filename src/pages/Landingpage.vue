@@ -12,6 +12,10 @@
               : 'min-width: 70px; max-width: 130px'
           "
           no-spinner
+          style="
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
+          "
           class="q-my-sm"
         />
       </q-toolbar>
@@ -46,6 +50,10 @@
               ? 'min-width: 50px; max-width: 150px'
               : 'min-width: 70px; max-width: 130px'
           "
+          style="
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
+          "
           no-spinner
           class="q-my-sm"
           @click="$router.push('https://agenda.chavi.com.br/hotmilk')"
@@ -70,22 +78,27 @@
       </div>
     </div>
 
-    <q-footer reveal elevated>
+    <footer reveal elevated>
       <div
-        class="full-width bg-grey-3 text-center justify-center"
-        style="height: 60px"
+        style="
+          height: 40px;
+          position: fixed;
+          left: 0;
+          bottom: 0;
+          width: 100%;
+          color: white;
+          text-align: center;
+        "
       >
-        <div>
-          <span
-            @click="openLink('https://chavi.com.br/', '_blank')"
-            class="text-black text-h6"
-            style="cursor: pointer; text-decoration: underline"
-          >
-            Visite nosso site
-          </span>
-        </div>
+        <span
+          @click="openLink('https://chavi.com.br', '_blank')"
+          style="cursor: pointer; font-size: 1.2rem; color: #505050"
+        >
+          Visite
+          <span style="text-decoration: underline">nosso site</span>
+        </span>
       </div>
-    </q-footer>
+    </footer>
   </q-layout>
 </template>
 

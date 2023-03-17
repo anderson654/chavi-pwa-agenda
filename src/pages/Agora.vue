@@ -2,29 +2,39 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
+        <q-btn
+          style="font-size: 0.7rem"
+          icon="home"
+          flat
+          dense
+          color="secondary"
+          class="home-icon"
+          @click="
+            selecionarBloco = true;
+            blocoSelecionado = null;
+          "
+        />
+
         <div class="header-logo" @click="$router.push('/')">
           <q-img
             src="agora_logo.png"
             fit="contain"
             width="100px"
-            :style="
-              $q.platform.is.desktop
-                ? 'min-width: 50px; max-width: 150px'
-                : 'min-width: 70px; max-width: 130px'
-            "
+            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
             no-spinner
-            class="q-my-sm"
+            class="q-my-sm agora-logo"
           />
+          <div class="bar"></div>
           <q-img
             src="chavi_marca.png"
             fit="contain"
             width="150px"
-            :style="
-              $q.platform.is.desktop
-                ? 'min-width: 50px; max-width: 150px'
-                : 'min-width: 70px; max-width: 130px'
-            "
+            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
             no-spinner
+            style="
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
             class="q-my-sm"
           />
         </div>
@@ -182,23 +192,18 @@
         </div>
       </q-page>
     </q-page-container>
-
     <q-footer v-model="footer" reveal elevated>
-      <div
-        class="full-width bg-grey-2 text-center justify-center"
-        style="height: 60px"
-      >
+      <div class="full-width text-center justify-center" style="height: 30px">
         <div>
           <span
-            @click="openLink('https://chavi.com.br/', '_blank')"
+            @click="openLink('https://chavi.com.br', '_blank')"
             class="text-black text-h6"
-            style="cursor: pointer; text-decoration: underline"
+            style="cursor: pointer"
           >
             Visite nosso site
           </span>
         </div>
       </div>
-      <div class="full-width bg-grey-8" style="height: 15px" />
     </q-footer>
   </q-layout>
 </template>
@@ -213,13 +218,13 @@ export default {
       blocoSelecionado: undefined,
       blocos: [
         {
-          foto: "https://lh3.googleusercontent.com/p/AF1QipP8ztDKoqbh1I73351TvijI1B8PwBaHpnAJKACT=s680-w680-h510g",
-          nome: "teste",
+          foto: "https://lh3.googleusercontent.com/p/AF1QipP8ztDKoqbh1I73351TvijI1B8PwBaHpnAJKACT=s680-w680-h510",
+          nome: "MOB",
           andares: {},
         },
         {
           foto: "https://lh3.googleusercontent.com/p/AF1QipPWu3yqxrg8rOIBY5X52V2cEUTvYoGT83TFOJc0=s680-w680-h510",
-          nome: "dois",
+          nome: "HUB",
           andares: {},
         },
       ],
@@ -231,24 +236,16 @@ export default {
   },
   computed: {
     imoveisFiltred() {
-      const imoveis = this.imoveis;
-      // .filter((item) => {
-      //   const andar =
-      //     item.andar != undefined && item.andar == 0 ? "Térreo" : item.andar;
-      //   return (
-      //     this.blocoSelecionado &&
-      //     this.andarSelecionado &&
-      //     item.bloco &&
-      //     andar &&
-      //     item.bloco == this.blocoSelecionado.nome &&
-      //     andar == this.andarSelecionado
-      //   );
-      // });
-      // imoveis.sort((a, b) => {
-      //   return a.nome < b.nome ? -1 : 1;
-      // });
-      console.log("aoba", this.imoveis);
-      return imoveis;
+      const filtered = this.imoveis.filter((imovel) => {
+        let imovelMob = imovel.nome.split(" ")[0];
+        if (this.blocoSelecionado.nome == "MOB") {
+          return imovelMob == "MOB";
+        } else {
+          return imovelMob != "MOB";
+        }
+      });
+
+      return filtered;
     },
   },
   methods: {
@@ -271,33 +268,34 @@ export default {
       });
       if (response.status == 200) {
         const imoveis = response.data;
+
         for (const imovel of imoveis) {
-          const complemento = imovel.complemento
-            ? imovel.complemento.split(" - ")
-            : undefined;
-          if (complemento) {
-            let bloco = complemento[0];
-            let andar = complemento[1];
-            console.log(bloco, "bloco");
-            console.log(andar, "andar");
-            if (bloco) {
-              bloco = parseInt(bloco.replace(/\D/g, ""));
-              imovel.bloco = bloco;
-            }
-            if (andar) {
-              andar = /(Térreo)+/gi.test(andar)
-                ? 0
-                : parseInt(andar.replace(/\D/g, ""));
-              const label = andar == 0 ? "Térreo" : andar;
-              imovel.andar = andar;
-              const index = this.blocos.findIndex((b) => b.nome == bloco);
-              if (index > -1 && !this.blocos[index].andares[andar])
-                this.blocos[index].andares[andar] = label;
-            }
-          } else console.log("Verificar complemento - ", imovel.nome);
+          // const complemento = imovel.complemento
+          //   ? imovel.complemento.split(" - ")
+          //   : undefined;
+          // if (complemento) {
+          //   let bloco = complemento[0];
+          //   console.log("bloco", bloco);
+          //   let andar = complemento[1];
+          //   console.log(bloco, "bloco");
+          //   console.log(andar, "andar");
+          //   if (bloco) {
+          //     bloco = parseInt(bloco.replace(/\D/g, ""));
+          //     imovel.bloco = bloco;
+          //   }
+          //   if (andar) {
+          //     andar = /(Térreo)+/gi.test(andar)
+          //       ? 0
+          //       : parseInt(andar.replace(/\D/g, ""));
+          //     const label = andar == 0 ? "Térreo" : andar;
+          //     imovel.andar = andar;
+          //     const index = this.blocos.findIndex((b) => b.nome == bloco);
+          //     if (index > -1 && !this.blocos[index].andares[andar])
+          //       this.blocos[index].andares[andar] = label;
+          //   }
+          // } else console.log("Verificar complemento - ", imovel.nome);
           imovel.link = `/${imovel.entidadeId}/${imovel.nome}`;
         }
-        console.log("imoveis", imoveis);
         this.imoveis = imoveis;
       }
     },
@@ -305,12 +303,41 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+@media (max-width: 450px) {
+  .home-icon {
+    display: none;
+  }
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+}
+.bar {
+  height: 40px;
+  width: 2px;
+  margin: 5px;
+  background-color: #505050;
+}
+
+.home-icon {
+  position: absolute;
+  transform: scale(1.6);
+  z-index: 9999999;
+  left: 20px;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
 }
 .header:hover {
   cursor: pointer;
+}
+
+.agora-logo {
+  cursor: pointer;
+  padding: 0 5px 0 5px;
 }
 </style>

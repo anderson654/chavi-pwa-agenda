@@ -7,23 +7,25 @@
           :src="logo"
           fit="contain"
           width="10vw"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
+          :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
+          style="
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
           "
           no-spinner
           class="q-my-sm"
         />
+        <div class="bar"></div>
         <q-img
-          style="cursor: pointer; min-width: 150px"
+          style="
+            cursor: pointer;
+            min-width: 150px;
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
+          "
           src="chavi_marca.png"
           fit="contain"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
+          :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
           no-spinner
           class="q-my-sm"
           @click="open('https://chavi.com.br', '_system')"
@@ -64,3 +66,12 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.bar {
+  height: 40px;
+  width: 2px;
+  margin: 20px;
+  background-color: black;
+  background-color: #505050;
+}
+</style>
