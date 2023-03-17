@@ -487,7 +487,8 @@
           </div>
         </div>
         <!-- AQUISIÇÃO DAS FOTOS DOS DOCUMENTOS -->
-        <div v-show="parte == 3 && utilizarDocumentos"
+        <div
+          v-show="parte == 3 && utilizarDocumentos"
           class="full-width q-mt-lg"
         >
           <div v-if="isDesktop" class="full-width text-center">
@@ -1014,7 +1015,7 @@ export default defineComponent({
           } while (--days > 0);
         }
       });
-      console.log("ERRO map", map)
+      console.log("ERRO map", map);
       return map;
     },
     intervalStart() {
@@ -1104,7 +1105,12 @@ export default defineComponent({
           };
           this.events.push(visita);
           // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
-          console.log("ERRO ValidadeInicial-Final", validadeFinal, " ", validadeFinal)
+          console.log(
+            "ERRO ValidadeInicial-Final",
+            validadeFinal,
+            " ",
+            validadeFinal
+          );
           delete this.login.validadeInicial;
           delete this.login.validadeFinal;
           this.$store.dispatch("setarDados", {
@@ -1150,7 +1156,7 @@ export default defineComponent({
 
         this.parte = 1;
         this.$router.go(-2);
-        console.log("ERRO logout")
+        console.log("ERRO logout");
         return;
       }
       Dialog.create({
@@ -1175,7 +1181,7 @@ export default defineComponent({
           value: [],
         });
         this.parte = 1;
-        console.log("ERRO login")
+        console.log("ERRO login");
       });
     },
     montarQrcode() {
@@ -1314,13 +1320,13 @@ export default defineComponent({
       let consumoDeCreditos = 1;
 
       if (this.entidadeUsuario) {
-        console.log("ERRO ver servidor")
+        console.log("ERRO ver servidor");
         let request = {
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
         const response = await this.executeMethod(request, false);
-        console.log("ERRO request", request)
+        console.log("ERRO request", request);
 
         horasDisponiveis = response.data.horasDisponiveis;
         horasExtras = response.data.horasExtras;
@@ -1332,9 +1338,12 @@ export default defineComponent({
         const trueKeys = [];
         for (const key in obj) {
           if (obj[key]) {
-            trueKeys.push({ label: key.toString(), value: `${key}` });
+            trueKeys.push({
+              label: this.capitalizeFirstLetter(key.toString()),
+              value: `${key}`,
+            });
           }
-          console.log("ERRO trueKeys", trueKeys)
+          console.log("ERRO trueKeys", trueKeys);
         }
 
         await new Promise((resolve, reject) => {
@@ -1488,7 +1497,6 @@ export default defineComponent({
 
           if (eventFilter.timestampInicial >= dateTimeFinal && inteiro)
             itens.push(opt);
-
         } else if (inteiro) itens.push(opt);
       }
 
@@ -1501,13 +1509,13 @@ export default defineComponent({
           return;
         }
         if (time == "hora" || time == "horas") {
-          if(value.charAt(1) == ":"){
-            value.split(":")
+          if (value.charAt(1) == ":") {
+            value.split(":");
             value = value[0] * 60 + 30;
 
-          element.label = `${element.label} (${
-            Number(value) * Number(consumoDeCreditos)
-          } créditos serão consumidos. )`;
+            element.label = `${element.label} (${
+              Number(value) * Number(consumoDeCreditos)
+            } créditos serão consumidos. )`;
           }
           value = value * 60;
 
@@ -1527,10 +1535,8 @@ export default defineComponent({
             Selecione a duração da sua utilização
             <p style="margin-top: 10px; text-align: center">Seu saldo de <strong>créditos:</strong></p>
             <div style="display: flex; gap: 20px;">
-            <p>Créditos normais: <strong>${
-              horasDisponiveis 
-            } min</strong></p>
-            <p>Créditos extras: <strong>${horasExtras } min</strong></p>
+            <p>Créditos normais: <strong>${horasDisponiveis} min</strong></p>
+            <p>Créditos extras: <strong>${horasExtras} min</strong></p>
             </div>
           </span>
           ${
@@ -2192,7 +2198,6 @@ export default defineComponent({
             },
             false
           );
-        
         else
           response = await this.executeMethod(
             {
