@@ -1314,7 +1314,7 @@ export default defineComponent({
       let minutos = scope.timestamp.minute;
       const dia = scope.timestamp.day;
       const now = moment();
-      this.entidadeUsuario = this.getParams.entidadeId || false;
+      this.entidadeUsuario = this.getLogin.user.entidadeId || false;
       let horasDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 1;
