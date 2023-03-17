@@ -1463,6 +1463,7 @@ export default defineComponent({
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
+        console.log("PIAZZETTA requst", request)
         const response = await this.executeMethod(request, false);
 
         if(response && response.status == 200){
