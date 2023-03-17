@@ -1394,17 +1394,17 @@ export default defineComponent({
         }
       
       let diaFuturo_vector = now.add(this.liberarAgendamento, "day").format("YYYY MM DD").split(" "); // 
-      if (this.liberarAgendamento > -1 && (diaFuturo_vector[2] < dia || diaFuturo_vector[1] < mes || diaFuturo_vector[0] < ano)) {
-        Dialog.create({
-          title:
-            "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-          message:
-            "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
-          html: true,
-          ok: "Ok",
-        });
-        return;
-      }
+      // if (this.liberarAgendamento > -1 && (diaFuturo_vector[2] < dia || diaFuturo_vector[1] < mes || diaFuturo_vector[0] < ano)) {
+      //   Dialog.create({
+      //     title:
+      //       "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+      //     message:
+      //       "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
+      //     html: true,
+      //     ok: "Ok",
+      //   });
+      //   return;
+      // }
         //tipo de evento - outros chama outra modal que pede o que é 
         await new Promise((resolve, reject) => {
           Dialog.create({
