@@ -1118,6 +1118,10 @@ export default defineComponent({
             value: this.login,
           });
         }
+        if (!this.login || !this.login.user) {
+          this.parte = 1;
+          this.inForms = true;
+        }
       }
       this.semImovel = false;
       if (!params || !params.entidadeId || !params.imovelRef)
@@ -1500,14 +1504,13 @@ export default defineComponent({
         } else if (inteiro) itens.push(opt);
       }
 
-      console.log("ERRO itens", itens);
-
+      if (!consumoDeCreditos) consumoDeCreditos = 1;
       itens.forEach((element) => {
         let value = element.label.split(" ")[0];
         const time = element.label.split(" ")[1];
-        if (!consumoDeCreditos) {
-          return;
-        }
+        // if (!consumoDeCreditos) {
+        //   return;
+        // }
         if (time == "hora" || time == "horas") {
           if (value.charAt(1) == ":") {
             value.split(":");
@@ -1516,12 +1519,13 @@ export default defineComponent({
             element.label = `${element.label} (${
               Number(value) * Number(consumoDeCreditos)
             } créditos serão consumidos. )`;
-          }
-          value = value * 60;
+          } else {
+            value = value * 60;
 
-          element.label = `${element.label} (${
-            Number(value) * Number(consumoDeCreditos)
-          } créditos serão consumidos. )`;
+            element.label = `${element.label} (${
+              Number(value) * Number(consumoDeCreditos)
+            } créditos serão consumidos. )`;
+          }
         } else {
           element.label = `${element.label} (${
             Number(value) * Number(consumoDeCreditos)
@@ -1530,14 +1534,12 @@ export default defineComponent({
       });
 
       Dialog.create({
-        title: `<span class='text-primary text-bold'>Agendamento</span>`,
+        title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
         message: `<span class='text-black' style='font-size: 1rem'>
-            Selecione a duração da sua utilização
-            <p style="margin-top: 10px; text-align: center">Seu saldo de <strong>créditos:</strong></p>
-            <div style="display: flex; gap: 20px;">
-            <p>Créditos normais: <strong>${horasDisponiveis} min</strong></p>
-            <p>Créditos extras: <strong>${horasExtras} min</strong></p>
-            </div>
+            <center>Selecione a duração da sua utilização</center>
+            <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>${
+              horasDisponiveis + horasExtras
+            }</strong></p>
           </span>
           ${
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
@@ -2248,7 +2250,8 @@ export default defineComponent({
           response.data.user.fotoAtras &&
           response.data.user.fotoSelfie;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
-        this.parte += 1;
+        if (this.user.validadeInicial) this.parte += 1;
+        else this.inForms = false;
         if (!this.utilizarEmail && !this.utilizarDocumentos) this.nextStep();
       } else {
         Notify.create({
