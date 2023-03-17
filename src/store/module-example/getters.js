@@ -13,3 +13,6 @@ export function getConvite(state) {
 export function getEstadoInicial(state) {
   return state.estadoInicial;
 }
+export function getImovelAgendamento(state){
+  return state.imovelAgendamento;
+}

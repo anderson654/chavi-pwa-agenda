@@ -4,6 +4,7 @@ export default function () {
     login: {},
     logo: "",
     convite: {},
+    imovelAgendamento: {},
     estadoInicial: false,
   };
 }

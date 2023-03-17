@@ -163,7 +163,10 @@
               "
               v-for="(imovel, index) in imoveisFiltred"
               :key="index"
-              @click="$router.push(imovel.link)"
+              @click="
+                      agendamento(imovel);
+                      $router.push(imovel.link);
+                      "
             >
               <div class="col-4 row content-center justify-center">
                 <q-img
@@ -294,7 +297,7 @@ export default {
       imoveis.sort((a, b) => {
         return a.nome < b.nome ? -1 : 1;
       });
-      return imoveis;
+      return imoveis;      
     },
   },
   methods: {
@@ -360,6 +363,10 @@ export default {
         }
         this.imoveis = imoveis;
       }
+    },
+    agendamento(imovel){
+      this.$store.dispatch("setarDados",{key:"setImovelAgendamento", value:imovel});
+      return
     },
   },
 };

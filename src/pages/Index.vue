@@ -698,6 +698,15 @@
               .
             </span>
           </div>
+          <div class="text-h8 q-mt-md text-justify">
+            <q-checkbox v-model="user.use" />
+            <span>
+              Declaro que li e concordo com os 
+              <strong @click="termosDeUso">termos de utilização da sala</strong>
+              
+              .
+            </span>
+          </div>
           <q-btn-group push flat unelevated class="full-width row q-my-md">
             <q-btn
               outline
@@ -801,6 +810,7 @@ export default defineComponent({
         cpf: "",
         email: "",
         terms: false,
+        use: false,
         hasDocs: false,
       },
       newUser: true,
@@ -835,6 +845,7 @@ export default defineComponent({
           tipoEvento: {},
         },
       },
+      maximoPessoas:"",
       eventoOutros: [],
     };
   },
@@ -1074,7 +1085,9 @@ export default defineComponent({
             this.login.user.fotoFrente &&
             this.login.user.fotoAtras,
           terms: false,
+          use: false,
         };
+        this.maximoPessoas = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
       }
       const params = this.getParams;
@@ -1313,10 +1326,14 @@ export default defineComponent({
       }
       return events;
     },
+
+    //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
     async onTimeClick({ event, scope }) {
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
       const dia = scope.timestamp.day;
+      const mes = scope.timestamp.month;
+      const ano = scope.timestamp.year;
       const now = moment();
       this.entidadeUsuario = this.getLogin.user.entidadeId || false;
       let horasDisponiveis = 0;
@@ -1342,14 +1359,53 @@ export default defineComponent({
         const trueKeys = [];
         for (const key in obj) {
           if (obj[key]) {
-            trueKeys.push({
-              label: this.capitalizeFirstLetter(key.toString()),
-              value: `${key}`,
-            });
+            let keyLabel = key.toString();
+            keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
+            if(keyLabel == "Reuniao") keyLabel = "Reunião"
+            trueKeys.push({ label: keyLabel, value: `${key}` });
           }
           console.log("ERRO trueKeys", trueKeys);
         }
 
+        //verifica se o horário esta certo para criar visita
+        const now_vector = now.format("MM DD HH mm").split(" ");
+        const minutes_base_ref = now
+          .subtract(this.timeStepMin, "minutes")
+          .format("mm");
+        if (scope.timestamp.past) {
+          if (
+            !(
+              dia == parseInt(now_vector[1]) &&
+              hora == parseInt(now_vector[2]) &&
+              minutos < parseInt(now_vector[3]) &&
+              minutos > parseInt(minutes_base_ref)
+            )
+          ) {
+            Dialog.create({
+              title:
+                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+              message:
+                "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
+              html: true,
+              ok: "Ok",
+            });
+            return;
+          }
+        }
+      
+      let diaFuturo_vector = now.add(this.liberarAgendamento, "day").format("YYYY MM DD").split(" "); // 
+      if (this.liberarAgendamento > -1 && (diaFuturo_vector[2] < dia || diaFuturo_vector[1] < mes || diaFuturo_vector[0] < ano)) {
+        Dialog.create({
+          title:
+            "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+          message:
+            "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
+          html: true,
+          ok: "Ok",
+        });
+        return;
+      }
+        //tipo de evento - outros chama outra modal que pede o que é 
         await new Promise((resolve, reject) => {
           Dialog.create({
             title: "Tipo de evento",
@@ -1365,6 +1421,7 @@ export default defineComponent({
           })
             .onOk((data) => {
               const filtrado = data.filter((el) => el == "outros");
+              // aqui pedo caso outro
               if (filtrado && filtrado.length) {
                 Dialog.create({
                   title: "Outro tipo de evento",
@@ -1393,43 +1450,7 @@ export default defineComponent({
         });
       }
 
-      const now_vector = now.format("DD HH mm").split(" ");
-      const minutes_base_ref = now
-        .subtract(this.timeStepMin, "minutes")
-        .format("mm");
-      if (scope.timestamp.past) {
-        if (
-          !(
-            dia == parseInt(now_vector[0]) &&
-            hora == parseInt(now_vector[1]) &&
-            minutos < parseInt(now_vector[2]) &&
-            minutos > parseInt(minutes_base_ref)
-          )
-        ) {
-          Dialog.create({
-            title:
-              "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-            message:
-              "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
-            html: true,
-            ok: "Ok",
-          });
-          return;
-        }
-      }
-      let diaFuturo = parseInt(now[0]) + this.liberarAgendamento;
-      if (this.liberarAgendamento > -1 && diaFuturo < dia) {
-        Dialog.create({
-          title:
-            "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-          message:
-            "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
-          html: true,
-          ok: "Ok",
-        });
-        return;
-      }
-
+      //aqui começa a parte de eescolher horário
       if (this.timeStepMin == 15) {
         if (minutos > 45) minutos = 60;
         else if (minutos > 30) minutos = 45;
@@ -1467,21 +1488,17 @@ export default defineComponent({
         { label: "6 horas", value: "360" },
       ];
 
-      console.log("ERRO options", options);
 
       const inicial = options.find((item) => {
         return item.value == this.timeStepMin;
       });
 
-      console.log("ERRO options-inicial", options);
 
       const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
 
       const filter = options.filter((item) => {
         return parseInt(item.value) <= this.tempoMaximo;
       });
-
-      console.log("ERRO options-filter", options);
       const date = scope.timestamp.date;
 
       const dateTime = new Date(
@@ -1612,7 +1629,13 @@ export default defineComponent({
             .onOk((res) => {
               Loading.show();
               setTimeout(() => {
+                if(res > this.maximoPessoas+1){
+                  Notify.create({message: "Mais pessoas que a capacidade da sala",
+                                type: "warning",
+                                });}
                 this.inForms = true;
+                //NÃO ESTÁ CONSIDERANDO O MAXIMO DE PESSOAS DA SALA
+                if(res > this.$store.imovelAgeda)
                 this.numeroVisitantesExternos = res;
                 if (this.login && this.login.id && this.login.user) {
                   this.entidadeUsuario = this.login.user.entidade.id;
@@ -1677,6 +1700,7 @@ export default defineComponent({
       }
       return filtro;
     },
+    //não existe nescessita pagamento - Verficar se é pra tirar
     async onSubmit() {
       if (this.necessitaPagamento) {
         this.checkoutPagamento();
@@ -1719,6 +1743,13 @@ export default defineComponent({
       if (!this.user.terms) {
         Notify.create({
           message: "Para prosseguir, aceite os termos de uso e privacidade",
+          type: "warning",
+        });
+        return;
+      }
+      if (!this.user.use) {
+        Notify.create({
+          message: "Para prosseguir, aceite os termos de utilização da sala",
           type: "warning",
         });
         return;
@@ -2316,6 +2347,7 @@ export default defineComponent({
           return "";
       }
     },
+
     setHoliday(y) {
       function easterDay(y) {
         var c = Math.floor(y / 100);
@@ -2394,6 +2426,7 @@ export default defineComponent({
         { m: natal, dia: "Natal", d: natal.format("DD/MM/YYYY") },
       ];
     },
+
     getHoliday(date) {
       date = moment(date).format("DD/MM/YYYY");
       const filter = this.holidays.filter((holiday) => {
@@ -2401,6 +2434,22 @@ export default defineComponent({
       });
       return filter;
     },
+
+    termosDeUso(){
+      Dialog.create({
+        title: "Termos de uso da sala",
+        message:
+                "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.",
+        html: true,
+        fullWidth: true,
+        ok: {
+          label: "Ok",
+          color: "positive",
+        },
+      })
+
+    }
+
   },
 });
 </script>
