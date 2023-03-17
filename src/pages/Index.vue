@@ -1341,15 +1341,16 @@ export default defineComponent({
       let consumoDeCreditos = 1;
 
       if (this.entidadeUsuario) {
-        console.log("ERRO ver servidor");
         let request = {
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
+        console.log("PIAZZETTA requst", request)
         const response = await this.executeMethod(request, false);
-        console.log("ERRO request", request);
 
-        horasDisponiveis = response.data.horasDisponiveis;
+        console.log("PIAZZETTA responce", response)
+
+        horasDisponiveis = response.data.horasMensaisDisponiveis;
         horasExtras = response.data.horasExtras;
         consumoDeCreditos = response.data.consumoCreditos;
       }
@@ -1394,17 +1395,24 @@ export default defineComponent({
         }
       
       let diaFuturo_vector = now.add(this.liberarAgendamento, "day").format("YYYY MM DD").split(" "); // 
-      // if (this.liberarAgendamento > -1 && (diaFuturo_vector[2] < dia || diaFuturo_vector[1] < mes || diaFuturo_vector[0] < ano)) {
-      //   Dialog.create({
-      //     title:
-      //       "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-      //     message:
-      //       "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
-      //     html: true,
-      //     ok: "Ok",
-      //   });
-      //   return;
-      // }
+      console.log("PIAZZETTA dia futuro comparação ", diaFuturo_vector[0] < ano, diaFuturo_vector[0] , ano )
+      console.log("PIAZZETTA dia futuro comparação ", diaFuturo_vector[1] < mes, diaFuturo_vector[1] , mes )
+      console.log("PIAZZETTA dia futuro comparação ", diaFuturo_vector[2] < dia, diaFuturo_vector[2] , dia )
+      if (this.liberarAgendamento > -1 && (diaFuturo_vector[2] < dia)) {
+        if(diaFuturo_vector[1] <= mes) {
+          if(diaFuturo_vector[0] <= ano){
+            Dialog.create({
+              title:
+                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+              message:
+                "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
+              html: true,
+              ok: "Ok",
+            });
+            return;
+          }
+        }
+      }
         //tipo de evento - outros chama outra modal que pede o que é 
         await new Promise((resolve, reject) => {
           Dialog.create({
@@ -1549,7 +1557,7 @@ export default defineComponent({
           } créditos serão consumidos. )`;
         }
       });
-
+      console.log("PIAZZETTA creditos", horasDisponiveis)
       Dialog.create({
         title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
         message: `<span class='text-black' style='font-size: 1rem'>
