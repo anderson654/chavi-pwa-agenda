@@ -1348,6 +1348,7 @@ export default defineComponent({
           if (obj[key]) {
             let keyLabel = key.toString();
             keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
+            if(keyLabel == "Reuniao") keyLabel = "Reunião"
             trueKeys.push({ label: keyLabel, value: `${key}` });
           }
         }
