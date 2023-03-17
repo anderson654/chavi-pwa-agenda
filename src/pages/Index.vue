@@ -1346,7 +1346,9 @@ export default defineComponent({
         const trueKeys = [];
         for (const key in obj) {
           if (obj[key]) {
-            trueKeys.push({ label: key.toString(), value: `${key}` });
+            let keyLabel = key.toString();
+            keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
+            trueKeys.push({ label: keyLabel, value: `${key}` });
           }
         }
 
