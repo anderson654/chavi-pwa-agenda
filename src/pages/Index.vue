@@ -80,7 +80,7 @@
           <span
             style="font-size: 1.4rem; color: #505050"
             v-html="botaoCalendario"
-            @click="logout(true)"
+            @click="goBack"
           >
           </span>
           <span
@@ -701,10 +701,10 @@
           <div class="text-h8 q-mt-md text-justify">
             <q-checkbox v-model="user.use" />
             <span>
-              Declaro que li e concordo com os 
-              <strong @click="termosDeUso">termos de utilização da sala</strong>
-              
-              .
+              Declaro que li e concordo com os
+              <a @click="termosDeUso" class="fakelink">
+                termos de utilização da sala</a
+              >.
             </span>
           </div>
           <q-btn-group push flat unelevated class="full-width row q-my-md">
@@ -1132,8 +1132,8 @@ export default defineComponent({
           });
         }
         if (!this.login || !this.login.user) {
-          this.parte = 1;
-          this.inForms = true;
+          this.parte = 4;
+          this.inForms = false;
         }
       }
       this.semImovel = false;
@@ -1147,6 +1147,25 @@ export default defineComponent({
     if (this.semImovel) this.$router.push("/hotmilk");
   },
   methods: {
+    //verificar créditos retorna false se não tiver créditos
+    verificarCreditos(horasDisponiveis, horasExtras, valor, consumoCreditos) {
+      if (horasDisponiveis + horasExtras < valor * consumoCreditos) {
+        Dialog.create({
+          title: "Aviso",
+          message:
+            "<p>Você não possui créditos suficientes</p>" +
+            "<a href='https://chat.openai.com/chat'> Clique aqui para solicitar mais créditos</a>",
+          html: true,
+          ok: {
+            label: "ok",
+            color: "positive",
+          },
+        }).onOk(() => {});
+        return false;
+      }
+      return true;
+    },
+
     async telaInicial() {
       await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
       await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
@@ -1154,6 +1173,9 @@ export default defineComponent({
       this.$router.push(`/${this.routeCoworking}`);
     },
 
+    goBack() {
+      this.$router.go(-2);
+    },
     async logout(force) {
       if (force) {
         this.user.name = "";
@@ -1327,15 +1349,92 @@ export default defineComponent({
       return events;
     },
 
-    //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
-    async onTimeClick({ event, scope }) {
-      let hora = scope.timestamp.hour;
-      let minutos = scope.timestamp.minute;
-      const dia = scope.timestamp.day;
-      const mes = scope.timestamp.month;
-      const ano = scope.timestamp.year;
-      const now = moment();
-      this.entidadeUsuario = this.getLogin.user.entidadeId || false;
+    qualEvento(informacao, minutos, hora, scope, filtrado) {
+      // aqui pedo caso outro
+      let ultimo = 0;
+      filtrado.forEach((element) => {
+        Dialog.create({
+          title: "Outro tipo de evento",
+          message: "Descreva o " + element,
+          prompt: {
+            model: "",
+            type: "text", // optional
+          },
+          cancel: true,
+          persistent: true,
+        }).onOk((data) => {
+          let indexOutros = this.eventoOutros.indexOf(element);
+          this.eventoOutros[indexOutros] = { label: element, value: data };
+          if (ultimo >= filtrado.length - 1)
+            this.escolherHorario(minutos, hora, scope);
+          ultimo++;
+        });
+      });
+      if (this.eventoOutros.length > 0) this.eventoOutros = [];
+      informacao.map((e) => this.eventoOutros.push(e));
+    },
+    quantasPessoas() {
+      Dialog.create({
+        title:
+          '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
+        message: `
+              <span>
+                Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
+                Insira 0 (zero) caso não haja participantes externos.
+              </span>
+            `,
+        prompt: {
+          model: 0,
+          type: "number",
+        },
+        ok: {
+          label: "Continuar",
+          color: "positive",
+          flat: true,
+        },
+        cancel: {
+          label: "Escolher outro horário",
+          color: "primary",
+          flat: true,
+        },
+        html: true,
+      })
+        .onOk((res) => {
+          Loading.show();
+          setTimeout(() => {
+            if (res > this.maximoPessoas + 1) {
+              Notify.create({
+                message: "Mais pessoas que a capacidade da sala",
+                type: "warning",
+              });
+            }
+            this.inForms = true;
+            //NÃO ESTÁ CONSIDERANDO O MAXIMO DE PESSOAS DA SALA
+            if (res > this.$store.imovelAgeda)
+              this.numeroVisitantesExternos = res;
+            if (this.login && this.login.id && this.login.user) {
+              this.entidadeUsuario = this.login.user.entidade.id;
+              if (
+                !this.utilizarEmail &&
+                !this.utilizarDocumentos &&
+                !this.utilizarCPF &&
+                (this.isCoworking
+                  ? this.user.empresa && this.user.empresa != ""
+                  : true)
+              )
+                this.parte = 4;
+              else this.parte = 2;
+            }
+            Loading.hide();
+          }, 1500);
+        })
+        .onCancel(() => {
+          this.events.pop();
+        });
+    },
+
+    async escolherHorario(minutos, hora, scope) {
+      //aqui começa a parte de eescolher horário
       let horasDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 1;
@@ -1583,6 +1682,16 @@ export default defineComponent({
         html: true,
         persistent: true,
       }).onOk((data) => {
+        if (
+          !this.verificarCreditos(
+            horasDisponiveis,
+            horasExtras,
+            parseInt(data),
+            consumoDeCreditos
+          )
+        ) {
+          return;
+        }
         const visita = {
           title: "Horário Selecionado",
           date: scope.timestamp.date,
@@ -1595,67 +1704,12 @@ export default defineComponent({
         const validadeInicial = new Date(
           (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
         ).getTime();
-        console.log(validadeInicial, "validade Inicial");
         this.user.validadeInicial = validadeInicial;
         this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
         this.montarQrcode();
 
         if (this.habilitarPublicoExterno) {
-          Dialog.create({
-            title:
-              '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
-            message: `
-              <span>
-                Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
-                Insira 0 (zero) caso não haja participantes externos.
-              </span>
-            `,
-            prompt: {
-              model: 0,
-              type: "number",
-            },
-            ok: {
-              label: "Continuar",
-              color: "positive",
-              flat: true,
-            },
-            cancel: {
-              label: "Escolher outro horário",
-              color: "primary",
-              flat: true,
-            },
-            html: true,
-          })
-            .onOk((res) => {
-              Loading.show();
-              setTimeout(() => {
-                if(res > this.maximoPessoas+1){
-                  Notify.create({message: "Mais pessoas que a capacidade da sala",
-                                type: "warning",
-                                });}
-                this.inForms = true;
-                //NÃO ESTÁ CONSIDERANDO O MAXIMO DE PESSOAS DA SALA
-                if(res > this.$store.imovelAgeda)
-                this.numeroVisitantesExternos = res;
-                if (this.login && this.login.id && this.login.user) {
-                  this.entidadeUsuario = this.login.user.entidade.id;
-                  if (
-                    !this.utilizarEmail &&
-                    !this.utilizarDocumentos &&
-                    !this.utilizarCPF &&
-                    (this.isCoworking
-                      ? this.user.empresa && this.user.empresa != ""
-                      : true)
-                  )
-                    this.parte = 4;
-                  else this.parte = 2;
-                }
-                Loading.hide();
-              }, 1500);
-            })
-            .onCancel(() => {
-              this.events.pop();
-            });
+          this.quantasPessoas();
         } else {
           Loading.show();
           setTimeout(() => {
@@ -1673,6 +1727,100 @@ export default defineComponent({
           }, 1500);
         }
       });
+    },
+    //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
+    async onTimeClick({ event, scope }) {
+      let hora = scope.timestamp.hour;
+      let minutos = scope.timestamp.minute;
+      const dia = moment(scope.timestamp.date);
+      const now = moment();
+      this.entidadeUsuario = this.getLogin.user.entidadeId || false;
+
+      if (this.contador == 0) {
+        let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
+        const trueKeys = [];
+        for (const key in obj) {
+          if (obj[key]) {
+            let keyLabel = key.toString();
+            keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
+            if (keyLabel == "Reuniao") keyLabel = "Reunião";
+            trueKeys.push({ label: keyLabel, value: `${key}` });
+          }
+        }
+
+        //verifica se o horário esta certo para criar visita
+        const now_vector = now.format("MM DD HH mm").split(" ");
+        const minutes_base_ref = now
+          .subtract(this.timeStepMin, "minutes")
+          .format("mm");
+        if (scope.timestamp.past) {
+          if (
+            !(
+              dia == parseInt(now_vector[1]) &&
+              hora == parseInt(now_vector[2]) &&
+              minutos < parseInt(now_vector[3]) &&
+              minutos > parseInt(minutes_base_ref)
+            )
+          ) {
+            Dialog.create({
+              title:
+                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+              message:
+                "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
+              html: true,
+              ok: "Ok",
+            });
+            return;
+          }
+        }
+
+        let diaFuturo = now.add(this.liberarAgendamento, "day");
+
+        if (this.liberarAgendamento > -1 && dia > diaFuturo) {
+          Dialog.create({
+            title:
+              "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+            message:
+              "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
+            html: true,
+            ok: "Ok",
+          });
+          return;
+        }
+        //tipo de evento - outros chama outra modal que pede o que é
+        await new Promise((resolve, reject) => {
+          Dialog.create({
+            title: "Tipo de evento",
+            message: "Escolha o tipo de evento:",
+            options: {
+              type: "checkbox",
+              model: [],
+              // inline: true
+              items: trueKeys,
+            },
+            cancel: true,
+            persistent: true,
+          })
+            .onOk((data) => {
+              const filtro = ["outros", "evento"];
+              const filtrado = data.filter((el) => filtro.includes(el));
+              if (filtrado && filtrado.length) {
+                this.qualEvento(data, minutos, hora, scope, filtrado);
+              } else {
+                data.map((e) => this.eventoOutros.push(e));
+                this.escolherHorario(minutos, hora, scope);
+              }
+              resolve();
+            })
+            .onCancel(() => {
+              this.contador = 0;
+              reject();
+            })
+            .onDismiss(() => {
+              reject();
+            });
+        });
+      }
     },
     filtraValor(valorDaSala) {
       if (valorDaSala) {
@@ -1909,8 +2057,6 @@ export default defineComponent({
             15),
       };
 
-      console.log(data);
-
       let request = {
         url: "Entidades/checkoutPagamento",
         method: "post",
@@ -1920,14 +2066,12 @@ export default defineComponent({
       const response = await this.executeMethod(request, false);
       this.user.entidadeUsuario = this.entidadeUsuario;
 
-      console.log("esse é o this user id", this.entidadeUsuario);
       this.$store.dispatch("setarDados", {
         key: "setConvite",
         value: this.user,
       });
 
       //const mp = new MercadoPago("TEST-948ecfba-0eda-4100-8f8c-bb4ef5e20c12", {
-      console.log(this.chaveAgendamento);
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
@@ -2435,7 +2579,7 @@ export default defineComponent({
       return filter;
     },
 
-    termosDeUso(){
+    termosDeUso() {
       Dialog.create({
         title: "Termos de uso da sala",
         message:
@@ -2446,10 +2590,8 @@ export default defineComponent({
           label: "Ok",
           color: "positive",
         },
-      })
-
-    }
-
+      });
+    },
   },
 });
 </script>
@@ -2547,6 +2689,11 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+.fakelink {
+  text-decoration: underline;
+  color: #4d278e;
+  cursor: pointer;
 }
 
 .bar {
