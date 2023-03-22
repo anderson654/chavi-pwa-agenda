@@ -845,7 +845,7 @@ export default defineComponent({
           tipoEvento: {},
         },
       },
-      maximoPessoas:"",
+      maximoPessoas: "",
       eventoOutros: [],
     };
   },
@@ -1087,7 +1087,8 @@ export default defineComponent({
           terms: false,
           use: false,
         };
-        this.maximoPessoas = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
+        this.maximoPessoas =
+          this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
       }
       const params = this.getParams;
@@ -1410,8 +1411,10 @@ export default defineComponent({
             }
             this.inForms = true;
             //NÃO ESTÁ CONSIDERANDO O MAXIMO DE PESSOAS DA SALA
-            if (res > this.$store.imovelAgeda)
+            if (res > this.$store.imovelAgeda) {
               this.numeroVisitantesExternos = res;
+            }
+
             if (this.login && this.login.id && this.login.user) {
               this.entidadeUsuario = this.login.user.entidade.id;
               if (
@@ -1453,102 +1456,6 @@ export default defineComponent({
         consumoDeCreditos = response.data.consumoCreditos;
       }
 
-      if (this.contador == 0) {
-        let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
-        const trueKeys = [];
-        for (const key in obj) {
-          if (obj[key]) {
-            let keyLabel = key.toString();
-            keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
-            if(keyLabel == "Reuniao") keyLabel = "Reunião"
-            trueKeys.push({ label: keyLabel, value: `${key}` });
-          }
-          console.log("ERRO trueKeys", trueKeys);
-        }
-
-        //verifica se o horário esta certo para criar visita
-        const now_vector = now.format("MM DD HH mm").split(" ");
-        const minutes_base_ref = now
-          .subtract(this.timeStepMin, "minutes")
-          .format("mm");
-        if (scope.timestamp.past) {
-          if (
-            !(
-              dia == parseInt(now_vector[1]) &&
-              hora == parseInt(now_vector[2]) &&
-              minutos < parseInt(now_vector[3]) &&
-              minutos > parseInt(minutes_base_ref)
-            )
-          ) {
-            Dialog.create({
-              title:
-                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-              message:
-                "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
-              html: true,
-              ok: "Ok",
-            });
-            return;
-          }
-        }
-      
-      let diaFuturo_vector = now.add(this.liberarAgendamento, "day").format("YYYY MM DD").split(" "); // 
-      // if (this.liberarAgendamento > -1 && (diaFuturo_vector[2] < dia || diaFuturo_vector[1] < mes || diaFuturo_vector[0] < ano)) {
-      //   Dialog.create({
-      //     title:
-      //       "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-      //     message:
-      //       "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
-      //     html: true,
-      //     ok: "Ok",
-      //   });
-      //   return;
-      // }
-        //tipo de evento - outros chama outra modal que pede o que é 
-        await new Promise((resolve, reject) => {
-          Dialog.create({
-            title: "Tipo de evento",
-            message: "Escolha o tipo de evento:",
-            options: {
-              type: "checkbox",
-              model: [],
-              // inline: true
-              items: trueKeys,
-            },
-            cancel: true,
-            persistent: true,
-          })
-            .onOk((data) => {
-              const filtrado = data.filter((el) => el == "outros");
-              // aqui pedo caso outro
-              if (filtrado && filtrado.length) {
-                Dialog.create({
-                  title: "Outro tipo de evento",
-                  message: "Qual o tipo de evento?",
-                  prompt: {
-                    model: "",
-                    type: "text", // optional
-                  },
-                  cancel: true,
-                  persistent: true,
-                }).onOk((data) => {
-                  this.eventoOutros.push(data);
-                });
-              }
-              this.eventoOutros.push(data);
-              resolve();
-            })
-            .onCancel(() => {
-              this.contador = 0;
-              reject();
-            })
-            .onDismiss(() => {
-              reject();
-              // console.log('I am triggered on both OK and Cancel')
-            });
-        });
-      }
-
       //aqui começa a parte de eescolher horário
       if (this.timeStepMin == 15) {
         if (minutos > 45) minutos = 60;
@@ -1587,11 +1494,9 @@ export default defineComponent({
         { label: "6 horas", value: "360" },
       ];
 
-
       const inicial = options.find((item) => {
         return item.value == this.timeStepMin;
       });
-
 
       const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
 
@@ -1734,7 +1639,8 @@ export default defineComponent({
       let minutos = scope.timestamp.minute;
       const dia = moment(scope.timestamp.date);
       const now = moment();
-      this.entidadeUsuario = this.getLogin.user.entidadeId || false;
+
+      this.entidadeUsuario = this.getLogin.user.entidadeId;
 
       if (this.contador == 0) {
         let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
@@ -2583,7 +2489,7 @@ export default defineComponent({
       Dialog.create({
         title: "Termos de uso da sala",
         message:
-                "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.",
+          "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.",
         html: true,
         fullWidth: true,
         ok: {
