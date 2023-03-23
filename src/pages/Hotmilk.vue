@@ -164,9 +164,9 @@
               v-for="(imovel, index) in imoveisFiltred"
               :key="index"
               @click="
-                      agendamento(imovel);
-                      $router.push(imovel.link);
-                      "
+                agendamento(imovel);
+                $router.push(imovel.link);
+              "
             >
               <div class="col-4 row content-center justify-center">
                 <q-img
@@ -278,6 +278,9 @@ export default {
   created() {
     this.carregarImoveis();
     this.voltarOndeEstava();
+    if (!(this.login && this.login.user)) {
+      this.$router.push("/login");
+    }
   },
   computed: {
     imoveisFiltred() {
@@ -297,7 +300,12 @@ export default {
       imoveis.sort((a, b) => {
         return a.nome < b.nome ? -1 : 1;
       });
-      return imoveis;      
+      return imoveis;
+    },
+    login: {
+      get() {
+        return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
+      },
     },
   },
   methods: {
@@ -364,9 +372,12 @@ export default {
         this.imoveis = imoveis;
       }
     },
-    agendamento(imovel){
-      this.$store.dispatch("setarDados",{key:"setImovelAgendamento", value:imovel});
-      return
+    agendamento(imovel) {
+      this.$store.dispatch("setarDados", {
+        key: "setImovelAgendamento",
+        value: imovel,
+      });
+      return;
     },
   },
 };

@@ -1090,6 +1090,8 @@ export default defineComponent({
         this.maximoPessoas =
           this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
+      } else {
+        this.$router.push("/login");
       }
       const params = this.getParams;
       if (params && params.entidadeId && params.imovelRef) {
@@ -1410,7 +1412,6 @@ export default defineComponent({
               });
             }
             this.inForms = true;
-            //NÃO ESTÁ CONSIDERANDO O MAXIMO DE PESSOAS DA SALA
             if (res > this.$store.imovelAgeda) {
               this.numeroVisitantesExternos = res;
             }
