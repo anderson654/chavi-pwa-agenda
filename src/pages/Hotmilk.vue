@@ -278,9 +278,6 @@ export default {
   created() {
     this.carregarImoveis();
     this.voltarOndeEstava();
-    if (!(this.login && this.login.user)) {
-      this.$router.push("/login");
-    }
   },
   computed: {
     imoveisFiltred() {
@@ -307,6 +304,11 @@ export default {
         return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
       },
     },
+  },
+  mounted() {
+    if (!(this.login && this.login.user)) {
+      this.$router.push("/login");
+    }
   },
   methods: {
     openLink(url, target) {
