@@ -1155,9 +1155,10 @@ export default defineComponent({
       if (horasDisponiveis + horasExtras < valor * consumoCreditos) {
         Dialog.create({
           title: "Aviso",
+          //link ainda não implemenado
           message:
             "<p>Você não possui créditos suficientes</p>" +
-            "<a href='https://chat.openai.com/chat'> Clique aqui para solicitar mais créditos</a>",
+            "<a href='#'> Clique aqui para solicitar mais créditos</a>",
           html: true,
           ok: {
             label: "ok",
