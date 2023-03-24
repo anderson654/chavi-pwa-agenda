@@ -753,7 +753,7 @@
 
 <script>
 import { defineComponent } from "vue";
-import { Loading, Notify } from "quasar";
+import { Loading, Notify, } from "quasar";
 import * as moment from "moment";
 import { QCalendarDay } from "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.esm.js";
 import { QCalendarMonth } from "@quasar/quasar-ui-qcalendar/dist/QCalendarMonth.esm.js";
@@ -847,6 +847,7 @@ export default defineComponent({
       },
       maximoPessoas: "",
       eventoOutros: [],
+      publicoExterno: false,
     };
   },
   computed: {
@@ -1353,29 +1354,55 @@ export default defineComponent({
       return events;
     },
 
-    qualEvento(informacao, minutos, hora, scope, filtrado) {
+    testeForm(){
+      Dialog.create({
+        title: "teste",
+        message:`
+                    <p>Abublé</p>
+                    <div>
+                      <input type="text" id="texto" placeholder="edit me" />
+
+                    </div>
+                    <div>
+                      <input type="checkbox" id="checkbox"/>
+                    </div>`,
+        html : true,
+        ok: {
+          label: 'ok',
+          color: "positive"
+        }
+      }).onOk(() => {
+        let texto = document.getElementById("texto").value
+        let checkbox = document.getElementById("checkbox").checked
+        })
+  },
+
+    qualEvento(informacao, minutos, hora, scope) {
       // aqui pedo caso outro
-      let ultimo = 0;
-      filtrado.forEach((element) => {
+      console.log("PIAZZETTA data: ", informacao,)
+        let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1)
         Dialog.create({
-          title: "Outro tipo de evento",
-          message: "Descreva o " + element,
-          prompt: {
-            model: "",
-            type: "text", // optional
-          },
+          title: informacaoM,
+          message:`
+                    <div style="margin-bottom: 10px;">
+                      <textarea name="textarea" style="width:100%;height:150px; border: none; background-color: lightgrey;" id="texto" placeholder="Descreva aqui"></textarea>
+                    </div>
+                    <div>
+                      <input type="checkbox" id="checkbox"/>
+                      <label for="checkbox">Evento externo</label>
+                    </div>`,
+        html : true,
           cancel: true,
           persistent: true,
         }).onOk((data) => {
-          let indexOutros = this.eventoOutros.indexOf(element);
-          this.eventoOutros[indexOutros] = { label: element, value: data };
-          if (ultimo >= filtrado.length - 1)
-            this.escolherHorario(minutos, hora, scope);
-          ultimo++;
-        });
+          let texto = document.getElementById("texto").value
+          this.publicoExterno = document.getElementById("checkbox").checked
+          console.log("PIAZZZETTA checkbox: ", this.publicoExterno," texto: ", texto)
+          this.eventoOutros = { label: informacao, value: texto };
+          this.escolherHorario(minutos, hora, scope);
       });
+      console.log("PIAZZETTA eventoOutos", this.eventoOutros)
       if (this.eventoOutros.length > 0) this.eventoOutros = [];
-      informacao.map((e) => this.eventoOutros.push(e));
     },
     quantasPessoas() {
       Dialog.create({
@@ -1701,7 +1728,7 @@ export default defineComponent({
             title: "Tipo de evento",
             message: "Escolha o tipo de evento:",
             options: {
-              type: "checkbox",
+              type: "radio",
               model: [],
               // inline: true
               items: trueKeys,
@@ -1710,12 +1737,13 @@ export default defineComponent({
             persistent: true,
           })
             .onOk((data) => {
+              console.log("PIAZZETTA data evento", data)
               const filtro = ["outros", "evento"];
-              const filtrado = data.filter((el) => filtro.includes(el));
-              if (filtrado && filtrado.length) {
-                this.qualEvento(data, minutos, hora, scope, filtrado);
+              if (filtro.includes(data)) {
+                this.qualEvento(data, minutos, hora, scope);
+                
               } else {
-                data.map((e) => this.eventoOutros.push(e));
+                this.eventoOutros.push(data);
                 this.escolherHorario(minutos, hora, scope);
               }
               resolve();
@@ -1872,6 +1900,7 @@ export default defineComponent({
       }
 
       const response = await this.executeMethod(request, false);
+      console.log("PIAZZETTA response.data.url", response.data.url)
       Loading.hide();
       if (response && response.status == 200) {
         const message = response.data.text;
