@@ -1027,7 +1027,6 @@ export default defineComponent({
           } while (--days > 0);
         }
       });
-      console.log("ERRO map", map);
       return map;
     },
     intervalStart() {
@@ -1122,12 +1121,6 @@ export default defineComponent({
           };
           this.events.push(visita);
           // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
-          console.log(
-            "ERRO ValidadeInicial-Final",
-            validadeFinal,
-            " ",
-            validadeFinal
-          );
           delete this.login.validadeInicial;
           delete this.login.validadeFinal;
           this.$store.dispatch("setarDados", {
@@ -1200,7 +1193,6 @@ export default defineComponent({
 
         this.parte = 1;
         this.$router.go(-2);
-        console.log("ERRO logout");
         return;
       }
       Dialog.create({
@@ -1225,7 +1217,6 @@ export default defineComponent({
           value: [],
         });
         this.parte = 1;
-        console.log("ERRO login");
       });
     },
     montarQrcode() {
@@ -1354,32 +1345,8 @@ export default defineComponent({
       return events;
     },
 
-    testeForm(){
-      Dialog.create({
-        title: "teste",
-        message:`
-                    <p>Abublé</p>
-                    <div>
-                      <input type="text" id="texto" placeholder="edit me" />
-
-                    </div>
-                    <div>
-                      <input type="checkbox" id="checkbox"/>
-                    </div>`,
-        html : true,
-        ok: {
-          label: 'ok',
-          color: "positive"
-        }
-      }).onOk(() => {
-        let texto = document.getElementById("texto").value
-        let checkbox = document.getElementById("checkbox").checked
-        })
-  },
-
     qualEvento(informacao, minutos, hora, scope) {
       // aqui pedo caso outro
-      console.log("PIAZZETTA data: ", informacao,)
         let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1)
         Dialog.create({
           title: informacaoM,
@@ -1397,11 +1364,9 @@ export default defineComponent({
         }).onOk((data) => {
           let texto = document.getElementById("texto").value
           this.publicoExterno = document.getElementById("checkbox").checked
-          console.log("PIAZZZETTA checkbox: ", this.publicoExterno," texto: ", texto)
           this.eventoOutros = { label: informacao, value: texto };
           this.escolherHorario(minutos, hora, scope);
       });
-      console.log("PIAZZETTA eventoOutos", this.eventoOutros)
       if (this.eventoOutros.length > 0) this.eventoOutros = [];
     },
     quantasPessoas() {
@@ -1472,13 +1437,11 @@ export default defineComponent({
       let consumoDeCreditos = 1;
 
       if (this.entidadeUsuario) {
-        console.log("ERRO ver servidor");
         let request = {
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
         const response = await this.executeMethod(request, false);
-        console.log("ERRO request", request);
 
         horasDisponiveis = response.data.horasDisponiveis;
         horasExtras = response.data.horasExtras;
@@ -1737,7 +1700,6 @@ export default defineComponent({
             persistent: true,
           })
             .onOk((data) => {
-              console.log("PIAZZETTA data evento", data)
               const filtro = ["outros", "evento"];
               if (filtro.includes(data)) {
                 this.qualEvento(data, minutos, hora, scope);
@@ -1900,7 +1862,6 @@ export default defineComponent({
       }
 
       const response = await this.executeMethod(request, false);
-      console.log("PIAZZETTA response.data.url", response.data.url)
       Loading.hide();
       if (response && response.status == 200) {
         const message = response.data.text;
