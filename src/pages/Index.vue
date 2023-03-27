@@ -600,41 +600,41 @@
           </div>
         </div>
         <!-- REVISÃO DOS DADOS -->
-        <div v-if="parte == 4" class="full-width flex flex-center">
-          <div class="column full-width" style="font-size: 1.2rem">
-            <div class="row">
-              <div class="col-5">Nome:</div>
-              <div class="col-7 text-bold">{{ getPrimeiroNome }}</div>
+        <div v-if="parte == 4" class="full-width flex flex-left">
+          <div class="full-width" style="font-size: 1.2rem">
+            <div class="row margin-bt">
+              <div class="col-3">Nome:</div>
+              <div class="col-9 text-bold">{{ getPrimeiroNome }} </div>
             </div>
-            <div class="row" v-if="isCoworking && user.empresa">
-              <div class="col-5">Empresa:</div>
-              <div class="col-7 text-bold">{{ user.empresa }}</div>
+            <div class="row margin-bt" v-if="isCoworking && user.empresa">
+              <div class="col-3">Empresa:</div>
+              <div class="col-9 text-bold">{{ user.empresa }} </div>
             </div>
-            <div class="row">
-              <div class="col-5">Telefone:</div>
-              <div class="col-7 text-bold">{{ user.phone }}</div>
+            <div class="row margin-bt">
+              <div class="col-3">Telefone:</div>
+              <div class="col-9 text-bold">{{ user.phone }} </div>
             </div>
-            <div class="row" v-if="utilizarEmail">
-              <div class="col-5">E-mail:</div>
+            <div class="row margin-bt" v-if="utilizarEmail">
+              <div class="col-3">E-mail:</div>
               <div
-                class="col-7 text-bold"
+                class="col-9 text-bold"
                 style=" overflow-wrap: break-word; word-wrap: break-word; hyphens: auto; white-space: normal;">
                 {{ user.email }}
               </div>
             </div>
-            <div class="row" v-if="utilizarCPF">
-              <div class="col-5">CPF:</div>
-              <div class="col-7 text-bold">{{ user.cpf }}</div>
+            <div class="row margin-bt" v-if="utilizarCPF">
+              <div class="col-3">CPF:</div>
+              <div class="col-9-shrink text-bold">{{ user.cpf }}</div>
             </div>
-            <div class="row">
-              <div class="col-5">Horário:</div>
-              <div class="col-7 text-bold">{{ parseData }}</div>
+            <div class="row margin-bt">
+              <div class="col-3">Data:</div>
+              <div class="col text-bold">{{ parseData }}</div>
             </div>
 
-            <div class="row" v-if="getEndereco">
-              <div class="col-5">Local:</div>
+            <div class="row margin-bt" v-if="getEndereco">
+              <div class="col-3">Local:</div>
 
-              <div class="col-7 text-bold" v-html="getEnderecoHtml"></div>
+              <div class="col-9 text-bold" v-html="getEnderecoHtml"></div>
             </div>
             <div v-if="necessitaPagamento">
               <div class="row">
@@ -849,19 +849,18 @@ export default defineComponent({
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial));
         const final = moment(new Date(this.user.validadeFinal));
-        this.seMesmoDia =
-          inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
+        let res =""
+        this.seMesmoDia = inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
+        let init = inicial.format("DD/MM/YYYY HH:mm");
+        let fim = final.format("HH:mm");
 
         if (this.seMesmoDia) {
-          this.seMesmoDia =
-            inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm");
+          res = init+ " - " + fim;
         } else {
-          this.seMesmoDia =
-            inicial.format("DD/MM/YYYY HH:mm") +
-            " - " +
-            final.format("DD/MM/YYYY HH:mm");
+          res = `${inicial.format("DD/MM/YYYY HH:mm")} - ${final.format("DD/MM/YYYY HH:mm")}`;
         }
-        return this.seMesmoDia;
+        console.log("PIAZZETTA parseData", res.split("-"))
+        return res;
       }
       return "";
     },
@@ -907,14 +906,14 @@ export default defineComponent({
     getEnderecoHtml() {
       let resultado = "";
       resultado = this.user.imovelRef
-      return resultado.replace("\n", "<br/>");
+      return resultado.replace("\n", "");
     },
 
     // pega o primeiro Nome
     getPrimeiroNome(){
-      let res = "";
-      res = this.user.name.split(" ");
-      return res[0];
+      let res = this.user.name.split(" ");
+      res = res[0];
+      return res;
     },
 
     botaoCalendario() {
@@ -1687,7 +1686,7 @@ export default defineComponent({
             message: "Escolha o tipo de evento:",
             options: {
               type: "radio",
-              model: [],
+              model: "",
               items: trueKeys,
             },
             cancel: true,
@@ -2594,6 +2593,9 @@ export default defineComponent({
   width: 2px;
   margin: 5px;
   background-color: black;
+}
+.margin-bt{
+  margin-bottom: 10px;
 }
 @media (min-width: 500px) {
   .img-salas {
