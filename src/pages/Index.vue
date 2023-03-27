@@ -823,7 +823,7 @@ export default defineComponent({
       habilitarPublicoExterno: false,
       horaFinal: 24,
       horaInicial: 0,
-      timeStepMin: 15,
+      timeStepMin: 30,
       necessitaAprovacao: false,
       chaveAgendamento: "",
       liberarAgendamento: -1,
@@ -868,7 +868,6 @@ export default defineComponent({
 
     tempoMinimoAprovacaoLabel() {
       const aux = [
-        { value: 15, label: "15 minutos" },
         { value: 30, label: "30 minutos" },
         { value: 45, label: "45 minutos" },
         { value: 60, label: "1 hora" },
@@ -1471,7 +1470,6 @@ export default defineComponent({
       if (minutos == 60) hora = parseInt(hora) + 1;
 
       const options = [
-        { label: "30 minutos", value: "30" },
         { label: "45 minutos", value: "45" },
         { label: "1 hora", value: "60" },
         { label: "1:30 hora", value: "90" },
@@ -1487,7 +1485,7 @@ export default defineComponent({
         return item.value == this.timeStepMin;
       });
 
-      const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
+      const itens = inicial ? [] : [{ label: "30 minutos", value: "30" }];
 
       const filter = options.filter((item) => {
         return parseInt(item.value) <= this.tempoMaximo;
