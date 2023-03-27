@@ -604,7 +604,7 @@
           <div class="column full-width" style="font-size: 1.2rem">
             <div class="row">
               <div class="col-5">Nome:</div>
-              <div class="col-7 text-bold">{{ user.name }}</div>
+              <div class="col-7 text-bold">{{ getPrimeiroNome }}</div>
             </div>
             <div class="row" v-if="isCoworking && user.empresa">
               <div class="col-5">Empresa:</div>
@@ -618,13 +618,7 @@
               <div class="col-5">E-mail:</div>
               <div
                 class="col-7 text-bold"
-                style="
-                  overflow-wrap: break-word;
-                  word-wrap: break-word;
-                  hyphens: auto;
-                  white-space: normal;
-                "
-              >
+                style=" overflow-wrap: break-word; word-wrap: break-word; hyphens: auto; white-space: normal;">
                 {{ user.email }}
               </div>
             </div>
@@ -913,13 +907,17 @@ export default defineComponent({
     },
     getEnderecoHtml() {
       let resultado = "";
-      if (this.cliente && this.cliente.enderecoImovel) {
-        resultado = this.user.imovelRef + " - " + this.cliente.enderecoImovel;
-      } else if (this.user.imovelRef) {
-        resultado = this.user.imovelRef;
-      }
+      resultado = this.user.imovelRef
       return resultado.replace("\n", "<br/>");
     },
+
+    // pega o primeiro Nome
+    getPrimeiroNome(){
+      let res = "";
+      res = this.user.name.split(" ");
+      return res[0];
+    },
+
     botaoCalendario() {
       return `<button
       class="red-button"style="max-width: 120px; border: none; border-radius: 16px; cursor: pointer; height: 40px;
@@ -2590,7 +2588,8 @@ export default defineComponent({
 }
 .fakelink {
   text-decoration: underline;
-  color: #4d278e;
+  /*color: #4d278e;*/
+  color: blue;
   cursor: pointer;
 }
 
