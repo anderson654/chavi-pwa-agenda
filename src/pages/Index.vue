@@ -1344,7 +1344,6 @@ export default defineComponent({
     },
 
     qualEvento(informacao, minutos, hora, scope) {
-      // aqui pedo caso outro
         let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1)
         Dialog.create({
           title: informacaoM,
@@ -1691,7 +1690,6 @@ export default defineComponent({
             options: {
               type: "radio",
               model: [],
-              // inline: true
               items: trueKeys,
             },
             cancel: true,
