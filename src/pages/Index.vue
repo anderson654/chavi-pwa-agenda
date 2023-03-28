@@ -823,7 +823,7 @@ export default defineComponent({
       habilitarPublicoExterno: false,
       horaFinal: 24,
       horaInicial: 0,
-      timeStepMin: 30,
+      timeStepMin: 15,
       necessitaAprovacao: false,
       chaveAgendamento: "",
       liberarAgendamento: -1,
@@ -849,24 +849,37 @@ export default defineComponent({
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial));
         const final = moment(new Date(this.user.validadeFinal));
-        let res =""
-        this.seMesmoDia = inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
-        let init = inicial.format("DD/MM/YYYY HH:mm");
-        let fim = final.format("HH:mm");
+        this.seMesmoDia =
+          inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
 
         if (this.seMesmoDia) {
-          res = init+ " - " + fim;
+          this.seMesmoDia =
+            inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm");
         } else {
-          res = `${inicial.format("DD/MM/YYYY HH:mm")} - ${final.format("DD/MM/YYYY HH:mm")}`;
+          this.seMesmoDia =
+            inicial.format("DD/MM/YYYY HH:mm") +
+            " - " +
+            final.format("DD/MM/YYYY HH:mm");
         }
-        console.log("PIAZZETTA parseData", res.split("-"))
-        return res;
+        return this.seMesmoDia;
       }
       return "";
     },
 
     tempoMinimoAprovacaoLabel() {
-      const aux = [
+      const aux = this.isHotmilk ? 
+      [
+        { value: 30, label: "30 minutos" },
+        { value: 45, label: "45 minutos" },
+        { value: 60, label: "1 hora" },
+        { value: 90, label: "1 hora e 30 min" },
+        { value: 120, label: "2 hora" },
+        { value: 180, label: "3 hora" },
+        { value: 240, label: "4 hora" },
+        { value: 300, label: "5 hora" },
+        { value: 360, label: "6 hora" },
+      ] : [
+        { value: 15, label: "15 minutos" },
         { value: 30, label: "30 minutos" },
         { value: 45, label: "45 minutos" },
         { value: 60, label: "1 hora" },
@@ -904,8 +917,7 @@ export default defineComponent({
       return resultado;
     },
     getEnderecoHtml() {
-      let resultado = "";
-      resultado = this.user.imovelRef
+      let resultado = this.user.imovelRef;
       return resultado.replace("\n", "");
     },
 
@@ -1351,7 +1363,7 @@ export default defineComponent({
                     </div>
                     <div>
                       <input type="checkbox" id="checkbox"/>
-                      <label for="checkbox">Evento externo</label>
+                      <label for="checkbox">Públoco externo</label>
                     </div>`,
         html : true,
           cancel: true,
@@ -1468,7 +1480,19 @@ export default defineComponent({
 
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const options = [
+      const options = this.isHotmilk ? 
+      [
+        { label: "45 minutos", value: "45" },
+        { label: "1 hora", value: "60" },
+        { label: "1:30 hora", value: "90" },
+        { label: "2 horas", value: "120" },
+        { label: "2:30 horas", value: "150" },
+        { label: "3 horas", value: "180" },
+        { label: "4 horas", value: "240" },
+        { label: "5 horas", value: "300" },
+        { label: "6 horas", value: "360" },
+      ]        : [
+        { label: "30 minutos", value: "30" },
         { label: "45 minutos", value: "45" },
         { label: "1 hora", value: "60" },
         { label: "1:30 hora", value: "90" },
@@ -1484,7 +1508,7 @@ export default defineComponent({
         return item.value == this.timeStepMin;
       });
 
-      const itens = inicial ? [] : [{ label: "30 minutos", value: "30" }];
+      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "30" }] : [{ label: "15 minutos", value: "15" }];
 
       const filter = options.filter((item) => {
         return parseInt(item.value) <= this.tempoMaximo;
@@ -1827,6 +1851,9 @@ export default defineComponent({
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
       if (!this.user.hasDocs) {
+
+        let formData = new FormData();
+        Object.keys(user).forEach((key) => formData.append(key, user[key]));
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
@@ -1844,8 +1871,6 @@ export default defineComponent({
           name: this.user.fotoSelfie.name,
         };
 
-        let formData = new FormData();
-        Object.keys(user).forEach((key) => formData.append(key, user[key]));
         formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
         formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
