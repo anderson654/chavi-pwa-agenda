@@ -56,7 +56,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('https://agenda.chavi.com.br/hotmilk')"
+          @click="$router.push('/login')"
         />
       </div>
 

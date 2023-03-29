@@ -35,6 +35,10 @@ const routes = [
     component: () => import("pages/Agora.vue"),
   },
   {
+    path: "/login",
+    component: () => import("pages/Login.vue"),
+  },
+  {
     path: "/baggio",
     component: () => import("pages/Baggio.vue"),
   },

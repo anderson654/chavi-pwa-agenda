@@ -49,6 +49,7 @@ module.exports = configure(function (ctx) {
           }
         : {
             VUE_APP_API_URL: "https://api.chavi.com.br/api",
+            //VUE_APP_API_URL: "https://beta2.chavi.com.br/api",
             //VUE_APP_API_URL: 'https://betaserver.chavi.com.br/api',
           },
       vueRouterMode: "history", // available values: 'hash', 'history'

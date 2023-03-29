@@ -80,7 +80,7 @@
           <span
             style="font-size: 1.4rem; color: #505050"
             v-html="botaoCalendario"
-            @click="logout(true)"
+            @click="goBack"
           >
           </span>
           <span
@@ -600,47 +600,41 @@
           </div>
         </div>
         <!-- REVISÃO DOS DADOS -->
-        <div v-if="parte == 4" class="full-width flex flex-center">
-          <div class="column full-width" style="font-size: 1.2rem">
-            <div class="row">
-              <div class="col-5">Nome:</div>
-              <div class="col-7 text-bold">{{ user.name }}</div>
+        <div v-if="parte == 4" class="full-width flex flex-left">
+          <div class="full-width" style="font-size: 1.2rem">
+            <div class="row margin-bt">
+              <div class="col-3">Nome:</div>
+              <div class="col-9 text-bold">{{ getPrimeiroNome }} </div>
             </div>
-            <div class="row" v-if="isCoworking && user.empresa">
-              <div class="col-5">Empresa:</div>
-              <div class="col-7 text-bold">{{ user.empresa }}</div>
+            <div class="row margin-bt" v-if="isCoworking && user.empresa">
+              <div class="col-3">Empresa:</div>
+              <div class="col-9 text-bold">{{ user.empresa }} </div>
             </div>
-            <div class="row">
-              <div class="col-5">Telefone:</div>
-              <div class="col-7 text-bold">{{ user.phone }}</div>
+            <div class="row margin-bt">
+              <div class="col-3">Telefone:</div>
+              <div class="col-9 text-bold">{{ user.phone }} </div>
             </div>
-            <div class="row" v-if="utilizarEmail">
-              <div class="col-5">E-mail:</div>
+            <div class="row margin-bt" v-if="utilizarEmail">
+              <div class="col-3">E-mail:</div>
               <div
-                class="col-7 text-bold"
-                style="
-                  overflow-wrap: break-word;
-                  word-wrap: break-word;
-                  hyphens: auto;
-                  white-space: normal;
-                "
-              >
+                class="col-9 text-bold"
+                style=" overflow-wrap: break-word; word-wrap: break-word; hyphens: auto; white-space: normal;">
                 {{ user.email }}
               </div>
             </div>
-            <div class="row" v-if="utilizarCPF">
-              <div class="col-5">CPF:</div>
-              <div class="col-7 text-bold">{{ user.cpf }}</div>
+            <div class="row margin-bt" v-if="utilizarCPF">
+              <div class="col-3">CPF:</div>
+              <div class="col-9-shrink text-bold">{{ user.cpf }}</div>
             </div>
-            <div class="row">
-              <div class="col-5">Horário:</div>
-              <div class="col-7 text-bold">{{ parseData }}</div>
+            <div class="row margin-bt">
+              <div class="col-3">Data:</div>
+              <div class="col text-bold">{{ parseData }}</div>
             </div>
 
-            <div class="row" v-if="getEndereco">
-              <div class="col-5">Local:</div>
+            <div class="row margin-bt" v-if="getEndereco">
+              <div class="col-3">Local:</div>
 
-              <div class="col-7 text-bold" v-html="getEnderecoHtml"></div>
+              <div class="col-9 text-bold" v-html="getEnderecoHtml"></div>
             </div>
             <div v-if="necessitaPagamento">
               <div class="row">
@@ -701,10 +695,10 @@
           <div class="text-h8 q-mt-md text-justify">
             <q-checkbox v-model="user.use" />
             <span>
-              Declaro que li e concordo com os 
-              <strong @click="termosDeUso">termos de utilização da sala</strong>
-              
-              .
+              Declaro que li e concordo com os
+              <a @click="termosDeUso" class="fakelink">
+                termos de utilização da sala</a
+              >.
             </span>
           </div>
           <q-btn-group push flat unelevated class="full-width row q-my-md">
@@ -753,7 +747,7 @@
 
 <script>
 import { defineComponent } from "vue";
-import { Loading, Notify } from "quasar";
+import { Loading, Notify, } from "quasar";
 import * as moment from "moment";
 import { QCalendarDay } from "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.esm.js";
 import { QCalendarMonth } from "@quasar/quasar-ui-qcalendar/dist/QCalendarMonth.esm.js";
@@ -845,8 +839,9 @@ export default defineComponent({
           tipoEvento: {},
         },
       },
-      maximoPessoas:"",
+      maximoPessoas: "",
       eventoOutros: [],
+      publicoExterno: false,
     };
   },
   computed: {
@@ -872,7 +867,18 @@ export default defineComponent({
     },
 
     tempoMinimoAprovacaoLabel() {
-      const aux = [
+      const aux = this.isHotmilk ? 
+      [
+        { value: 30, label: "30 minutos" },
+        { value: 45, label: "45 minutos" },
+        { value: 60, label: "1 hora" },
+        { value: 90, label: "1 hora e 30 min" },
+        { value: 120, label: "2 hora" },
+        { value: 180, label: "3 hora" },
+        { value: 240, label: "4 hora" },
+        { value: 300, label: "5 hora" },
+        { value: 360, label: "6 hora" },
+      ] : [
         { value: 15, label: "15 minutos" },
         { value: 30, label: "30 minutos" },
         { value: 45, label: "45 minutos" },
@@ -911,14 +917,16 @@ export default defineComponent({
       return resultado;
     },
     getEnderecoHtml() {
-      let resultado = "";
-      if (this.cliente && this.cliente.enderecoImovel) {
-        resultado = this.user.imovelRef + " - " + this.cliente.enderecoImovel;
-      } else if (this.user.imovelRef) {
-        resultado = this.user.imovelRef;
-      }
-      return resultado.replace("\n", "<br/>");
+      let resultado = this.user.imovelRef;
+      return resultado.replace("\n", "");
     },
+
+    // pega o primeiro Nome
+    getPrimeiroNome(){
+      let res = this.user.name.split(" ");
+      return res[0];
+    },
+
     botaoCalendario() {
       return `<button
       class="red-button"style="max-width: 120px; border: none; border-radius: 16px; cursor: pointer; height: 40px;
@@ -1026,7 +1034,6 @@ export default defineComponent({
           } while (--days > 0);
         }
       });
-      console.log("ERRO map", map);
       return map;
     },
     intervalStart() {
@@ -1087,8 +1094,11 @@ export default defineComponent({
           terms: false,
           use: false,
         };
-        this.maximoPessoas = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
+        this.maximoPessoas =
+          this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
+      } else {
+        this.$router.push("/login");
       }
       const params = this.getParams;
       if (params && params.entidadeId && params.imovelRef) {
@@ -1118,22 +1128,12 @@ export default defineComponent({
           };
           this.events.push(visita);
           // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
-          console.log(
-            "ERRO ValidadeInicial-Final",
-            validadeFinal,
-            " ",
-            validadeFinal
-          );
           delete this.login.validadeInicial;
           delete this.login.validadeFinal;
           this.$store.dispatch("setarDados", {
             key: "setLogin",
             value: this.login,
           });
-        }
-        if (!this.login || !this.login.user) {
-          this.parte = 1;
-          this.inForms = true;
         }
       }
       this.semImovel = false;
@@ -1147,6 +1147,26 @@ export default defineComponent({
     if (this.semImovel) this.$router.push("/hotmilk");
   },
   methods: {
+    //verificar créditos retorna false se não tiver créditos
+    verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
+      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
+        Dialog.create({
+          title: "Aviso",
+          //link ainda não implemenado
+          message:
+            "<p>Você não possui créditos suficientes</p>" +
+            "<a href='#'> Clique aqui para solicitar mais créditos</a>",
+          html: true,
+          ok: {
+            label: "ok",
+            color: "positive",
+          },
+        }).onOk(() => {});
+        return false;
+      }
+      return true;
+    },
+
     async telaInicial() {
       await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
       await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
@@ -1154,6 +1174,9 @@ export default defineComponent({
       this.$router.push(`/${this.routeCoworking}`);
     },
 
+    goBack() {
+      this.$router.go(-2);
+    },
     async logout(force) {
       if (force) {
         this.user.name = "";
@@ -1173,7 +1196,6 @@ export default defineComponent({
 
         this.parte = 1;
         this.$router.go(-2);
-        console.log("ERRO logout");
         return;
       }
       Dialog.create({
@@ -1198,7 +1220,6 @@ export default defineComponent({
           value: [],
         });
         this.parte = 1;
-        console.log("ERRO login");
       });
     },
     montarQrcode() {
@@ -1327,16 +1348,93 @@ export default defineComponent({
       return events;
     },
 
-    //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
-    async onTimeClick({ event, scope }) {
-      let hora = scope.timestamp.hour;
-      let minutos = scope.timestamp.minute;
-      const dia = scope.timestamp.day;
-      const mes = scope.timestamp.month;
-      const ano = scope.timestamp.year;
-      const now = moment();
-      this.entidadeUsuario = this.getLogin.user.entidadeId || false;
-      let horasDisponiveis = 0;
+    qualEvento(informacao, minutos, hora, scope) {
+        let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1)
+        Dialog.create({
+          title: informacaoM,
+          message:`
+                    <div style="margin-bottom: 10px;">
+                      <textarea name="textarea" style="width:100%;height:150px; border: none; background-color: lightgrey;" id="texto" placeholder="Descreva aqui"></textarea>
+                    </div>
+                    <div>
+                      <input type="checkbox" id="checkbox"/>
+                      <label for="checkbox">Públoco externo</label>
+                    </div>`,
+        html : true,
+          cancel: true,
+          persistent: true,
+        }).onOk((data) => {
+          let texto = document.getElementById("texto").value
+          this.publicoExterno = document.getElementById("checkbox").checked
+          this.eventoOutros = { label: informacao, value: texto };
+          this.escolherHorario(minutos, hora, scope);
+      });
+      if (this.eventoOutros.length > 0) this.eventoOutros = [];
+    },
+    quantasPessoas() {
+      Dialog.create({
+        title:
+          '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
+        message: `
+              <span>
+                Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
+                Insira 0 (zero) caso não haja participantes externos.
+              </span>
+            `,
+        prompt: {
+          model: 0,
+          type: "number",
+        },
+        ok: {
+          label: "Continuar",
+          color: "positive",
+          flat: true,
+        },
+        cancel: {
+          label: "Escolher outro horário",
+          color: "primary",
+          flat: true,
+        },
+        html: true,
+      })
+        .onOk((res) => {
+          Loading.show();
+          setTimeout(() => {
+            if (res > this.maximoPessoas + 1) {
+              Notify.create({
+                message: "Mais pessoas que a capacidade da sala",
+                type: "warning",
+              });
+            }
+            this.inForms = true;
+            if (res > this.$store.imovelAgeda) {
+              this.numeroVisitantesExternos = res;
+            }
+
+            if (this.login && this.login.id && this.login.user) {
+              this.entidadeUsuario = this.login.user.entidade.id;
+              if (
+                !this.utilizarEmail &&
+                !this.utilizarDocumentos &&
+                !this.utilizarCPF &&
+                (this.isCoworking
+                  ? this.user.empresa && this.user.empresa != ""
+                  : true)
+              )
+                this.parte = 4;
+              else this.parte = 2;
+            }
+            Loading.hide();
+          }, 1500);
+        })
+        .onCancel(() => {
+          this.events.pop();
+        });
+    },
+
+    async escolherHorario(minutos, hora, scope) {
+      //aqui começa a parte de escolher horário
+      let horasMensaisDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 1;
 
@@ -1348,117 +1446,12 @@ export default defineComponent({
         console.log("PIAZZETTA requst", request)
         const response = await this.executeMethod(request, false);
 
-        console.log("PIAZZETTA responce", response)
 
-        horasDisponiveis = response.data.horasMensaisDisponiveis;
+        horasMensaisDisponiveis = response.data.horasMensaisDisponiveis;
         horasExtras = response.data.horasExtras;
         consumoDeCreditos = response.data.consumoCreditos;
       }
 
-      if (this.contador == 0) {
-        let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
-        const trueKeys = [];
-        for (const key in obj) {
-          if (obj[key]) {
-            let keyLabel = key.toString();
-            keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
-            if(keyLabel == "Reuniao") keyLabel = "Reunião"
-            trueKeys.push({ label: keyLabel, value: `${key}` });
-          }
-          console.log("ERRO trueKeys", trueKeys);
-        }
-
-        //verifica se o horário esta certo para criar visita
-        const now_vector = now.format("MM DD HH mm").split(" ");
-        const minutes_base_ref = now
-          .subtract(this.timeStepMin, "minutes")
-          .format("mm");
-        if (scope.timestamp.past) {
-          if (
-            !(
-              dia == parseInt(now_vector[1]) &&
-              hora == parseInt(now_vector[2]) &&
-              minutos < parseInt(now_vector[3]) &&
-              minutos > parseInt(minutes_base_ref)
-            )
-          ) {
-            Dialog.create({
-              title:
-                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-              message:
-                "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
-              html: true,
-              ok: "Ok",
-            });
-            return;
-          }
-        }
-      
-      let diaFuturo_vector = now.add(this.liberarAgendamento, "day").format("YYYY MM DD").split(" "); // 
-      console.log("PIAZZETTA dia futuro comparação ", diaFuturo_vector[0] < ano, diaFuturo_vector[0] , ano )
-      console.log("PIAZZETTA dia futuro comparação ", diaFuturo_vector[1] < mes, diaFuturo_vector[1] , mes )
-      console.log("PIAZZETTA dia futuro comparação ", diaFuturo_vector[2] < dia, diaFuturo_vector[2] , dia )
-      if (this.liberarAgendamento > -1 && (diaFuturo_vector[2] < dia)) {
-        if(diaFuturo_vector[1] <= mes) {
-          if(diaFuturo_vector[0] <= ano){
-            Dialog.create({
-              title:
-                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-              message:
-                "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
-              html: true,
-              ok: "Ok",
-            });
-            return;
-          }
-        }
-      }
-        //tipo de evento - outros chama outra modal que pede o que é 
-        await new Promise((resolve, reject) => {
-          Dialog.create({
-            title: "Tipo de evento",
-            message: "Escolha o tipo de evento:",
-            options: {
-              type: "checkbox",
-              model: [],
-              // inline: true
-              items: trueKeys,
-            },
-            cancel: true,
-            persistent: true,
-          })
-            .onOk((data) => {
-              const filtrado = data.filter((el) => el == "outros");
-              // aqui pedo caso outro
-              if (filtrado && filtrado.length) {
-                Dialog.create({
-                  title: "Outro tipo de evento",
-                  message: "Qual o tipo de evento?",
-                  prompt: {
-                    model: "",
-                    type: "text", // optional
-                  },
-                  cancel: true,
-                  persistent: true,
-                }).onOk((data) => {
-                  this.eventoOutros.push(data);
-                });
-              }
-              this.eventoOutros.push(data);
-              resolve();
-            })
-            .onCancel(() => {
-              this.contador = 0;
-              reject();
-            })
-            .onDismiss(() => {
-              reject();
-              // console.log('I am triggered on both OK and Cancel')
-            });
-        });
-      }
-
-      //aqui começa a parte de eescolher horário
       if (this.timeStepMin == 15) {
         if (minutos > 45) minutos = 60;
         else if (minutos > 30) minutos = 45;
@@ -1483,7 +1476,18 @@ export default defineComponent({
 
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const options = [
+      const options = this.isHotmilk ? 
+      [
+        { label: "45 minutos", value: "45" },
+        { label: "1 hora", value: "60" },
+        { label: "1:30 hora", value: "90" },
+        { label: "2 horas", value: "120" },
+        { label: "2:30 horas", value: "150" },
+        { label: "3 horas", value: "180" },
+        { label: "4 horas", value: "240" },
+        { label: "5 horas", value: "300" },
+        { label: "6 horas", value: "360" },
+      ]        : [
         { label: "30 minutos", value: "30" },
         { label: "45 minutos", value: "45" },
         { label: "1 hora", value: "60" },
@@ -1496,13 +1500,11 @@ export default defineComponent({
         { label: "6 horas", value: "360" },
       ];
 
-
       const inicial = options.find((item) => {
         return item.value == this.timeStepMin;
       });
 
-
-      const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
+      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "30" }] : [{ label: "15 minutos", value: "15" }];
 
       const filter = options.filter((item) => {
         return parseInt(item.value) <= this.tempoMaximo;
@@ -1533,9 +1535,6 @@ export default defineComponent({
       itens.forEach((element) => {
         let value = element.label.split(" ")[0];
         const time = element.label.split(" ")[1];
-        // if (!consumoDeCreditos) {
-        //   return;
-        // }
         if (time == "hora" || time == "horas") {
           if (value.charAt(1) == ":") {
             value.split(":");
@@ -1563,7 +1562,7 @@ export default defineComponent({
         message: `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
             <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>${
-              horasDisponiveis + horasExtras
+              horasMensaisDisponiveis + horasExtras
             }</strong></p>
           </span>
           ${
@@ -1591,6 +1590,16 @@ export default defineComponent({
         html: true,
         persistent: true,
       }).onOk((data) => {
+        if (
+          !this.verificarCreditos(
+            horasMensaisDisponiveis,
+            horasExtras,
+            parseInt(data),
+            consumoDeCreditos
+          )
+        ) {
+          return;
+        }
         const visita = {
           title: "Horário Selecionado",
           date: scope.timestamp.date,
@@ -1603,67 +1612,12 @@ export default defineComponent({
         const validadeInicial = new Date(
           (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
         ).getTime();
-        console.log(validadeInicial, "validade Inicial");
         this.user.validadeInicial = validadeInicial;
         this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
         this.montarQrcode();
 
         if (this.habilitarPublicoExterno) {
-          Dialog.create({
-            title:
-              '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
-            message: `
-              <span>
-                Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
-                Insira 0 (zero) caso não haja participantes externos.
-              </span>
-            `,
-            prompt: {
-              model: 0,
-              type: "number",
-            },
-            ok: {
-              label: "Continuar",
-              color: "positive",
-              flat: true,
-            },
-            cancel: {
-              label: "Escolher outro horário",
-              color: "primary",
-              flat: true,
-            },
-            html: true,
-          })
-            .onOk((res) => {
-              Loading.show();
-              setTimeout(() => {
-                if(res > this.maximoPessoas+1){
-                  Notify.create({message: "Mais pessoas que a capacidade da sala",
-                                type: "warning",
-                                });}
-                this.inForms = true;
-                //NÃO ESTÁ CONSIDERANDO O MAXIMO DE PESSOAS DA SALA
-                if(res > this.$store.imovelAgeda)
-                this.numeroVisitantesExternos = res;
-                if (this.login && this.login.id && this.login.user) {
-                  this.entidadeUsuario = this.login.user.entidade.id;
-                  if (
-                    !this.utilizarEmail &&
-                    !this.utilizarDocumentos &&
-                    !this.utilizarCPF &&
-                    (this.isCoworking
-                      ? this.user.empresa && this.user.empresa != ""
-                      : true)
-                  )
-                    this.parte = 4;
-                  else this.parte = 2;
-                }
-                Loading.hide();
-              }, 1500);
-            })
-            .onCancel(() => {
-              this.events.pop();
-            });
+          this.quantasPessoas();
         } else {
           Loading.show();
           setTimeout(() => {
@@ -1681,6 +1635,100 @@ export default defineComponent({
           }, 1500);
         }
       });
+    },
+    //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
+    async onTimeClick({ event, scope }) {
+      let hora = scope.timestamp.hour;
+      let minutos = scope.timestamp.minute;
+      const dia = moment(scope.timestamp.date);
+      const now = moment();
+
+      this.entidadeUsuario = this.getLogin.user.entidadeId;
+
+      if (this.contador == 0) {
+        let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
+        const trueKeys = [];
+        for (const key in obj) {
+          if (obj[key]) {
+            let keyLabel = key.toString();
+            keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
+            if (keyLabel == "Reuniao") keyLabel = "Reunião";
+            trueKeys.push({ label: keyLabel, value: `${key}` });
+          }
+        }
+
+        //verifica se o horário esta certo para criar visita
+        const now_vector = now.format("MM DD HH mm").split(" ");
+        const minutes_base_ref = now
+          .subtract(this.timeStepMin, "minutes")
+          .format("mm");
+        if (scope.timestamp.past) {
+          if (
+            !(
+              dia == parseInt(now_vector[1]) &&
+              hora == parseInt(now_vector[2]) &&
+              minutos < parseInt(now_vector[3]) &&
+              minutos > parseInt(minutes_base_ref)
+            )
+          ) {
+            Dialog.create({
+              title:
+                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+              message:
+                "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
+              html: true,
+              ok: "Ok",
+            });
+            return;
+          }
+        }
+
+        let diaFuturo = now.add(this.liberarAgendamento, "day");
+
+        if (this.liberarAgendamento > -1 && dia > diaFuturo) {
+          Dialog.create({
+            title:
+              "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+            message:
+              "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
+            html: true,
+            ok: "Ok",
+          });
+          return;
+        }
+        //tipo de evento - outros chama outra modal que pede o que é
+        await new Promise((resolve, reject) => {
+          Dialog.create({
+            title: "Tipo de evento",
+            message: "Escolha o tipo de evento:",
+            options: {
+              type: "radio",
+              model: "",
+              items: trueKeys,
+            },
+            cancel: true,
+            persistent: true,
+          })
+            .onOk((data) => {
+              const filtro = ["outros", "evento"];
+              if (filtro.includes(data)) {
+                this.qualEvento(data, minutos, hora, scope);
+                
+              } else {
+                this.eventoOutros.push(data);
+                this.escolherHorario(minutos, hora, scope);
+              }
+              resolve();
+            })
+            .onCancel(() => {
+              this.contador = 0;
+              reject();
+            })
+            .onDismiss(() => {
+              reject();
+            });
+        });
+      }
     },
     filtraValor(valorDaSala) {
       if (valorDaSala) {
@@ -1796,6 +1844,7 @@ export default defineComponent({
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
       if (!this.user.hasDocs) {
+
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
@@ -1822,12 +1871,11 @@ export default defineComponent({
         request.headers = { "Content-Type": "multipart/form-data" };
         request.data = formData;
       }
-
       const response = await this.executeMethod(request, false);
       Loading.hide();
+
       if (response && response.status == 200) {
         const message = response.data.text;
-
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
@@ -1917,8 +1965,6 @@ export default defineComponent({
             15),
       };
 
-      console.log(data);
-
       let request = {
         url: "Entidades/checkoutPagamento",
         method: "post",
@@ -1928,14 +1974,11 @@ export default defineComponent({
       const response = await this.executeMethod(request, false);
       this.user.entidadeUsuario = this.entidadeUsuario;
 
-      console.log("esse é o this user id", this.entidadeUsuario);
       this.$store.dispatch("setarDados", {
         key: "setConvite",
         value: this.user,
       });
 
-      //const mp = new MercadoPago("TEST-948ecfba-0eda-4100-8f8c-bb4ef5e20c12", {
-      console.log(this.chaveAgendamento);
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
@@ -2333,8 +2376,8 @@ export default defineComponent({
         formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
 
-        // request.headers = { "Content-Type": "multipart/form-data" };
-        // request.data = formData;
+        request.headers = { "Content-Type": "multipart/form-data" };
+        request.data = formData;
       }
 
       return user;
@@ -2448,21 +2491,19 @@ export default defineComponent({
       return filter;
     },
 
-    termosDeUso(){
+    termosDeUso() {
       Dialog.create({
         title: "Termos de uso da sala",
         message:
-                "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.",
+          "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.",
         html: true,
         fullWidth: true,
         ok: {
           label: "Ok",
           color: "positive",
         },
-      })
-
-    }
-
+      });
+    },
   },
 });
 </script>
@@ -2561,12 +2602,20 @@ export default defineComponent({
   align-items: center;
   height: 100%;
 }
+.fakelink {
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
+}
 
 .bar {
   height: 40px;
   width: 2px;
   margin: 5px;
   background-color: black;
+}
+.margin-bt{
+  margin-bottom: 10px;
 }
 @media (min-width: 500px) {
   .img-salas {
