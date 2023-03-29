@@ -924,8 +924,7 @@ export default defineComponent({
     // pega o primeiro Nome
     getPrimeiroNome(){
       let res = this.user.name.split(" ");
-      res = res[0];
-      return res;
+      return res[0];
     },
 
     botaoCalendario() {
@@ -1438,7 +1437,7 @@ export default defineComponent({
     },
 
     async escolherHorario(minutos, hora, scope) {
-      //aqui começa a parte de eescolher horário
+      //aqui começa a parte de escolher horário
       let horasDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 1;
@@ -1455,7 +1454,6 @@ export default defineComponent({
         consumoDeCreditos = response.data.consumoCreditos;
       }
 
-      //aqui começa a parte de eescolher horário
       if (this.timeStepMin == 15) {
         if (minutos > 45) minutos = 60;
         else if (minutos > 30) minutos = 45;
@@ -1539,9 +1537,6 @@ export default defineComponent({
       itens.forEach((element) => {
         let value = element.label.split(" ")[0];
         const time = element.label.split(" ")[1];
-        // if (!consumoDeCreditos) {
-        //   return;
-        // }
         if (time == "hora" || time == "horas") {
           if (value.charAt(1) == ":") {
             value.split(":");
@@ -1987,7 +1982,6 @@ export default defineComponent({
         value: this.user,
       });
 
-      //const mp = new MercadoPago("TEST-948ecfba-0eda-4100-8f8c-bb4ef5e20c12", {
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
@@ -2380,8 +2374,8 @@ export default defineComponent({
         formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
 
-        // request.headers = { "Content-Type": "multipart/form-data" };
-        // request.data = formData;
+        request.headers = { "Content-Type": "multipart/form-data" };
+        request.data = formData;
       }
 
       return user;
@@ -2608,7 +2602,6 @@ export default defineComponent({
 }
 .fakelink {
   text-decoration: underline;
-  /*color: #4d278e;*/
   color: blue;
   cursor: pointer;
 }
