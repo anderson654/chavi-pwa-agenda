@@ -1135,10 +1135,6 @@ export default defineComponent({
             value: this.login,
           });
         }
-        if (!this.login || !this.login.user) {
-          this.parte = 4;
-          this.inForms = false;
-        }
       }
       this.semImovel = false;
       if (!params || !params.entidadeId || !params.imovelRef)
@@ -1152,8 +1148,8 @@ export default defineComponent({
   },
   methods: {
     //verificar créditos retorna false se não tiver créditos
-    verificarCreditos(horasDisponiveis, horasExtras, valor, consumoCreditos) {
-      if (horasDisponiveis + horasExtras < valor * consumoCreditos) {
+    verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
+      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
         Dialog.create({
           title: "Aviso",
           //link ainda não implemenado
@@ -1438,7 +1434,7 @@ export default defineComponent({
 
     async escolherHorario(minutos, hora, scope) {
       //aqui começa a parte de escolher horário
-      let horasDisponiveis = 0;
+      let horasMensaisDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 1;
 
@@ -1449,7 +1445,8 @@ export default defineComponent({
         };
         const response = await this.executeMethod(request, false);
 
-        horasDisponiveis = response.data.horasDisponiveis;
+
+        horasMensaisDisponiveis = response.data.horasMensaisDisponiveis;
         horasExtras = response.data.horasExtras;
         consumoDeCreditos = response.data.consumoCreditos;
       }
@@ -1564,7 +1561,7 @@ export default defineComponent({
         message: `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
             <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>${
-              horasDisponiveis + horasExtras
+              horasMensaisDisponiveis + horasExtras
             }</strong></p>
           </span>
           ${
@@ -1594,7 +1591,7 @@ export default defineComponent({
       }).onOk((data) => {
         if (
           !this.verificarCreditos(
-            horasDisponiveis,
+            horasMensaisDisponiveis,
             horasExtras,
             parseInt(data),
             consumoDeCreditos
@@ -1847,8 +1844,6 @@ export default defineComponent({
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
       if (!this.user.hasDocs) {
 
-        let formData = new FormData();
-        Object.keys(user).forEach((key) => formData.append(key, user[key]));
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
@@ -1866,6 +1861,8 @@ export default defineComponent({
           name: this.user.fotoSelfie.name,
         };
 
+        let formData = new FormData();
+        Object.keys(user).forEach((key) => formData.append(key, user[key]));
         formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
         formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
@@ -1873,12 +1870,11 @@ export default defineComponent({
         request.headers = { "Content-Type": "multipart/form-data" };
         request.data = formData;
       }
-
       const response = await this.executeMethod(request, false);
       Loading.hide();
+
       if (response && response.status == 200) {
         const message = response.data.text;
-
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
