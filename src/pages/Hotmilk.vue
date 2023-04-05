@@ -121,7 +121,7 @@
               />
             </div>
           </div>
-          <style-bloco v-bind:blocoSelecionado="blocoSelecionado" />
+          <style-bloco class="igual-black-negrito" v-bind:blocoSelecionado="blocoSelecionado" />
           <div
             v-if="blocoSelecionado && selecionarAndar"
             class="justify-center text-center q-gutter-y-md"
@@ -433,5 +433,16 @@ export default {
     gap: 30px;
     flex-direction: row;
   }
+}
+@font-face {
+  font-family: 'igualnegrito';
+  src: url('../../public/fonts/Igual/Igual-Black.otf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+.igual-black-negrito {
+  font-family: 'igualnegrito';
+  font-weight: bold;
 }
 </style>

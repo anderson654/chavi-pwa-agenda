@@ -2,10 +2,10 @@
   <div class="container-blocos">
     <div class="box-blocos">
       <span class="texto-1"
-        >BLOCO{{ blocoSelecionado ? blocoSelecionado.num : 0 }}</span
+        ><strong>BLOCO{{ blocoSelecionado ? blocoSelecionado.num : 0 }}</strong></span
       >
       <span class="texto-2"
-        >BLOCO{{ blocoSelecionado ? blocoSelecionado.num : 0 }}</span
+        ><strong>BLOCO{{ blocoSelecionado ? blocoSelecionado.num : 0 }}</strong></span
       >
     </div>
   </div>
@@ -25,7 +25,6 @@ export default {
   display: flex;
   justify-content: center;
   color: #505050;
-  font-family: sans-serif, "Helvetica Neue", "Lucida Grande", Arial;
   scale: 1.2;
 }
 
