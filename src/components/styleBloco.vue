@@ -26,6 +26,7 @@ export default {
   justify-content: center;
   color: #505050;
   scale: 1.2;
+  margin-top:15px;
 }
 
 .box-blocos {
@@ -43,8 +44,8 @@ export default {
   background-color: #f0f0f0;
   background-image: linear-gradient(
     0deg,
-    rgba(240, 240, 240, 1) 23%,
-    rgba(150, 84, 255, 1) 100%
+    rgba(240, 240, 240, 1) 33%,
+    rgba(150, 84, 255, 1) 140%
   );
 
   background-size: 100%;
@@ -59,7 +60,7 @@ export default {
   font-size: 3rem;
   position: absolute;
   color: #505050;
-  transform: scale(1.3, 1.2);
+  transform: scale(1.3, 1.2) translateX(-6px);
   left: 110px;
   top: 8px;
 }

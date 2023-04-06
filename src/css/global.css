@@ -33,9 +33,9 @@ body {
   font-size: 1.2rem;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 520px) {
   .purple-button {
-    width: 130px;
+    width: 100px;
   }
 }
 .red-button {
@@ -47,6 +47,6 @@ body {
   );
   color: white;
   height: 30px;
-  width: 220px !important;
+  width: 300px !important;
   font-size: 1.2rem;
 }

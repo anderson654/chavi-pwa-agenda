@@ -89,20 +89,14 @@
           >
           </span>
         </div>
-
+        <!--AQUI-->
         <img
+        
           :src="logo"
           spinner-color="#9654ff"
           class="img-salas"
-          style="
-            width: 100vw;
-            height: 60vh;
-            position: absolute;
-            left: 0;
-            -o-object-fit: contain;
-          "
         />
-        <div class="img-salas" style="width: 100vw; height: 60vh"></div>
+        
       </div>
 
       <!-- CALENDÁRIO -->
@@ -946,7 +940,8 @@ export default defineComponent({
             ref +
             ". </strong> </p>"
         : `
-        Agende o melhor <strong>dia e hora</strong> para utilizar<br> <strong>${this.user.imovelRef}</strong> `;
+        <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px;" >Agende o melhor<br>dia e hora para utilizar:<br></p>
+          <p style="line-height: 0px;margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
     },
     isHotmilk() {
       return (
@@ -2611,9 +2606,26 @@ export default defineComponent({
 .margin-bt{
   margin-bottom: 10px;
 }
-@media (min-width: 500px) {
+@media (max-width: 520px) {
   .img-salas {
-    height: 20vh;
+    width: 100vw;
   }
+}
+.img-salas {
+    margin-top: 15px;
+    width: 100%;
+    height: 20vh;
+    position: center;
+    object-fit: contain;
+  }
+@font-face {
+  font-family: 'igualfina';
+  src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
+  font-style: normal;
+}
+@font-face {
+  font-family: 'igualnegrito';
+  src: url('../../public/fonts/Igual/Igual-ExtraBold.otf') format('truetype');
+  font-style: normal;  
 }
 </style>
