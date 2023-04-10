@@ -17,7 +17,7 @@
 
         <div class="header-logo" @click="$router.push('/')">
           <q-img
-            src="logo aplicação.png"
+            src="mindhub_logo.svg"
             fit="contain"
             width="100px"
             :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
@@ -86,6 +86,21 @@
           style="margin-top: 100px"
         >
           <div class="full-width text-center text-primary text-bold q-mb-md">
+            <div class="q-mb-md">
+              <q-btn
+                style="font-size: 0.8rem; background-color: #0070a0"
+                class="q-px-md"
+                dense
+                rounded
+                push
+                text-color="white"
+                label="Selecionar outro bloco"
+                @click="
+                  selecionarBloco = true;
+                  blocoSelecionado = undefined;
+                "
+              />
+            </div>
             <div class="q-mb-md" v-if="andarSelecionado">
               <q-btn
                 style="font-size: 0.8rem; background-color: #0070a0"
@@ -101,7 +116,30 @@
                 "
               />
             </div>
+            <span class="text-h4 text-bold" style="color: teal">
+              Bloco {{ blocoSelecionado ? blocoSelecionado.nome : 0 }}
+            </span>
           </div>
+          <!-- <div
+            v-if="blocoSelecionado && selecionarAndar"
+            class="column justify-center text-center q-gutter-y-md"
+          >
+            <span style="font-size: 1rem">Selecione um andar</span>
+            <div v-for="andar in blocoSelecionado.andares" :key="andar">
+              <q-btn
+                push
+                rounded
+                dense
+                color="primary"
+                :label="`Andar ${andar}`"
+                style="width: 100%; max-width: 200px"
+                @click="
+                  andarSelecionado = andar;
+                  selecionarAndar = false;
+                "
+              />
+            </div>
+          </div> -->
           <div
             v-if="true"
             class="full-width column shadow-3 text-center items-center"
@@ -179,9 +217,14 @@ export default {
       andarSelecionado: undefined,
       blocoSelecionado: undefined,
       blocos: [
-      {
-          foto: "https://media.gazetadopovo.com.br/2022/09/06141736/mindhub-capa-960x540.jpg",
-          nome: "FAE Business School",
+        {
+          foto: "https://lh3.googleusercontent.com/p/AF1QipP8ztDKoqbh1I73351TvijI1B8PwBaHpnAJKACT=s680-w680-h510",
+          nome: "MOB",
+          andares: {},
+        },
+        {
+          foto: "https://lh3.googleusercontent.com/p/AF1QipPWu3yqxrg8rOIBY5X52V2cEUTvYoGT83TFOJc0=s680-w680-h510",
+          nome: "HUB",
           andares: {},
         },
       ],
@@ -193,9 +236,16 @@ export default {
   },
   computed: {
     imoveisFiltred() {
-      const imoveis = this.imoveis;
+      const filtered = this.imoveis.filter((imovel) => {
+        let imovelMob = imovel.nome.split(" ")[0];
+        if (this.blocoSelecionado.nome == "MOB") {
+          return imovelMob == "MOB";
+        } else {
+          return imovelMob != "MOB";
+        }
+      });
 
-      return imoveis
+      return filtered;
     },
   },
   methods: {
@@ -213,7 +263,7 @@ export default {
         url: "Imoveis/retornarImoveisAgendamento",
         method: "get",
         params: {
-          entidadeId: "642da32cb5e1fd78ec65767e",
+          entidadeId: "618ec1c37ec86fa253e9d3ab",
         },
       });
       if (response.status == 200) {
