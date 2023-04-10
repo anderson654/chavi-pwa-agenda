@@ -35,6 +35,10 @@ const routes = [
     component: () => import("pages/Agora.vue"),
   },
   {
+    path: "/mindhub",
+    component: () => import("pages/Mindhub.vue"),
+  },
+  {
     path: "/baggio",
     component: () => import("pages/Baggio.vue"),
   },
