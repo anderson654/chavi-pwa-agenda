@@ -96,7 +96,7 @@
 
       <div class="mindhub">
         <q-img
-          src="mindhub_logo.svg"
+          src="logo aplicação.png"
           fit="contain"
           height="100px"
           width="150px"

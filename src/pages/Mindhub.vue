@@ -17,7 +17,7 @@
 
         <div class="header-logo" @click="$router.push('/')">
           <q-img
-            src="mindhub_logo.svg"
+            src="logo aplicação.png"
             fit="contain"
             width="100px"
             :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
@@ -86,21 +86,6 @@
           style="margin-top: 100px"
         >
           <div class="full-width text-center text-primary text-bold q-mb-md">
-            <div class="q-mb-md">
-              <q-btn
-                style="font-size: 0.8rem; background-color: #0070a0"
-                class="q-px-md"
-                dense
-                rounded
-                push
-                text-color="white"
-                label="Selecionar outro bloco"
-                @click="
-                  selecionarBloco = true;
-                  blocoSelecionado = undefined;
-                "
-              />
-            </div>
             <div class="q-mb-md" v-if="andarSelecionado">
               <q-btn
                 style="font-size: 0.8rem; background-color: #0070a0"
@@ -117,29 +102,9 @@
               />
             </div>
             <span class="text-h4 text-bold" style="color: teal">
-              Bloco {{ blocoSelecionado ? blocoSelecionado.nome : 0 }}
+              FAE Business Schoo
             </span>
           </div>
-          <!-- <div
-            v-if="blocoSelecionado && selecionarAndar"
-            class="column justify-center text-center q-gutter-y-md"
-          >
-            <span style="font-size: 1rem">Selecione um andar</span>
-            <div v-for="andar in blocoSelecionado.andares" :key="andar">
-              <q-btn
-                push
-                rounded
-                dense
-                color="primary"
-                :label="`Andar ${andar}`"
-                style="width: 100%; max-width: 200px"
-                @click="
-                  andarSelecionado = andar;
-                  selecionarAndar = false;
-                "
-              />
-            </div>
-          </div> -->
           <div
             v-if="true"
             class="full-width column shadow-3 text-center items-center"
