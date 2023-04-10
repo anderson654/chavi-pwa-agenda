@@ -216,7 +216,7 @@ export default {
         url: "Imoveis/retornarImoveisAgendamento",
         method: "get",
         params: {
-          entidadeId: "642da32cb5e1fd78ec65767e",
+          entidadeId: "618ec1c37ec86fa253e9d3ab",
         },
       });
       if (response.status == 200) {

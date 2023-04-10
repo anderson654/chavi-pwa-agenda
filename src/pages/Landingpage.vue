@@ -93,6 +93,23 @@
           @click="$router.push('/mindhub')"
         />
       </div>
+
+      <div class="mindhub">
+        <q-img
+          src="logo aplicação.png"
+          fit="contain"
+          height="100px"
+          width="150px"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+          class="q-my-sm"
+          @click="$router.push('https://agenda.chavi.com.br/mindhub')"
+        />
+      </div>
     </div>
 
     <footer reveal elevated>
