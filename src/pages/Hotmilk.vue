@@ -66,7 +66,7 @@
                 push
                 rounded
                 class="q-mb-md purple-button"
-                style="font-size: 2rem; border-radius: 40px; max-width: 80%; font-weight: bolder;"
+                style=" border-radius: 40px; max-width: 80%; font-weight: bolder;"
                 :label="'Bloco ' + bloco.num"
                 @click="
                   selecionarBloco = false;
