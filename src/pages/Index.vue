@@ -1543,12 +1543,13 @@ export default defineComponent({
       ).getTime();
       let multiplicaMs = 60 * 1000;
       for (const opt of filter) {
-        const inteiro = this.isHotmilk ? Number(opt.value) % Number(this.timeStepMin/60) == 0 : Number(opt.value) % Number(this.timeStepMin) == 0
-        const ms = Number(opt.value) * multiplicaMs;
+        const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
+        const ms = parseInt(opt.value) * 60 * 1000;
 
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
         });
+
 
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
