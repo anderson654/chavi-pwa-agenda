@@ -944,12 +944,16 @@ export default defineComponent({
           <p style="line-height: 0px;margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
     },
     isHotmilk() {
-      return (
-        this.cliente &&
-        this.cliente.nome &&
-        (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
-          this.cliente.nome.toString().toLowerCase() == "dormakaba")
-      );
+      return false
+//==============================================================================
+      //código comentado para iniibir a parte de créditos
+      // (
+      //   this.cliente &&
+      //   this.cliente.nome &&
+      //   (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
+      //     this.cliente.nome.toString().toLowerCase() == "dormakaba")
+      // );
+//===============================================================================
     },
     isAgora() {
       return this.cliente.nome == "Ágora Tech Park";
@@ -1144,7 +1148,7 @@ export default defineComponent({
   methods: {
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
-      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
+      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos && this.isHotmilk) {
         Dialog.create({
           title: "Aviso",
           //link ainda não implemenado
@@ -1529,35 +1533,13 @@ export default defineComponent({
       itens.forEach((element) => {
         let value = element.label.split(" ")[0];
         const time = element.label.split(" ")[1];
-        if (time == "hora" || time == "horas") {
-          if (value.charAt(1) == ":") {
-            value.split(":");
-            value = value[0] * 60 + 30;
-
-            element.label = `${element.label} (${
-              Number(value) * Number(consumoDeCreditos)
-            } créditos serão consumidos. )`;
-          } else {
-            value = value * 60;
-
-            element.label = `${element.label} (${
-              Number(value) * Number(consumoDeCreditos)
-            } créditos serão consumidos. )`;
-          }
-        } else {
-          element.label = `${element.label} (${
-            Number(value) * Number(consumoDeCreditos)
-          } créditos serão consumidos. )`;
-        }
+          element.label = `${element.label}`;
       });
 
       Dialog.create({
         title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
         message: `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
-            <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>${
-              horasMensaisDisponiveis + horasExtras
-            }</strong></p>
           </span>
           ${
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
@@ -1590,7 +1572,7 @@ export default defineComponent({
             horasExtras,
             parseInt(data),
             consumoDeCreditos
-          )
+          ) && this.isHotmilk
         ) {
           return;
         }
