@@ -1472,15 +1472,14 @@ export default defineComponent({
 
       const options = this.isHotmilk ? 
       [
-        { label: "45 minutos", value: "45" },
-        { label: "1 hora", value: "60" },
-        { label: "1:30 hora", value: "90" },
-        { label: "2 horas", value: "120" },
-        { label: "2:30 horas", value: "150" },
-        { label: "3 horas", value: "180" },
-        { label: "4 horas", value: "240" },
-        { label: "5 horas", value: "300" },
-        { label: "6 horas", value: "360" },
+        { label: "1 hora", value: "1" },
+        { label: "1:30 hora", value: "1.5" },
+        { label: "2 horas", value: "2" },
+        { label: "2:30 horas", value: "2.5" },
+        { label: "3 horas", value: "3" },
+        { label: "4 horas", value: "4" },
+        { label: "5 horas", value: "5" },
+        { label: "6 horas", value: "6" },
       ]        : [
         { label: "30 minutos", value: "30" },
         { label: "45 minutos", value: "45" },
@@ -1498,11 +1497,17 @@ export default defineComponent({
         return item.value == this.timeStepMin;
       });
 
-      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "30" }] : [{ label: "15 minutos", value: "15" }];
+      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "0.5" }] : [{ label: "15 minutos", value: "15" }];
+
 
       const filter = options.filter((item) => {
-        return parseInt(item.value) <= this.tempoMaximo;
+        if(this.isHotmilk){
+          return Number(item.value) <= this.tempoMaximo/60;
+        }
+        return Number(item.value) <= this.tempoMaximo;
       });
+
+
       const date = scope.timestamp.date;
 
       const dateTime = new Date(
@@ -1510,12 +1515,14 @@ export default defineComponent({
       ).getTime();
 
       for (const opt of filter) {
-        const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
-        const ms = parseInt(opt.value) * 60 * 1000;
+        const multiplicadorMs = this.isHotmilk ? 60 * 60 * 1000 : 60 * 1000
+        const inteiro = this.isHotmilk ? Number(opt.value) % Number(this.timeStepMin/60) == 0 : inteiro = Number(opt.value) % Number(this.timeStepMin) == 0
+        const ms = Number(opt.value) * multiplicadorMs;
 
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
         });
+
 
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
@@ -1527,7 +1534,12 @@ export default defineComponent({
 
       if (!consumoDeCreditos) consumoDeCreditos = 1;
       itens.forEach((element) => {
-        let value = element.label.split(" ")[0];
+        if(this.isHotmilk){let value = element.value;
+          element.label = `${element.label} (${
+            Number(value) * Number(consumoDeCreditos)
+          } créditos serão consumidos. )`;
+        }else {
+          let value = element.label.split(" ")[0];
         const time = element.label.split(" ")[1];
         if (time == "hora" || time == "horas") {
           if (value.charAt(1) == ":") {
@@ -1549,6 +1561,8 @@ export default defineComponent({
             Number(value) * Number(consumoDeCreditos)
           } créditos serão consumidos. )`;
         }
+        }
+        
       });
 
       Dialog.create({
