@@ -15,7 +15,12 @@
           class="q-my-sm"
         />
         <q-img
-          style="cursor: pointer; min-width: 150px"
+          style="
+            cursor: pointer;
+            min-width: 150px;
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
+          "
           src="chavi_marca.png"
           fit="contain"
           :style="

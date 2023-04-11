@@ -24,6 +24,10 @@
               : 'min-width: 70px; max-width: 130px'
           "
           no-spinner
+          style="
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
+          "
           class="q-my-sm"
         />
       </q-toolbar>
@@ -85,16 +89,16 @@
       </q-page>
     </q-page-container>
 
-    <q-footer reveal elevated>
+    <q-footer v-model="footer" reveal elevated>
       <div
-        class="full-width bg-grey-3 text-center justify-center"
-        style="height: 60px"
+        class="full-width text-center justify-center"
+        style="height: 30px; background-color: white"
       >
         <div>
           <span
-            @click="openLink('https://chavi.com.br/', '_blank')"
+            @click="openLink('https://chavi.com.br', '_blank')"
             class="text-black text-h6"
-            style="cursor: pointer; text-decoration: underline"
+            style="cursor: pointer"
           >
             Visite nosso site
           </span>

@@ -28,7 +28,7 @@
     <q-footer reveal elevated>
       <div
         class="full-width bg-grey-2 text-center justify-center"
-        style="height: 60px"
+        style="height: 30px"
       >
         <div>
           <span

@@ -2,24 +2,16 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <q-btn
-          style="font-size: 0.7rem"
-          icon="home"
-          flat
-          dense
-          color="secondary"
-          class="home-icon"
-          @click="
-            selecionarBloco = true;
-            blocoSelecionado = null;
-          "
-        />
         <div class="header" @click="$router.push('/')">
           <q-img
             src="hotmilk.png"
             fit="contain"
             width="150px"
             :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
+            style="
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
             no-spinner
             class="q-my-sm"
           />
@@ -31,6 +23,10 @@
             :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
             no-spinner
             class="q-my-sm"
+            style="
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
           />
         </div>
       </q-toolbar>
@@ -42,49 +38,51 @@
         <div
           v-if="selecionarBloco && imoveis && imoveis.length > 0"
           class="full-width text-h5 text-center"
-          style="margin-top: 100px"
+          style="margin-top: 10px"
         >
           <div>
-            <span>Em qual bloco você esta?</span>
+            <span class="texto-bloco"
+              >Em qual bloco <strong>você está</strong>?</span
+            >
           </div>
-          <div class="flex justify-around q-mt-md">
+          <div class="flex justify-around q-mt-md bloco-escolha">
             <div
               v-for="(bloco, index) in blocos"
               :key="index"
-              class="q-my-sm column flex content-center"
-              style="width: 48%"
+              class="q-my-sm column flex content-center box-images"
+              style="width: 48%;"
             >
+              <q-img
+                :src="bloco.foto"
+                fit="contain"
+                style="
+                  max-width: 300px;
+                  border-radius: 16px;
+                  margin-bottom: 15px;
+                "
+              />
+
               <q-btn
                 push
                 rounded
-                color="primary"
-                class="text-bold q-mb-md"
-                style="max-width: 300px; width: 100%"
+                class="q-mb-md purple-button"
+                style=" border-radius: 40px; max-width: 80%; font-weight: bolder;"
                 :label="'Bloco ' + bloco.num"
                 @click="
                   selecionarBloco = false;
                   blocoSelecionado = bloco;
                 "
               />
-              <q-img
-                :src="bloco.foto"
-                fit="contain"
-                style="max-width: 300px; max-height: "
-              />
             </div>
           </div>
         </div>
         <!-- SELEÇÃO DO IMÓVEL -->
-        <div
-          v-else
-          class="full-width column flex-center"
-          style="margin-top: 100px"
-        >
-          <div class="full-width text-center text-primary text-bold q-mb-md">
+        <div v-else class="full-width column flex-center no-wrap">
+          <div class="flex buttons-mobile justify-center q-mt-lg q-mb-lg">
             <div class="q-mb-md">
               <q-btn
-                style="font-size: 0.8rem; background-color: #0070a0"
-                class="q-px-md"
+                style=" background-color: #0070a0; z-index: 5"
+                class="red-button igual-black-negrito"
                 dense
                 rounded
                 push
@@ -98,8 +96,8 @@
             </div>
             <div class="q-mb-md" v-if="andarSelecionado">
               <q-btn
-                style="font-size: 0.8rem; background-color: #0070a0"
-                class="q-px-md"
+                style=" background-color: #0070a0; z-index: 5"
+                class="red-button igual-black-negrito"
                 dense
                 rounded
                 push
@@ -111,75 +109,107 @@
                 "
               />
             </div>
-            <span class="text-h4 text-bold">
-              Bloco {{ blocoSelecionado ? blocoSelecionado.num : 0 }}
-            </span>
           </div>
+          <style-bloco class="igual-black-negrito" v-bind:blocoSelecionado="blocoSelecionado" />
+          <div v-if="blocoSelecionado && !selecionarAndar"
+          class="igual-black-negrito q-mt-md"
+          style="color: rgb(150, 84, 255); font-size: 1.47rem;"
+          >{{ this.andarSelecionado === 'Térreo' ? 'TÉRREO' : `${this.andarSelecionado}° ANDAR `}}</div>
           <div
             v-if="blocoSelecionado && selecionarAndar"
-            class="column justify-center text-center q-gutter-y-md"
+            class="justify-center text-center q-gutter-y-md"
+            style="margin-top: 20px"
           >
-            <span style="font-size: 1rem">Selecione um andar</span>
-            <div v-for="andar in blocoSelecionado.andares" :key="andar">
-              <q-btn
-                push
-                rounded
-                dense
-                color="primary"
-                :label="`Andar ${andar}`"
-                style="width: 100%; max-width: 200px"
-                @click="
-                  andarSelecionado = andar;
-                  selecionarAndar = false;
-                "
-              />
+            <span style="font-size: 1.33rem; color: #505050;" class="texto-bloco"
+              >Selecione <strong>um andar</strong></span
+            >
+            <div class="container-andares" >
+              <div v-for="andar in blocoSelecionado.andares" :key="andar">
+                <q-btn
+                  push
+                  rounded
+                  dense
+                  class="purple-button q-pr-xl q-pl-xl igual-black-negrito "
+                  :label="`${andar === 'Térreo' ? andar : andar + '° Andar '}`"
+                  style="width: 100%; max-width: 200px "
+                  @click="
+                    andarSelecionado = andar;
+                    selecionarAndar = false;
+                  "
+                />
+              </div>
             </div>
           </div>
           <div
             v-if="blocoSelecionado && !selecionarAndar"
-            class="full-width column shadow-3 text-center items-center"
+            class="full-width column text-center items-center"
+            style="margin-top: 10px;"
           >
             <!-- Card de cada imóvel   -->
             <div
-              class="full-width shadow-3 row q-my-md q-px-md bg-grey-3"
+              class="full-width shadow-3 row q-my-md q-px-md gradient-hotmilk"
               style="
                 border-radius: 20px;
                 height: 180px;
-                max-width: 900px;
+                max-width: 500px;
                 cursor: pointer;
               "
               v-for="(imovel, index) in imoveisFiltred"
               :key="index"
-              @click="$router.push(imovel.link)"
+              @click="
+                agendamento(imovel);
+                $router.push(imovel.link);
+              "
             >
               <div class="col-4 row content-center justify-center">
                 <q-img
                   :src="getImage(imovel.foto)"
-                  fit="contain"
-                  height="150px"
-                  width="180px"
+                  style="border-radius: 20px; height: 150px; max-width: 100px"
                   spinner-color="primary"
                 />
               </div>
-              <div class="col-8 column items-center justify-around">
-                <span style="font-size: 1.2rem" class="text-primary"
-                  >{{ imovel.nome }}
+              <div
+                class="col-7 column justify-evenly"
+                style="padding-left: 15px; text-align: left"
+              >
+                <span
+                  class="igual-black-negrito"
+                  style="
+                    font-size: 1.2rem;
+                    color: #505050;
+                    white-space: nowrap;
+                    min-width: 270px;
+                  "
+                  >{{ imovel.nome.toUpperCase().split("-")[0] }}
                 </span>
-                <div style="font-size: 0.9rem">
+                <div
+                  style="
+                    font-size: 0.9rem;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    font-family: 'igualfina';
+                    color: #505050;
+                  "
+                >
                   <span
                     v-if="
                       imovel.opcoesAgendamentoIndividual &&
                       imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas &&
                       imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas > 0
                     "
-                    class="text-bold"
                   >
                     Limite de pessoas:
-                    {{ imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas }}
+                    <strong style="font-family: 'igual';">{{
+                      imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas
+                        .length == 1
+                        ? `0${imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas}`
+                        : imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas
+                    }}</strong>
                   </span>
                   <br />
-                  <span>{{ imovel.endereco }}</span>
-                  <span class="text-bold"> - {{ imovel.complemento }}</span>
+                  <span style="max-width: 250px; color: #505050;">{{ imovel.endereco }}.</span>
+                  <span style="font-family: 'igual'; font-weight: bold;">{{ imovel.complemento }}</span>
                 </div>
               </div>
             </div>
@@ -188,28 +218,34 @@
       </q-page>
     </q-page-container>
 
-    <q-footer v-model="footer" reveal elevated>
+    <footer>
       <div
-        class="full-width bg-grey-2 text-center justify-center"
-        style="height: 60px"
+        style="
+          height: 40px;
+          width: 100%;
+          color: white;
+          text-align: center; 
+          background-color: 
+          rgba(240, 240, 240, 0.9);"
       >
-        <div>
-          <span
-            @click="openLink('https://chavi.com.br', '_blank')"
-            class="text-black text-h6"
-            style="cursor: pointer; text-decoration: underline"
-          >
-            Visite nosso site
-          </span>
-        </div>
+        <span
+          @click="openLink('https://chavi.com.br', '_blank')"
+          style="cursor: pointer; font-size: 1.2rem; color: #505050"
+        >
+          Visite
+          <span style="text-decoration: underline">nosso site</span>
+        </span>
       </div>
-      <div class="full-width bg-grey-8" style="height: 15px" />
-    </q-footer>
+    </footer>
   </q-layout>
 </template>
-
 <script>
+import StyleBloco from "src/components/styleBloco.vue";
+
 export default {
+  components: {
+    "style-bloco": StyleBloco,
+  },
   data() {
     return {
       selecionarBloco: true,
@@ -233,12 +269,14 @@ export default {
   },
   created() {
     this.carregarImoveis();
+    this.voltarOndeEstava();
   },
   computed: {
     imoveisFiltred() {
       const imoveis = this.imoveis.filter((item) => {
         const andar =
           item.andar != undefined && item.andar == 0 ? "Térreo" : item.andar;
+
         return (
           this.blocoSelecionado &&
           this.andarSelecionado &&
@@ -253,10 +291,37 @@ export default {
       });
       return imoveis;
     },
+    login: {
+      get() {
+        return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
+      },
+    },
+  },
+  mounted() {
+    if (!(this.login && this.login.user)) {
+      this.$router.push("/login");
+    }
   },
   methods: {
     openLink(url, target) {
       window.open(url, target);
+    },
+    voltarOndeEstava() {
+      if (this.$store.getters.getEstadoInicial) {
+        this.selecionarBloco = false;
+        this.selecionarAndar = false;
+        this.andarSelecionado = "Térreo";
+        this.blocoSelecionado = {
+          andares: { 0: "Térreo", 1: 1, 2: 2 },
+          foto: "bloco_1.png",
+          num: 1,
+        };
+      } else {
+        this.selecionarBloco = true;
+        this.selecionarAndar = true;
+        this.andarSelecionado = undefined;
+        this.blocoSelecionado = undefined;
+      }
     },
     getImage(image) {
       if (image && image.indexOf("https://") > -1) return image;
@@ -301,11 +366,42 @@ export default {
         this.imoveis = imoveis;
       }
     },
+    agendamento(imovel) {
+      this.$store.dispatch("setarDados", {
+        key: "setImovelAgendamento",
+        value: imovel,
+      });
+      return;
+    },
   },
 };
 </script>
 
 <style scoped>
+.texto-bloco {
+  font-family: 'igualfina';
+  color: #505050;
+}
+@media (max-width: 620px) {
+  .bloco-escolha {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+.box-images {
+  align-items: center;
+}
+@media (max-width: 620px) {
+    .container-andares {
+    flex-direction: column;
+  }
+}
+.container-andares {
+  display: flex;
+  gap: 20px;
+  margin-top: 30px;
+}
+
 @media (max-width: 450px) {
   .home-icon {
     display: none;
@@ -327,11 +423,34 @@ export default {
 .header:hover {
   cursor: pointer;
 }
-
 .bar {
   height: 40px;
   width: 2px;
   margin: 5px;
-  background-color: black;
+  background-color: #505050;
 }
+
+@media (min-width: 500px) {
+  .buttons-mobile {
+    gap: 30px;
+    flex-direction: row;
+  }
+}
+@font-face {
+  font-family: 'igualnegrito';
+  src: url('../../public/fonts/Igual/Igual-Black.otf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+.igual-black-negrito {
+  font-family: 'igualnegrito';
+  font-weight: bold;
+}
+@font-face {
+  font-family: 'igualfina';
+  src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
+  font-style: normal;
+}
+
 </style>

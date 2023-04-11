@@ -22,9 +22,19 @@
         style="width: 200px; min-width: 150px; height: 125px"
         @click="$router.push('/hotmilk')"
       >
-        <q-img src="hotmilk.png" />
+        <q-img
+          src="hotmilk.png"
+          style="
+            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+              brightness(96%) contrast(81%);
+          "
+        />
       </q-btn>
     </div>
+    <!-- <div v-if="parte == 4">
+      <button @click="this.parte = 5">Próxima</button>
+    </div> -->
+
     <!-- CALENDÁRIO -->
     <div v-else class="flex-center column">
       <!-- TÍTULOS/HEADES -->
@@ -67,23 +77,57 @@
           </div>
         </div>
         <div v-else class="text-center column">
-          <span style="font-size: 1.4rem" v-html="tituloCalendario"> </span>
-          <div class="full-width flex justify-center q-mt-sm">
-            <q-img
-              v-if="logo"
-              :src="logo"
-              spinner-color="primary"
-              fit="contain"
-              style="max-width: 300px"
-            />
-          </div>
+          <span
+            style="font-size: 1.4rem; color: #505050"
+            v-html="botaoCalendario"
+            @click="goBack"
+          >
+          </span>
+          <span
+            style="font-size: 1.2rem; color: #505050"
+            v-html="tituloCalendario"
+          >
+          </span>
         </div>
+        <!--AQUI-->
+        <img
+        
+          :src="logo"
+          spinner-color="#9654ff"
+          class="img-salas"
+        />
+        
       </div>
+
       <!-- CALENDÁRIO -->
       <div class="full-width" v-if="!inForms">
         <div class="row justify-center items-center">
           <div class="col-12 row justify-center items-center">
             <!-- BTN NAVEGAÇÃO -->
+            <div
+              v-if="
+                imovel.opcoesDeCredito.descritivo &&
+                imovel.opcoesDeCredito.descritivo.length > 0
+              "
+            >
+              <div class="descritivo">
+                <div class="descritivo-title">
+                  <p>Descritivo do imóvel:</p>
+                </div>
+
+                <div
+                  v-for="descritivo in imovel.opcoesDeCredito.descritivo"
+                  :key="descritivo"
+                  class="q-py-xs"
+                >
+                  <li>
+                    <span class="descrt">
+                      {{ descritivo }}
+                    </span>
+                  </li>
+                </div>
+              </div>
+            </div>
             <div class="col-12">
               <navigation-bar
                 @today="onTodayMonth"
@@ -95,7 +139,11 @@
               class="row justify-center items-center full-width"
               style="font-size: 1rem"
             >
-              <span> {{ getMonth }} </span>
+              <span
+                style="color: #505050; font-size: 1.6rem; font-weight: bold"
+              >
+                {{ getMonth.toUpperCase() }}
+              </span>
             </div>
             <!-- NAVEGAÇÃO (MESES) VERSÃO MOBILE -->
             <div style="width: 80%" v-if="!$q.platform.is.desktop">
@@ -409,11 +457,9 @@
               class="row full-width justify-center q-mb-xs"
             >
               <q-btn
-                class="col-10"
+                class="col-10 red-button"
                 style="font-size: 0.7rem"
                 label="Escolher outro horário"
-                outline
-                color="primary"
                 @click="
                   inForms = false;
                   events.pop();
@@ -422,16 +468,13 @@
             </q-btn-group>
             <q-btn-group push flat unelevated class="full-width row">
               <q-btn
-                outline
                 label="Limpar"
                 type="reset"
-                color="secondary"
-                class="q-mr-xs col-6"
+                class="q-mr-xs col-6 red-button"
               />
               <q-btn
-                class="col-6 q-ml-xs"
+                class="col-6 q-ml-xs purple-button"
                 label="Próximo"
-                color="positive"
                 @click="nextStep()"
               />
             </q-btn-group>
@@ -551,47 +594,41 @@
           </div>
         </div>
         <!-- REVISÃO DOS DADOS -->
-        <div v-if="parte == 4" class="full-width flex flex-center">
-          <div class="column full-width" style="font-size: 1.2rem">
-            <div class="row">
-              <div class="col-5">Nome:</div>
-              <div class="col-7 text-bold">{{ user.name }}</div>
+        <div v-if="parte == 4" class="full-width flex flex-left">
+          <div class="full-width" style="font-size: 1.2rem">
+            <div class="row margin-bt">
+              <div class="col-3">Nome:</div>
+              <div class="col-9 text-bold">{{ getPrimeiroNome }} </div>
             </div>
-            <div class="row" v-if="isCoworking && user.empresa">
-              <div class="col-5">Empresa:</div>
-              <div class="col-7 text-bold">{{ user.empresa }}</div>
+            <div class="row margin-bt" v-if="isCoworking && user.empresa">
+              <div class="col-3">Empresa:</div>
+              <div class="col-9 text-bold">{{ user.empresa }} </div>
             </div>
-            <div class="row">
-              <div class="col-5">Telefone:</div>
-              <div class="col-7 text-bold">{{ user.phone }}</div>
+            <div class="row margin-bt">
+              <div class="col-3">Telefone:</div>
+              <div class="col-9 text-bold">{{ user.phone }} </div>
             </div>
-            <div class="row" v-if="utilizarEmail">
-              <div class="col-5">E-mail:</div>
+            <div class="row margin-bt" v-if="utilizarEmail">
+              <div class="col-3">E-mail:</div>
               <div
-                class="col-7 text-bold"
-                style="
-                  overflow-wrap: break-word;
-                  word-wrap: break-word;
-                  hyphens: auto;
-                  white-space: normal;
-                "
-              >
+                class="col-9 text-bold"
+                style=" overflow-wrap: break-word; word-wrap: break-word; hyphens: auto; white-space: normal;">
                 {{ user.email }}
               </div>
             </div>
-            <div class="row" v-if="utilizarCPF">
-              <div class="col-5">CPF:</div>
-              <div class="col-7 text-bold">{{ user.cpf }}</div>
+            <div class="row margin-bt" v-if="utilizarCPF">
+              <div class="col-3">CPF:</div>
+              <div class="col-9-shrink text-bold">{{ user.cpf }}</div>
             </div>
-            <div class="row">
-              <div class="col-5">Horário:</div>
-              <div class="col-7 text-bold">{{ parseData }}</div>
+            <div class="row margin-bt">
+              <div class="col-3">Data:</div>
+              <div class="col text-bold">{{ parseData }}</div>
             </div>
 
-            <div class="row" v-if="getEndereco">
-              <div class="col-5">Local:</div>
+            <div class="row margin-bt" v-if="getEndereco">
+              <div class="col-3">Local:</div>
 
-              <div class="col-7 text-bold" v-html="getEnderecoHtml"></div>
+              <div class="col-9 text-bold" v-html="getEnderecoHtml"></div>
             </div>
             <div v-if="necessitaPagamento">
               <div class="row">
@@ -649,6 +686,15 @@
               .
             </span>
           </div>
+          <div class="text-h8 q-mt-md text-justify">
+            <q-checkbox v-model="user.use" />
+            <span>
+              Declaro que li e concordo com os
+              <a @click="termosDeUso" class="fakelink">
+                termos de utilização da sala</a
+              >.
+            </span>
+          </div>
           <q-btn-group push flat unelevated class="full-width row q-my-md">
             <q-btn
               outline
@@ -689,30 +735,13 @@
           <div class="cho-container"></div>
         </div>
       </q-form>
-      <q-footer
-        class="full-width fixed-bottom q-py-xs flex justify-center bg-grey-3"
-        elevated
-      >
-        <q-btn
-          style="max-width: 200px"
-          class="full-width"
-          outline
-          rounded
-          push
-          no-caps
-          color="primary"
-          icon="home"
-          label="Início"
-          @click="telaInicial()"
-        />
-      </q-footer>
     </div>
   </q-page>
 </template>
 
 <script>
 import { defineComponent } from "vue";
-import { Loading, Notify } from "quasar";
+import { Loading, Notify, } from "quasar";
 import * as moment from "moment";
 import { QCalendarDay } from "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.esm.js";
 import { QCalendarMonth } from "@quasar/quasar-ui-qcalendar/dist/QCalendarMonth.esm.js";
@@ -730,6 +759,7 @@ import "@quasar/quasar-ui-qcalendar/dist/QCalendarVariables.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarTransitions.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
 import { Dialog } from "quasar";
+import StyleBloco from "src/components/styleBloco.vue";
 
 export default defineComponent({
   name: "PageIndex",
@@ -737,9 +767,12 @@ export default defineComponent({
     "q-calendar": QCalendarDay,
     "navigation-bar": NavigatioBar,
     "q-calendar-month": QCalendarMonth,
+    "style-bloco": StyleBloco,
   },
   data() {
     return {
+      contador: 0,
+      idImovel: "",
       seMesmoDia: "",
       salasHotMilkValidarEntrada: false,
       emailAvisoAgendamento: "",
@@ -765,6 +798,7 @@ export default defineComponent({
         cpf: "",
         email: "",
         terms: false,
+        use: false,
         hasDocs: false,
       },
       newUser: true,
@@ -792,7 +826,16 @@ export default defineComponent({
       tempoMinimoAprovacao: 0,
       numeroVisitantesExternos: 0,
       redirecionarPagamento: true,
-      idEntidade: "",
+      entidadeUsuario: "",
+      imovel: {
+        opcoesDeCredito: {
+          descritivo: [],
+          tipoEvento: {},
+        },
+      },
+      maximoPessoas: "",
+      eventoOutros: [],
+      publicoExterno: false,
     };
   },
   computed: {
@@ -816,8 +859,20 @@ export default defineComponent({
       }
       return "";
     },
+
     tempoMinimoAprovacaoLabel() {
-      const aux = [
+      const aux = this.isHotmilk ? 
+      [
+        { value: 30, label: "30 minutos" },
+        { value: 45, label: "45 minutos" },
+        { value: 60, label: "1 hora" },
+        { value: 90, label: "1 hora e 30 min" },
+        { value: 120, label: "2 hora" },
+        { value: 180, label: "3 hora" },
+        { value: 240, label: "4 hora" },
+        { value: 300, label: "5 hora" },
+        { value: 360, label: "6 hora" },
+      ] : [
         { value: 15, label: "15 minutos" },
         { value: 30, label: "30 minutos" },
         { value: 45, label: "45 minutos" },
@@ -856,21 +911,37 @@ export default defineComponent({
       return resultado;
     },
     getEnderecoHtml() {
-      let resultado = "";
-      if (this.cliente && this.cliente.enderecoImovel) {
-        resultado = this.user.imovelRef + " - " + this.cliente.enderecoImovel;
-      } else if (this.user.imovelRef) {
-        resultado = this.user.imovelRef;
-      }
-      return resultado.replace("\n", "<br/>");
+      let resultado = this.user.imovelRef;
+      return resultado.replace("\n", "");
+    },
+
+    // pega o primeiro Nome
+    getPrimeiroNome(){
+      let res = this.user.name.split(" ");
+      return res[0];
+    },
+
+    botaoCalendario() {
+      return `<button
+      class="red-button"style="max-width: 120px; border: none; border-radius: 16px; cursor: pointer; height: 40px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      ;">
+          <span class="material-icons" style="scale: 2.8;">arrow_left</span>
+          voltar
+        </button>
+        <br>`;
     },
 
     tituloCalendario() {
+      let ref = this.user.imovelRef;
       return !this.isCoworking
-        ? "Clique no melhor <strong>dia e hora</strong> para visitar o imóvel " +
-            this.user.imovelRef +
-            "."
-        : `Agende o melhor <strong>dia e hora</strong> para utilizar ${this.user.imovelRef}`;
+        ? "Agende o melhor  dia<br> e hora para utilizar:<br> <strong> <p style='font-size: 1.8rem; margin-bottom: 16px;'>" +
+            ref +
+            ". </strong> </p>"
+        : `
+        <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px;" >Agende o melhor<br>dia e hora para utilizar:<br></p>
+          <p style="line-height: 0px;margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
     },
     isHotmilk() {
       return (
@@ -1016,8 +1087,13 @@ export default defineComponent({
             this.login.user.fotoFrente &&
             this.login.user.fotoAtras,
           terms: false,
+          use: false,
         };
+        this.maximoPessoas =
+          this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
+      } else {
+        this.$router.push("/login");
       }
       const params = this.getParams;
       if (params && params.entidadeId && params.imovelRef) {
@@ -1066,11 +1142,35 @@ export default defineComponent({
     if (this.semImovel) this.$router.push("/hotmilk");
   },
   methods: {
+    //verificar créditos retorna false se não tiver créditos
+    verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
+      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
+        Dialog.create({
+          title: "Aviso",
+          //link ainda não implemenado
+          message:
+            "<p>Você não possui créditos suficientes</p>" +
+            "<a href='#'> Clique aqui para solicitar mais créditos</a>",
+          html: true,
+          ok: {
+            label: "ok",
+            color: "positive",
+          },
+        }).onOk(() => {});
+        return false;
+      }
+      return true;
+    },
+
     async telaInicial() {
       await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
       await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
       this.semImovel = true;
       this.$router.push(`/${this.routeCoworking}`);
+    },
+
+    goBack() {
+      this.$router.go(-2);
     },
     async logout(force) {
       if (force) {
@@ -1083,7 +1183,14 @@ export default defineComponent({
           key: "setLogin",
           value: [],
         });
+
+        this.$store.dispatch("setarDados", {
+          key: "setEstadoInicial",
+          value: true,
+        });
+
         this.parte = 1;
+        this.$router.go(-2);
         return;
       }
       Dialog.create({
@@ -1162,7 +1269,10 @@ export default defineComponent({
       console.log("onMoved", JSON.stringify(data));
     },
     async nextStep() {
-      if (!this.$refs.forms.validate()) return;
+      if (!this.$refs.forms.validate()) {
+        console.log("cai aqui");
+        return;
+      }
       const nome = this.isCoworking
         ? this.user.name + " - " + this.user.empresa
         : this.user.name;
@@ -1196,9 +1306,14 @@ export default defineComponent({
         }
       }
       this.montarQrcode();
+      console.log("montar qrcode");
+      console.log(this.utilizarDocumentos, this.user.hasDocs);
+
       this.utilizarDocumentos && !this.user.hasDocs
         ? (this.parte += 1)
         : (this.parte += 2);
+
+      console.log("Parte:", this.parte);
     },
     badgeClasses(event, type) {
       const isHeader = type === "header";
@@ -1227,59 +1342,124 @@ export default defineComponent({
       }
       return events;
     },
-    onTimeClick({ event, scope }) {
-      let hora = scope.timestamp.hour;
-      let minutos = scope.timestamp.minute;
-      const dia = scope.timestamp.day;
-      const now = moment();
 
-      const now_vector = now.format("DD HH mm").split(" ");
-      const minutes_base_ref = now
-        .subtract(this.timeStepMin, "minutes")
-        .format("mm");
-      if (scope.timestamp.past) {
-        if (
-          !(
-            dia == parseInt(now_vector[0]) &&
-            hora == parseInt(now_vector[1]) &&
-            minutos < parseInt(now_vector[2]) &&
-            minutos > parseInt(minutes_base_ref)
-          )
-        ) {
-          Dialog.create({
-            title:
-              "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-            message:
-              "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
-            html: true,
-            ok: "Ok",
-          });
-          return;
-        }
-      }
-      let diaFuturo = parseInt(now[0]) + this.liberarAgendamento;
-      if (this.liberarAgendamento > -1 && diaFuturo < dia) {
+    qualEvento(informacao, minutos, hora, scope) {
+        let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1)
         Dialog.create({
-          title:
-            "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-          message:
-            "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
-          html: true,
-          ok: "Ok",
+          title: informacaoM,
+          message:`
+                    <div style="margin-bottom: 10px;">
+                      <textarea name="textarea" style="width:100%;height:150px; border: none; background-color: lightgrey;" id="texto" placeholder="Descreva aqui"></textarea>
+                    </div>
+                    <div>
+                      <input type="checkbox" id="checkbox"/>
+                      <label for="checkbox">Públoco externo</label>
+                    </div>`,
+        html : true,
+          cancel: true,
+          persistent: true,
+        }).onOk((data) => {
+          let texto = document.getElementById("texto").value
+          this.publicoExterno = document.getElementById("checkbox").checked
+          this.eventoOutros = { label: informacao, value: texto };
+          this.escolherHorario(minutos, hora, scope);
+      });
+      if (this.eventoOutros.length > 0) this.eventoOutros = [];
+    },
+    quantasPessoas() {
+      Dialog.create({
+        title:
+          '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
+        message: `
+              <span>
+                Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
+                Insira 0 (zero) caso não haja participantes externos.
+              </span>
+            `,
+        prompt: {
+          model: 0,
+          type: "number",
+        },
+        ok: {
+          label: "Continuar",
+          color: "positive",
+          flat: true,
+        },
+        cancel: {
+          label: "Escolher outro horário",
+          color: "primary",
+          flat: true,
+        },
+        html: true,
+      })
+        .onOk((res) => {
+          Loading.show();
+          setTimeout(() => {
+            if (res > this.maximoPessoas + 1) {
+              Notify.create({
+                message: "Mais pessoas que a capacidade da sala",
+                type: "warning",
+              });
+            }
+            this.inForms = true;
+            if (res > this.$store.imovelAgeda) {
+              this.numeroVisitantesExternos = res;
+            }
+
+            if (this.login && this.login.id && this.login.user) {
+              this.entidadeUsuario = this.login.user.entidade.id;
+              if (
+                !this.utilizarEmail &&
+                !this.utilizarDocumentos &&
+                !this.utilizarCPF &&
+                (this.isCoworking
+                  ? this.user.empresa && this.user.empresa != ""
+                  : true)
+              )
+                this.parte = 4;
+              else this.parte = 2;
+            }
+            Loading.hide();
+          }, 1500);
+        })
+        .onCancel(() => {
+          this.events.pop();
         });
-        return;
+    },
+
+    async escolherHorario(minutos, hora, scope) {
+      //aqui começa a parte de escolher horário
+      let horasMensaisDisponiveis = 0;
+      let horasExtras = 0;
+      let consumoDeCreditos = 1;
+
+      if (this.entidadeUsuario) {
+        let request = {
+          url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
+          method: "get",
+        };
+        const response = await this.executeMethod(request, false);
+
+
+        horasMensaisDisponiveis = response.data.horasMensaisDisponiveis;
+        horasExtras = response.data.horasExtras;
+        consumoDeCreditos = response.data.consumoCreditos;
       }
+
       if (this.timeStepMin == 15) {
         if (minutos > 45) minutos = 60;
         else if (minutos > 30) minutos = 45;
         else if (minutos > 15) minutos = 30;
         else minutos = 15;
       }
+
       if (this.timeStepMin == 30) {
         if (minutos > 30) minutos = 60;
         else minutos = 30;
       }
+
       if (this.timeStepMin == 60) minutos = 60;
+
       const horario =
         hora.toString() +
         ":" +
@@ -1287,9 +1467,21 @@ export default defineComponent({
           ? "00"
           : minutos - this.timeStepMin
         ).toString();
+
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const options = [
+      const options = this.isHotmilk ? 
+      [
+        { label: "45 minutos", value: "45" },
+        { label: "1 hora", value: "60" },
+        { label: "1:30 hora", value: "90" },
+        { label: "2 horas", value: "120" },
+        { label: "2:30 horas", value: "150" },
+        { label: "3 horas", value: "180" },
+        { label: "4 horas", value: "240" },
+        { label: "5 horas", value: "300" },
+        { label: "6 horas", value: "360" },
+      ]        : [
         { label: "30 minutos", value: "30" },
         { label: "45 minutos", value: "45" },
         { label: "1 hora", value: "60" },
@@ -1301,39 +1493,77 @@ export default defineComponent({
         { label: "5 horas", value: "300" },
         { label: "6 horas", value: "360" },
       ];
+
       const inicial = options.find((item) => {
         return item.value == this.timeStepMin;
       });
-      const itens = inicial ? [] : [{ label: "15 minutos", value: "15" }];
+
+      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "30" }] : [{ label: "15 minutos", value: "15" }];
+
       const filter = options.filter((item) => {
         return parseInt(item.value) <= this.tempoMaximo;
       });
       const date = scope.timestamp.date;
+
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
       ).getTime();
+
       for (const opt of filter) {
         const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
         const ms = parseInt(opt.value) * 60 * 1000;
+
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
         });
+
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
+
           if (eventFilter.timestampInicial >= dateTimeFinal && inteiro)
             itens.push(opt);
         } else if (inteiro) itens.push(opt);
       }
+
+      if (!consumoDeCreditos) consumoDeCreditos = 1;
+      itens.forEach((element) => {
+        let value = element.label.split(" ")[0];
+        const time = element.label.split(" ")[1];
+        if (time == "hora" || time == "horas") {
+          if (value.charAt(1) == ":") {
+            value.split(":");
+            value = value[0] * 60 + 30;
+
+            element.label = `${element.label} (${
+              Number(value) * Number(consumoDeCreditos)
+            } créditos serão consumidos. )`;
+          } else {
+            value = value * 60;
+
+            element.label = `${element.label} (${
+              Number(value) * Number(consumoDeCreditos)
+            } créditos serão consumidos. )`;
+          }
+        } else {
+          element.label = `${element.label} (${
+            Number(value) * Number(consumoDeCreditos)
+          } créditos serão consumidos. )`;
+        }
+      });
+
       Dialog.create({
-        title: `<span class='text-primary text-bold'>Agendamento</span>`,
+        title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
         message: `<span class='text-black' style='font-size: 1rem'>
-            Selecione a duração da sua utilização:
+            <center>Selecione a duração da sua utilização</center>
+            <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>${
+              horasMensaisDisponiveis + horasExtras
+            }</strong></p>
           </span>
           ${
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
               ? `<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel} os agendamentos estão sugeitos a aprovação. </span>`
               : !this.aprovarVisita
-              ? "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à serem aprovados. </span>"
+              ? "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>"
               : ""
           }
           `,
@@ -1354,6 +1584,16 @@ export default defineComponent({
         html: true,
         persistent: true,
       }).onOk((data) => {
+        if (
+          !this.verificarCreditos(
+            horasMensaisDisponiveis,
+            horasExtras,
+            parseInt(data),
+            consumoDeCreditos
+          )
+        ) {
+          return;
+        }
         const visita = {
           title: "Horário Selecionado",
           date: scope.timestamp.date,
@@ -1371,55 +1611,7 @@ export default defineComponent({
         this.montarQrcode();
 
         if (this.habilitarPublicoExterno) {
-          Dialog.create({
-            title:
-              '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
-            message: `
-              <span>
-                Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
-                Insira 0 (zero) caso não haja participantes externos.
-              </span>
-            `,
-            prompt: {
-              model: 0,
-              type: "number",
-            },
-            ok: {
-              label: "Continuar",
-              color: "positive",
-              flat: true,
-            },
-            cancel: {
-              label: "Escolher outro horário",
-              color: "primary",
-              flat: true,
-            },
-            html: true,
-          })
-            .onOk((res) => {
-              Loading.show();
-              setTimeout(() => {
-                this.inForms = true;
-                this.numeroVisitantesExternos = res;
-                if (this.login && this.login.id && this.login.user) {
-                  this.idEntidade = this.login.user.entidade.id;
-                  if (
-                    !this.utilizarEmail &&
-                    !this.utilizarDocumentos &&
-                    !this.utilizarCPF &&
-                    (this.isCoworking
-                      ? this.user.empresa && this.user.empresa != ""
-                      : true)
-                  )
-                    this.parte = 4;
-                  else this.parte = 2;
-                }
-                Loading.hide();
-              }, 1500);
-            })
-            .onCancel(() => {
-              this.events.pop();
-            });
+          this.quantasPessoas();
         } else {
           Loading.show();
           setTimeout(() => {
@@ -1437,6 +1629,100 @@ export default defineComponent({
           }, 1500);
         }
       });
+    },
+    //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
+    async onTimeClick({ event, scope }) {
+      let hora = scope.timestamp.hour;
+      let minutos = scope.timestamp.minute;
+      const dia = moment(scope.timestamp.date);
+      const now = moment();
+
+      this.entidadeUsuario = this.getLogin.user.entidadeId;
+
+      if (this.contador == 0) {
+        let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
+        const trueKeys = [];
+        for (const key in obj) {
+          if (obj[key]) {
+            let keyLabel = key.toString();
+            keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
+            if (keyLabel == "Reuniao") keyLabel = "Reunião";
+            trueKeys.push({ label: keyLabel, value: `${key}` });
+          }
+        }
+
+        //verifica se o horário esta certo para criar visita
+        const now_vector = now.format("MM DD HH mm").split(" ");
+        const minutes_base_ref = now
+          .subtract(this.timeStepMin, "minutes")
+          .format("mm");
+        if (scope.timestamp.past) {
+          if (
+            !(
+              dia == parseInt(now_vector[1]) &&
+              hora == parseInt(now_vector[2]) &&
+              minutos < parseInt(now_vector[3]) &&
+              minutos > parseInt(minutes_base_ref)
+            )
+          ) {
+            Dialog.create({
+              title:
+                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+              message:
+                "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
+              html: true,
+              ok: "Ok",
+            });
+            return;
+          }
+        }
+
+        let diaFuturo = now.add(this.liberarAgendamento, "day");
+
+        if (this.liberarAgendamento > -1 && dia > diaFuturo) {
+          Dialog.create({
+            title:
+              "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+            message:
+              "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
+            html: true,
+            ok: "Ok",
+          });
+          return;
+        }
+        //tipo de evento - outros chama outra modal que pede o que é
+        await new Promise((resolve, reject) => {
+          Dialog.create({
+            title: "Tipo de evento",
+            message: "Escolha o tipo de evento:",
+            options: {
+              type: "radio",
+              model: "",
+              items: trueKeys,
+            },
+            cancel: true,
+            persistent: true,
+          })
+            .onOk((data) => {
+              const filtro = ["outros", "evento"];
+              if (filtro.includes(data)) {
+                this.qualEvento(data, minutos, hora, scope);
+                
+              } else {
+                this.eventoOutros.push(data);
+                this.escolherHorario(minutos, hora, scope);
+              }
+              resolve();
+            })
+            .onCancel(() => {
+              this.contador = 0;
+              reject();
+            })
+            .onDismiss(() => {
+              reject();
+            });
+        });
+      }
     },
     filtraValor(valorDaSala) {
       if (valorDaSala) {
@@ -1464,6 +1750,7 @@ export default defineComponent({
       }
       return filtro;
     },
+    //não existe nescessita pagamento - Verficar se é pra tirar
     async onSubmit() {
       if (this.necessitaPagamento) {
         this.checkoutPagamento();
@@ -1510,6 +1797,13 @@ export default defineComponent({
         });
         return;
       }
+      if (!this.user.use) {
+        Notify.create({
+          message: "Para prosseguir, aceite os termos de utilização da sala",
+          type: "warning",
+        });
+        return;
+      }
       Loading.show({ message: "Gerando a visita..." });
       this.user.numeroVisitantesExternos = parseInt(
         this.numeroVisitantesExternos
@@ -1531,6 +1825,10 @@ export default defineComponent({
         user.emailAvisoAgendamento = this.emailAvisoAgendamento;
       }
 
+      if (this.eventoOutros) {
+        user.eventoOutros = this.eventoOutros;
+      }
+
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
@@ -1540,6 +1838,7 @@ export default defineComponent({
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
       if (!this.user.hasDocs) {
+
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
@@ -1566,12 +1865,11 @@ export default defineComponent({
         request.headers = { "Content-Type": "multipart/form-data" };
         request.data = formData;
       }
-
       const response = await this.executeMethod(request, false);
       Loading.hide();
+
       if (response && response.status == 200) {
         const message = response.data.text;
-
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
@@ -1661,8 +1959,6 @@ export default defineComponent({
             15),
       };
 
-      console.log(data);
-
       let request = {
         url: "Entidades/checkoutPagamento",
         method: "post",
@@ -1670,14 +1966,13 @@ export default defineComponent({
       };
 
       const response = await this.executeMethod(request, false);
-      this.user.idEntidade = this.idEntidade;
+      this.user.entidadeUsuario = this.entidadeUsuario;
+
       this.$store.dispatch("setarDados", {
         key: "setConvite",
         value: this.user,
       });
 
-      //const mp = new MercadoPago("TEST-948ecfba-0eda-4100-8f8c-bb4ef5e20c12", {
-      console.log(this.chaveAgendamento);
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
@@ -1763,6 +2058,8 @@ export default defineComponent({
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
 
+            this.idImovel = response.data.idImovel;
+            this.imovel = response.data.imovel;
             this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
@@ -1771,8 +2068,6 @@ export default defineComponent({
             response.data.entidade.preferenciaVisita.necessitaAprovacao
               ? (this.necessitaAprovacao = true)
               : (this.necessitaAprovacao = false);
-
-            console.log(response.data);
 
             response.data.entidade.preferenciaVisita.necessitaPagamento
               ? (this.necessitaPagamento = true)
@@ -1855,7 +2150,8 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            (this.events = response.data.horarios), this.formatData();
+            this.events = response.data.horarios;
+            this.formatData();
           } else {
             Notify.create({
               message:
@@ -1911,8 +2207,8 @@ export default defineComponent({
               timestampInicial: horario.timestampInicial,
             });
           }
-          this.events = optionsOff;
         }
+        this.events = optionsOff;
       }
     },
     async sendCode() {
@@ -2000,6 +2296,7 @@ export default defineComponent({
               "Não foi possível cadastrar o Usuário. Por favor, tente novamente.",
             type: "warning",
           });
+          inForms = false;
           return;
         } else if (response.status == 200) this.newUser = false;
       }
@@ -2029,7 +2326,8 @@ export default defineComponent({
           response.data.user.fotoAtras &&
           response.data.user.fotoSelfie;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
-        this.parte += 1;
+        if (this.user.validadeInicial) this.parte += 1;
+        else this.inForms = false;
         if (!this.utilizarEmail && !this.utilizarDocumentos) this.nextStep();
       } else {
         Notify.create({
@@ -2067,8 +2365,8 @@ export default defineComponent({
         formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
 
-        // request.headers = { "Content-Type": "multipart/form-data" };
-        // request.data = formData;
+        request.headers = { "Content-Type": "multipart/form-data" };
+        request.data = formData;
       }
 
       return user;
@@ -2094,6 +2392,7 @@ export default defineComponent({
           return "";
       }
     },
+
     setHoliday(y) {
       function easterDay(y) {
         var c = Math.floor(y / 100);
@@ -2172,12 +2471,27 @@ export default defineComponent({
         { m: natal, dia: "Natal", d: natal.format("DD/MM/YYYY") },
       ];
     },
+
     getHoliday(date) {
       date = moment(date).format("DD/MM/YYYY");
       const filter = this.holidays.filter((holiday) => {
         return holiday.d == date;
       });
       return filter;
+    },
+
+    termosDeUso() {
+      Dialog.create({
+        title: "Termos de uso da sala",
+        message:
+          "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.",
+        html: true,
+        fullWidth: true,
+        ok: {
+          label: "Ok",
+          color: "positive",
+        },
+      });
     },
   },
 });
@@ -2198,6 +2512,55 @@ export default defineComponent({
   top: 20px;
 }
 
+.descritivo {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  width: 400px;
+  max-height: 130px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  color: #505050;
+  justify-content: center;
+}
+
+.descritivo-title {
+  width: 100%;
+  padding-top: 4px;
+  padding-bottom: -4px;
+  height: 40px;
+  text-align: center;
+  align-items: center;
+}
+
+.descritivo-title > p {
+  margin: 0;
+}
+.descritivo > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.new-div {
+  display: flex;
+  justify-content: center;
+}
+.descritivo > div > li {
+  padding-left: 10px;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.descrt {
+  position: relative;
+  left: -10px;
+}
 .title-modal {
   color: #e86628;
 }
@@ -2228,11 +2591,41 @@ export default defineComponent({
   align-items: center;
   height: 100%;
 }
+.fakelink {
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
+}
 
 .bar {
   height: 40px;
   width: 2px;
   margin: 5px;
   background-color: black;
+}
+.margin-bt{
+  margin-bottom: 10px;
+}
+@media (max-width: 520px) {
+  .img-salas {
+    width: 100vw;
+  }
+}
+.img-salas {
+    margin-top: 15px;
+    width: 100%;
+    height: 20vh;
+    position: center;
+    object-fit: contain;
+  }
+@font-face {
+  font-family: 'igualfina';
+  src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
+  font-style: normal;
+}
+@font-face {
+  font-family: 'igualnegrito';
+  src: url('../../public/fonts/Igual/Igual-ExtraBold.otf') format('truetype');
+  font-style: normal;  
 }
 </style>

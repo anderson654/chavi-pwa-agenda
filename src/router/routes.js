@@ -25,10 +25,10 @@ const routes = [
     children: [{ path: "", component: () => import("pages/Checkoutpage.vue") }],
   },
 
-  // {
-  //   path: "/dormakaba",
-  //   component: () => import("pages/Dormakaba.vue"),
-  // },
+  {
+    path: "/dormakaba",
+    component: () => import("pages/Dormakaba.vue"),
+  },
 
   {
     path: "/agora",
@@ -37,6 +37,10 @@ const routes = [
   {
     path: "/mindhub",
     component: () => import("pages/Mindhub.vue"),
+  },
+  {
+    path: "/login",
+    component: () => import("pages/Login.vue"),
   },
   {
     path: "/baggio",

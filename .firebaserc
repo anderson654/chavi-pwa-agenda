@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "wide-gecko-270115"
+  },
+  "targets": {
+    "wide-gecko-270115": {
+      "hosting": {
+        "beta": [
+          "beta-agenda"
+        ]
+      }
+    }
+  }
+}

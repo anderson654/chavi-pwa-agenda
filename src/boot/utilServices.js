@@ -11,9 +11,13 @@ export default ({ app, router, store }) => {
       ...mapGetters({
         getParams: "getParams",
         getLogin: "getLogin",
+        getEstadoInicial: "getEstadoInicial",
       }),
     },
     methods: {
+      capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      },
       async executeMethod(data, b, excluirAuthorization) {
         let response;
         let errorMsg = "";
