@@ -1550,6 +1550,7 @@ export default defineComponent({
           return item.timestampInicial > dateTime;
         });
 
+
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
           if (eventFilter.timestampInicial >= dateTimeFinal && inteiro) {
