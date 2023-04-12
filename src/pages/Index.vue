@@ -1095,7 +1095,12 @@ export default defineComponent({
           this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
       } else {
-        if(this.isHotmilk)this.$router.push("/login");
+        if(this.isHotmilk){
+          this.$router.push("/login");
+        }else {
+          this.inForms = true
+          this.parte = 1
+        }
       }
       const params = this.getParams;
       if (params && params.entidadeId && params.imovelRef) {
