@@ -20,13 +20,11 @@
       <q-btn
         color="primary"
         style="width: 200px; min-width: 150px; height: 125px"
-        @click="$router.push('/hotmilk')"
+        @click="$router.push(`${routeCoworking}`)"
       >
         <q-img
           src="hotmilk.png"
-          style="
-            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-              brightness(96%) contrast(81%);
+          style="filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg) brightness(96%) contrast(81%);
           "
         />
       </q-btn>
@@ -1097,7 +1095,7 @@ export default defineComponent({
           this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
       } else {
-        this.$router.push("/login");
+        if(this.isHotmilk)this.$router.push("/login");
       }
       const params = this.getParams;
       if (params && params.entidadeId && params.imovelRef) {
