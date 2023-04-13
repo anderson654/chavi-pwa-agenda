@@ -20,13 +20,11 @@
       <q-btn
         color="primary"
         style="width: 200px; min-width: 150px; height: 125px"
-        @click="$router.push('/hotmilk')"
+        @click="$router.push(`${routeCoworking}`)"
       >
         <q-img
           src="hotmilk.png"
-          style="
-            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-              brightness(96%) contrast(81%);
+          style="filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg) brightness(96%) contrast(81%);
           "
         />
       </q-btn>
@@ -944,12 +942,16 @@ export default defineComponent({
           <p style="line-height: 0px;margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
     },
     isHotmilk() {
-      return (
-        this.cliente &&
-        this.cliente.nome &&
-        (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
-          this.cliente.nome.toString().toLowerCase() == "dormakaba")
-      );
+      return false
+//==============================================================================
+      //código comentado para iniibir a parte de créditos
+      // (
+      //   this.cliente &&
+      //   this.cliente.nome &&
+      //   (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
+      //     this.cliente.nome.toString().toLowerCase() == "dormakaba")
+      // );
+//===============================================================================
     },
     isAgora() {
       return this.cliente.nome == "Ágora Tech Park";
@@ -1149,7 +1151,7 @@ export default defineComponent({
   methods: {
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
-      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
+      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos && this.isHotmilk) {
         Dialog.create({
           title: "Aviso",
           //link ainda não implemenado
@@ -1574,9 +1576,6 @@ export default defineComponent({
         title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
         message: `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
-            <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>${
-              horasMensaisDisponiveis + horasExtras
-            }</strong></p>
           </span>
           ${
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
@@ -1609,7 +1608,7 @@ export default defineComponent({
             horasExtras,
             parseInt(data),
             consumoDeCreditos
-          )
+          ) && this.isHotmilk
         ) {
           return;
         }

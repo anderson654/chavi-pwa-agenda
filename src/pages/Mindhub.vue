@@ -101,9 +101,6 @@
                 "
               />
             </div>
-            <span class="text-h4 text-bold" style="color: teal">
-              FAE Business Schoo
-            </span>
           </div>
           <div
             v-if="true"
@@ -182,14 +179,9 @@ export default {
       andarSelecionado: undefined,
       blocoSelecionado: undefined,
       blocos: [
-        {
-          foto: "https://lh3.googleusercontent.com/p/AF1QipP8ztDKoqbh1I73351TvijI1B8PwBaHpnAJKACT=s680-w680-h510",
-          nome: "MOB",
-          andares: {},
-        },
-        {
-          foto: "https://lh3.googleusercontent.com/p/AF1QipPWu3yqxrg8rOIBY5X52V2cEUTvYoGT83TFOJc0=s680-w680-h510",
-          nome: "HUB",
+      {
+          foto: "https://media.gazetadopovo.com.br/2022/09/06141736/mindhub-capa-960x540.jpg",
+          nome: "FAE Business School",
           andares: {},
         },
       ],
@@ -201,16 +193,9 @@ export default {
   },
   computed: {
     imoveisFiltred() {
-      const filtered = this.imoveis.filter((imovel) => {
-        let imovelMob = imovel.nome.split(" ")[0];
-        if (this.blocoSelecionado.nome == "MOB") {
-          return imovelMob == "MOB";
-        } else {
-          return imovelMob != "MOB";
-        }
-      });
+      const imoveis = this.imoveis;
 
-      return filtered;
+      return imoveis
     },
   },
   methods: {
