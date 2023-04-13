@@ -1093,7 +1093,12 @@ export default defineComponent({
           this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
       } else {
-        this.$router.push("/login");
+        if(this.isHotmilk){
+          this.$router.push("/login");
+        }else{ 
+          this.inForms = true
+          this.parte = 1
+        }
       }
       const params = this.getParams;
       if (params && params.entidadeId && params.imovelRef) {
@@ -1139,7 +1144,7 @@ export default defineComponent({
       console.log("Erro ao carregar ", e);
       this.semImovel = true;
     }
-    if (this.semImovel) this.$router.push("/hotmilk");
+    if (this.semImovel) this.$router.push("/");
   },
   methods: {
     //verificar créditos retorna false se não tiver créditos

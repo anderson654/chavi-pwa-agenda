@@ -73,7 +73,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('https://agenda.chavi.com.br/baggio')"
+          @click="$router.push('/baggio')"
         />
       </div>
 
@@ -90,7 +90,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('https://agenda.chavi.com.br/mindhub')"
+          @click="$router.push('/mindhub')"
         />
       </div>
     </div>
