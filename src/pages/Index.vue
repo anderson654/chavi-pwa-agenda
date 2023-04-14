@@ -946,15 +946,14 @@ export default defineComponent({
 
 //===============================================================================
     isHotmilk() {
-      return false
-//==============================================================================
-      //código comentado para iniibir a parte de créditos
-      // (
-      //   this.cliente &&
-      //   this.cliente.nome &&
-      //   (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
-      //     this.cliente.nome.toString().toLowerCase() == "dormakaba")
-      // );
+      return  false
+           (
+        this.cliente &&
+        this.cliente.nome &&
+        (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
+          this.cliente.nome.toString().toLowerCase() == "dormakaba")
+      );
+
 //===============================================================================
     },
     isAgora() {
@@ -1075,6 +1074,7 @@ export default defineComponent({
       return week;
     },
     isUsoDeCreditos(){
+      return false
       if(this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras){
         return true
       }
