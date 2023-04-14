@@ -1159,9 +1159,6 @@ export default defineComponent({
       this.semImovel = true;
     }
     if (this.semImovel) this.$router.push("/");
-    if(this.isUsoDeCreditos){
-      this.usoDeCreditos = true
-    }
   },
   methods: {
     //verificar créditos retorna false se não tiver créditos
