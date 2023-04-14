@@ -946,14 +946,15 @@ export default defineComponent({
 
 //===============================================================================
     isHotmilk() {
-      return  false
-           (
+      return (
         this.cliente &&
         this.cliente.nome &&
         (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
           this.cliente.nome.toString().toLowerCase() == "dormakaba")
       );
-
+//==============================================================================
+      //código comentado para iniibir a parte de créditos
+      
 //===============================================================================
     },
     isAgora() {
@@ -1103,6 +1104,9 @@ export default defineComponent({
         this.maximoPessoas =
           this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
+        if(this.isUsoDeCreditos){
+          this.usoDeCreditos = true
+        }
       } else {
         if(this.isHotmilk){
           this.$router.push("/login");
@@ -1156,20 +1160,21 @@ export default defineComponent({
       this.semImovel = true;
     }
     if (this.semImovel) this.$router.push("/");
-    if(this.isUsoDeCreditos){
-      this.usoDeCreditos = true
-    }
   },
   methods: {
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
-      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos && this.isHotmilk) {
+      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
+        let message;
+        if(this.isHotmilk){
+          message = "<p>Você não possui créditos suficientes</p>" + "<a href='#'> Clique aqui para solicitar mais créditos</a>"
+        }else{
+          message = "<p>Você não possui créditos suficientes</p>"
+        }
         Dialog.create({
           title: "Aviso",
           //link ainda não implemenado
-          message:
-            "<p>Você não possui créditos suficientes</p>" +
-            "<a href='#'> Clique aqui para solicitar mais créditos</a>",
+          message:message,
           html: true,
           ok: {
             label: "ok",
@@ -1592,7 +1597,7 @@ export default defineComponent({
         
       });
       let message;
-      if(this.isHotmilk){
+      if(this.usoDeCreditos && consumoDeCreditos > 0){
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
             <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
@@ -1637,7 +1642,7 @@ export default defineComponent({
             horasExtras,
             Number(data),
             consumoDeCreditos) 
-            && this.isHotmilk) {
+            && this.usoDeCreditos) {
           return;
         }
         if(this.isHotmilk){
@@ -2377,6 +2382,9 @@ export default defineComponent({
         if (this.user.validadeInicial) this.parte += 1;
         else this.inForms = false;
         if (!this.utilizarEmail && !this.utilizarDocumentos) this.nextStep();
+        if(this.isUsoDeCreditos){
+          this.usoDeCreditos = true
+        }
       } else {
         Notify.create({
           message: "Número de Telefone inválido ou Código SMS incorreto.",
