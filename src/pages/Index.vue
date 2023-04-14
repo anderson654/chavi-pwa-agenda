@@ -1075,6 +1075,7 @@ export default defineComponent({
       return week;
     },
     isUsoDeCreditos(){
+      return false
       if(this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras){
         return true
       }
