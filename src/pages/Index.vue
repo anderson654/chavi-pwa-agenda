@@ -1075,7 +1075,6 @@ export default defineComponent({
       return week;
     },
     isUsoDeCreditos(){
-      return false
       if(this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras){
         return true
       }
@@ -1160,6 +1159,9 @@ export default defineComponent({
       this.semImovel = true;
     }
     if (this.semImovel) this.$router.push("/");
+    if(this.isUsoDeCreditos){
+      this.usoDeCreditos = true
+    }
   },
   methods: {
     //verificar créditos retorna false se não tiver créditos
@@ -1530,7 +1532,7 @@ export default defineComponent({
       const filter = options.filter((item) => {
         if(this.isHotmilk){
           return Number(item.value) <= this.tempoMaximo/60;
-
+          
         }
         return Number(item.value) <= this.tempoMaximo;
       });
@@ -1549,7 +1551,6 @@ export default defineComponent({
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
         });
-
 
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
