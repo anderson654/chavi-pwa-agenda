@@ -2,10 +2,10 @@
   <div class="container-blocos">
     <div class="box-blocos">
       <span class="texto-1"
-        >BLOCO{{ blocoSelecionado ? blocoSelecionado.num : 0 }}</span
+        ><strong>BLOCO{{ blocoSelecionado ? blocoSelecionado.num : 0 }}</strong></span
       >
       <span class="texto-2"
-        >BLOCO{{ blocoSelecionado ? blocoSelecionado.num : 0 }}</span
+        ><strong>BLOCO{{ blocoSelecionado ? blocoSelecionado.num : 0 }}</strong></span
       >
     </div>
   </div>
@@ -25,8 +25,8 @@ export default {
   display: flex;
   justify-content: center;
   color: #505050;
-  font-family: sans-serif, "Helvetica Neue", "Lucida Grande", Arial;
   scale: 1.2;
+  margin-top:15px;
 }
 
 .box-blocos {
@@ -44,8 +44,8 @@ export default {
   background-color: #f0f0f0;
   background-image: linear-gradient(
     0deg,
-    rgba(240, 240, 240, 1) 23%,
-    rgba(150, 84, 255, 1) 100%
+    rgba(240, 240, 240, 1) 33%,
+    rgba(150, 84, 255, 1) 140%
   );
 
   background-size: 100%;
@@ -60,7 +60,7 @@ export default {
   font-size: 3rem;
   position: absolute;
   color: #505050;
-  transform: scale(1.3, 1.2);
+  transform: scale(1.3, 1.2) translateX(-6px);
   left: 110px;
   top: 8px;
 }

@@ -3,16 +3,14 @@
     <div class="q-pa-md q-gutter-sm row">
       <q-btn
         no-caps
-        class="purple-button"
-        style="max-width: 128px; border-radius: 16px"
+        class="purple-button navigation-button"        
         @click="$emit('prev')"
       >
         anterior
       </q-btn>
       <q-btn
         no-caps
-        class="purple-button"
-        style="max-width: 128px; border-radius: 16px"
+        class="purple-button navigation-button"
         @click="$emit('today')"
       >
         hoje
@@ -20,8 +18,7 @@
 
       <q-btn
         no-caps
-        class="purple-button"
-        style="max-width: 128px; border-radius: 16px"
+        class="purple-button navigation-button"
         @click="$emit('next')"
       >
         próximo
@@ -36,4 +33,15 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+@media (max-width: 580px) {
+  .navigation-button{
+    flex-direction: column;
+    align-items: center;
+  }
+}
+.navigation-button{
+  max-width: 150px;
+  border-radius: 16px;
+}
+</style>

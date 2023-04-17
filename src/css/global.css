@@ -28,14 +28,15 @@ body {
     rgba(194, 155, 255, 1) 100%
   );
   color: white;
-  height: 50px;
+  height: 35px;
   width: 250px;
   font-size: 1.2rem;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 520px) {
   .purple-button {
-    width: 130px;
+    width: 120px;
+    font-size: 1.2rem;
   }
 }
 .red-button {
@@ -47,6 +48,6 @@ body {
   );
   color: white;
   height: 30px;
-  width: 220px !important;
+  width: 300px !important;
   font-size: 1.2rem;
 }

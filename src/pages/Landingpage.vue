@@ -73,7 +73,24 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('https://agenda.chavi.com.br/baggio')"
+          @click="$router.push('/baggio')"
+        />
+      </div>
+
+      <div class="mindhub">
+        <q-img
+          src="logo aplicação.png"
+          fit="contain"
+          height="100px"
+          width="150px"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+          class="q-my-sm"
+          @click="$router.push('/mindhub')"
         />
       </div>
     </div>
@@ -161,6 +178,10 @@ export default {
 
 .baggio {
   border-left: #223764 3px solid;
+}
+
+.mindhub {
+  border-left: #7c4ac7 3px solid;
 }
 
 @media (max-width: 600px) {

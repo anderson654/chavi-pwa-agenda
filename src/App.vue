@@ -1,5 +1,5 @@
 <template>
-  <router-view class="poppins-font" />
+  <router-view class="igual-font" />
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -31,6 +31,13 @@ export default defineComponent({
 @font-face {
   font-family: poppins;
   src: url("../public/fonts/Poppins/Poppins-Medium.ttf");
+}
+@font-face {
+  font-family: igual;
+  src: url("../public/fonts/Igual/Igual-Medium.otf");
+}
+.igual-font{
+  font-family: "igual";
 }
 .poppins-font {
   font-family: "poppins";

@@ -1,13 +1,13 @@
 <template>
-  <div v-if="isHotmilk || this.isAgora">
+  <div>
     <q-btn
       style="font-size: 0.7rem"
-      icon="home"
+      icon="logout"
       flat
       dense
       color="secondary"
       class="home-icon"
-      @click="$router.push(`${routeCoworking}`)"
+      @click="logout()"
     />
   </div>
   <q-page class="flex-center column">
@@ -20,13 +20,11 @@
       <q-btn
         color="primary"
         style="width: 200px; min-width: 150px; height: 125px"
-        @click="$router.push('/hotmilk')"
+        @click="$router.push(`${routeCoworking}`)"
       >
         <q-img
           src="hotmilk.png"
-          style="
-            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-              brightness(96%) contrast(81%);
+          style="filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg) brightness(96%) contrast(81%);
           "
         />
       </q-btn>
@@ -89,20 +87,14 @@
           >
           </span>
         </div>
-
+        <!--AQUI-->
         <img
+
           :src="logo"
           spinner-color="#9654ff"
           class="img-salas"
-          style="
-            width: 100vw;
-            height: 60vh;
-            position: absolute;
-            left: 0;
-            -o-object-fit: contain;
-          "
         />
-        <div class="img-salas" style="width: 100vw; height: 60vh"></div>
+
       </div>
 
       <!-- CALENDÁRIO -->
@@ -766,6 +758,7 @@ import "@quasar/quasar-ui-qcalendar/dist/QCalendarTransitions.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
 import { Dialog } from "quasar";
 import StyleBloco from "src/components/styleBloco.vue";
+import { getLogin } from "src/store/module-example/getters";
 
 export default defineComponent({
   name: "PageIndex",
@@ -842,6 +835,7 @@ export default defineComponent({
       maximoPessoas: "",
       eventoOutros: [],
       publicoExterno: false,
+      usoDeCreditos: false,
     };
   },
   computed: {
@@ -867,10 +861,9 @@ export default defineComponent({
     },
 
     tempoMinimoAprovacaoLabel() {
-      const aux = this.isHotmilk ? 
+      const aux = this.isHotmilk ?
       [
         { value: 30, label: "30 minutos" },
-        { value: 45, label: "45 minutos" },
         { value: 60, label: "1 hora" },
         { value: 90, label: "1 hora e 30 min" },
         { value: 120, label: "2 hora" },
@@ -892,6 +885,9 @@ export default defineComponent({
       ];
 
       return aux.find((item) => {
+        if(this.isHotmilk){
+          return item.value == this.tempoMinimoAprovacao;
+        }
         return item.value == this.tempoMinimoAprovacao;
       }).label;
     },
@@ -942,12 +938,13 @@ export default defineComponent({
     tituloCalendario() {
       let ref = this.user.imovelRef;
       return !this.isCoworking
-        ? "Agende o melhor  dia<br> e hora para utilizar:<br> <strong> <p style='font-size: 1.8rem; margin-bottom: 16px;'>" +
-            ref +
-            ". </strong> </p>"
+        ? `Agende o melhor  dia<br> e hora para utilizar:<br> <strong> <p style='font-size: 1.8rem; margin-bottom: 16px;'> ${ref} . </strong> </p>`
         : `
-        Agende o melhor <strong>dia e hora</strong> para utilizar<br> <strong>${this.user.imovelRef}</strong> `;
+        <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px;" >Agende o melhor<br>dia e hora para utilizar:<br></p>
+          <p style="line-height: 0px;margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
     },
+
+//===============================================================================
     isHotmilk() {
       return (
         this.cliente &&
@@ -955,6 +952,10 @@ export default defineComponent({
         (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
           this.cliente.nome.toString().toLowerCase() == "dormakaba")
       );
+//==============================================================================
+      //código comentado para iniibir a parte de créditos
+
+//===============================================================================
     },
     isAgora() {
       return this.cliente.nome == "Ágora Tech Park";
@@ -1073,6 +1074,12 @@ export default defineComponent({
       }, 200);
       return week;
     },
+    isUsoDeCreditos(){
+      return false
+      if(this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras){
+        return true
+      }
+    }
   },
   mounted() {
     try {
@@ -1097,8 +1104,16 @@ export default defineComponent({
         this.maximoPessoas =
           this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
+        if(this.isUsoDeCreditos){
+          this.usoDeCreditos = true
+        }
       } else {
-        this.$router.push("/login");
+        if(this.isHotmilk){
+          this.$router.push("/login");
+        }else{
+          this.inForms = true
+          this.parte = 1
+        }
       }
       const params = this.getParams;
       if (params && params.entidadeId && params.imovelRef) {
@@ -1144,18 +1159,22 @@ export default defineComponent({
       console.log("Erro ao carregar ", e);
       this.semImovel = true;
     }
-    if (this.semImovel) this.$router.push("/hotmilk");
+    if (this.semImovel) this.$router.push("/");
   },
   methods: {
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
       if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
+        let message;
+        if(this.isHotmilk){
+          message = "<p>Você não possui créditos suficientes</p>" + "<a href='#'> Clique aqui para solicitar mais créditos</a>"
+        }else{
+          message = "<p>Você não possui créditos suficientes</p>"
+        }
         Dialog.create({
           title: "Aviso",
           //link ainda não implemenado
-          message:
-            "<p>Você não possui créditos suficientes</p>" +
-            "<a href='#'> Clique aqui para solicitar mais créditos</a>",
+          message:message,
           html: true,
           ok: {
             label: "ok",
@@ -1194,13 +1213,12 @@ export default defineComponent({
           value: true,
         });
 
-        this.parte = 1;
-        this.$router.go(-2);
         return;
       }
       Dialog.create({
         title: "Aviso",
-        message: "Você esta prestes a fazer logout. Você tem certeza?",
+        message: `<p>Retornar para a tela inicial?</p> <p>Você irá deslogar</p>`,
+        html:true,
         ok: {
           label: "Sim",
           color: "positive",
@@ -1220,6 +1238,8 @@ export default defineComponent({
           value: [],
         });
         this.parte = 1;
+        this.inForms = true;
+        this.$router.push("/");
       });
     },
     montarQrcode() {
@@ -1436,7 +1456,7 @@ export default defineComponent({
       //aqui começa a parte de escolher horário
       let horasMensaisDisponiveis = 0;
       let horasExtras = 0;
-      let consumoDeCreditos = 1;
+      let consumoDeCreditos = 0;
 
       if (this.entidadeUsuario) {
         let request = {
@@ -1446,10 +1466,11 @@ export default defineComponent({
         console.log("PIAZZETTA requst", request)
         const response = await this.executeMethod(request, false);
 
-
-        horasMensaisDisponiveis = response.data.horasMensaisDisponiveis;
-        horasExtras = response.data.horasExtras;
-        consumoDeCreditos = response.data.consumoCreditos;
+        if(response && response.status == 200){
+          horasMensaisDisponiveis = response.data.horasMensaisDisponiveis;
+          horasExtras = response.data.horasExtras;
+          consumoDeCreditos = response.data.consumoCreditos;
+        }
       }
 
       if (this.timeStepMin == 15) {
@@ -1476,17 +1497,16 @@ export default defineComponent({
 
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const options = this.isHotmilk ? 
+      const options = this.isHotmilk ?
       [
-        { label: "45 minutos", value: "45" },
-        { label: "1 hora", value: "60" },
-        { label: "1:30 hora", value: "90" },
-        { label: "2 horas", value: "120" },
-        { label: "2:30 horas", value: "150" },
-        { label: "3 horas", value: "180" },
-        { label: "4 horas", value: "240" },
-        { label: "5 horas", value: "300" },
-        { label: "6 horas", value: "360" },
+        { label: "1 hora", value: "1" },
+        { label: "1:30 hora", value: "1.5" },
+        { label: "2 horas", value: "2" },
+        { label: "2:30 horas", value: "2.5" },
+        { label: "3 horas", value: "3" },
+        { label: "4 horas", value: "4" },
+        { label: "5 horas", value: "5" },
+        { label: "6 horas", value: "6" },
       ]        : [
         { label: "30 minutos", value: "30" },
         { label: "45 minutos", value: "45" },
@@ -1504,20 +1524,27 @@ export default defineComponent({
         return item.value == this.timeStepMin;
       });
 
-      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "30" }] : [{ label: "15 minutos", value: "15" }];
+      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "0.5" }] : [{ label: "15 minutos", value: "15" }];
+
 
       const filter = options.filter((item) => {
-        return parseInt(item.value) <= this.tempoMaximo;
+        if(this.isHotmilk){
+          return Number(item.value) <= this.tempoMaximo/60;
+
+        }
+        return Number(item.value) <= this.tempoMaximo;
       });
+
+
       const date = scope.timestamp.date;
 
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
       ).getTime();
-
+      let multiplicaMs = 60 * 1000;
       for (const opt of filter) {
-        const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
-        const ms = parseInt(opt.value) * 60 * 1000;
+        const inteiro = this.isHotmilk ? Number(opt.value) % Number(this.timeStepMin/60) == 0 : Number(opt.value) % Number(this.timeStepMin) == 0
+        const ms = Number(opt.value) * multiplicaMs;
 
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
@@ -1525,46 +1552,59 @@ export default defineComponent({
 
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
-
-          if (eventFilter.timestampInicial >= dateTimeFinal && inteiro)
+          if (eventFilter.timestampInicial >= dateTimeFinal && inteiro) {
             itens.push(opt);
-        } else if (inteiro) itens.push(opt);
+          }
+        } else if (inteiro) {
+          itens.push(opt);
+        }
       }
 
-      if (!consumoDeCreditos) consumoDeCreditos = 1;
       itens.forEach((element) => {
-        let value = element.label.split(" ")[0];
+        if(this.usoDeCreditos && consumoDeCreditos > 0){
+          if(this.isHotmilk){
+            let value = element.value;
+            element.label = `${element.label} (Custo: ${
+              Number(value) * Number(consumoDeCreditos)
+              } créditos)`;
+        }else {
+          let value = element.label.split(" ")[0];
         const time = element.label.split(" ")[1];
         if (time == "hora" || time == "horas") {
           if (value.charAt(1) == ":") {
             value.split(":");
             value = value[0] * 60 + 30;
 
-            element.label = `${element.label} (${
+            element.label = `${element.label} (Custo: ${
               Number(value) * Number(consumoDeCreditos)
-            } créditos serão consumidos. )`;
+            } créditos)`;
           } else {
             value = value * 60;
 
-            element.label = `${element.label} (${
+            element.label = `${element.label} (Custo: ${
               Number(value) * Number(consumoDeCreditos)
-            } créditos serão consumidos. )`;
+            } créditos)`;
+          }
+            }else {
+             element.label = `${element.label} (Custo: ${
+                Number(value) * Number(consumoDeCreditos)
+              } créditos)`;
+            }
           }
         } else {
-          element.label = `${element.label} (${
-            Number(value) * Number(consumoDeCreditos)
-          } créditos serão consumidos. )`;
+          element.label = `${element.label}`
         }
+
+
       });
-      console.log("PIAZZETTA creditos", horasDisponiveis)
-      Dialog.create({
-        title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
-        message: `<span class='text-black' style='font-size: 1rem'>
+      let message;
+      if(this.usoDeCreditos && consumoDeCreditos > 0){
+        message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
-            <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>${
-              horasMensaisDisponiveis + horasExtras
-            }</strong></p>
-          </span>
+            <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
+              ${ horasMensaisDisponiveis + horasExtras }
+              </strong></p>
+            </span>
           ${
             this.tempoMinimoAprovacao != 0 && this.aprovarVisita
               ? `<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel} os agendamentos estão sugeitos a aprovação. </span>`
@@ -1572,7 +1612,15 @@ export default defineComponent({
               ? "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>"
               : ""
           }
-          `,
+          `
+      } else {
+        message = `<span class='text-black' style='font-size: 1rem'>
+            <center>Selecione a duração da sua utilização</center>
+          </span>`
+      }
+      Dialog.create({
+        title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
+        message: message,
         options: {
           type: "radio",
           model: this.duracao,
@@ -1590,21 +1638,22 @@ export default defineComponent({
         html: true,
         persistent: true,
       }).onOk((data) => {
-        if (
-          !this.verificarCreditos(
+        if (!this.verificarCreditos(
             horasMensaisDisponiveis,
             horasExtras,
-            parseInt(data),
-            consumoDeCreditos
-          )
-        ) {
+            Number(data),
+            consumoDeCreditos)
+            && this.usoDeCreditos) {
           return;
+        }
+        if(this.isHotmilk){
+          data = data *60
         }
         const visita = {
           title: "Horário Selecionado",
           date: scope.timestamp.date,
           time: horario,
-          duration: parseInt(data),
+          duration: Number(data),
           bgcolor: "green-10",
           textColor: "text-white",
         };
@@ -1613,7 +1662,7 @@ export default defineComponent({
           (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
         ).getTime();
         this.user.validadeInicial = validadeInicial;
-        this.user.validadeFinal = validadeInicial + parseInt(data) * 60000;
+        this.user.validadeFinal = validadeInicial + Number(data) * 60000;
         this.montarQrcode();
 
         if (this.habilitarPublicoExterno) {
@@ -1713,7 +1762,7 @@ export default defineComponent({
               const filtro = ["outros", "evento"];
               if (filtro.includes(data)) {
                 this.qualEvento(data, minutos, hora, scope);
-                
+
               } else {
                 this.eventoOutros.push(data);
                 this.escolherHorario(minutos, hora, scope);
@@ -1909,6 +1958,7 @@ export default defineComponent({
             window.open(
               `${process.env.VUE_APP_API_URL}/StorageContainers/ics/download/${ics}`,
               "_system"
+              ,
             );
             Dialog.create({
               title:
@@ -2156,7 +2206,7 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            this.events = response.data.horarios;
+            this.events = response.data.horarios;/////
             this.formatData();
           } else {
             Notify.create({
@@ -2180,32 +2230,49 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
+
           if (!horario.paraAprovar) {
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
               )
             );
-            const duracao = horario.intervalo / 60000;
-            const titleBusy = horario.usuario;
-            let formated = titleBusy.split(" ");
 
-            console.log(titleBusy, "tittle busy");
-            console.log(formated[formated.length - 1], "tittle busy")
-              ? `
+            let finalTemp = horario.timestampInicial + horario.intervalo
+
+            const final = parseTimestamp(
+              moment(parseInt(finalTemp)).format(
+                "YYYY-MM-DD HH:mm"
+              )
+            );
+
+            const duracao = horario.intervalo / 60000;
+
+            let titleBusy = "Ocupado";
+
+            if (horario.usuario){
+              titleBusy = `
                 <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
-                  <div class="full-width text-center">${
-                    horario.usuario.indexOf("-") == -1
-                      ? horario.usuario.trim()
-                      : `${horario.usuario.split("-")[0].trim()}<br/>${
-                          horario.usuario.split("-")[1]
-                            ? horario.usuario.split("-")[1].trim()
-                            : ""
-                        }`
-                  }</div>
-                </div>
-              `
-              : "Ocupado";
+                    <div class="full-width text-center">`;
+
+              if (horario.usuario.indexOf("-") == -1){
+                titleBusy += horario.usuario.trim();
+              }
+              else{
+                titleBusy += `${horario.usuario.split("-")[0].trim()}<br/>`
+
+                if(horario.usuario.split("-")[1]){
+                  titleBusy += horario.usuario.split("-")[1].trim();
+                }
+                else
+                {
+                  titleBusy += "";
+                }
+              }
+
+              titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
+            }
+
             optionsOff.push({
               title: horario.paraAprovar
                 ? "Pendente"
@@ -2340,6 +2407,9 @@ export default defineComponent({
         if (this.user.validadeInicial) this.parte += 1;
         else this.inForms = false;
         if (!this.utilizarEmail && !this.utilizarDocumentos) this.nextStep();
+        if(this.isUsoDeCreditos){
+          this.usoDeCreditos = true
+        }
       } else {
         Notify.create({
           message: "Número de Telefone inválido ou Código SMS incorreto.",
@@ -2511,7 +2581,7 @@ export default defineComponent({
 <style scoped>
 @media (max-width: 450px) {
   .home-icon {
-    display: none;
+    transform: scale(0.8);
   }
 }
 
@@ -2519,7 +2589,7 @@ export default defineComponent({
   position: fixed;
   transform: scale(1.6);
   z-index: 9999999;
-  left: 20px;
+  right: 20px;
   top: 20px;
 }
 
@@ -2617,9 +2687,26 @@ export default defineComponent({
 .margin-bt{
   margin-bottom: 10px;
 }
-@media (min-width: 500px) {
+@media (max-width: 520px) {
   .img-salas {
-    height: 20vh;
+    width: 100vw;
   }
+}
+.img-salas {
+    margin-top: 15px;
+    width: 100%;
+    height: 20vh;
+    position: center;
+    object-fit: contain;
+  }
+@font-face {
+  font-family: 'igualfina';
+  src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
+  font-style: normal;
+}
+@font-face {
+  font-family: 'igualnegrito';
+  src: url('../../public/fonts/Igual/Igual-ExtraBold.otf') format('truetype');
+  font-style: normal;
 }
 </style>
