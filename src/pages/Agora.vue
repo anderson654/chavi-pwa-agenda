@@ -155,7 +155,10 @@
               "
               v-for="(imovel, index) in imoveisFiltred"
               :key="index"
-              @click="$router.push(imovel.link)"
+              @click="
+                agendamento(imovel);
+                $router.push(imovel.link);
+                "
             >
               <div class="col-4 row content-center justify-center">
                 <q-img

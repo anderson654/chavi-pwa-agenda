@@ -163,6 +163,13 @@ export default ({ app, router, store }) => {
             });
         });
       },
+      agendamento(imovel) {
+        this.$store.dispatch("setarDados", {
+          key: "setImovelAgendamento",
+          value: imovel,
+        });
+        return;
+      }
     },
   });
 };
