@@ -1377,7 +1377,7 @@ export default defineComponent({
                     </div>
                     <div>
                       <input type="checkbox" id="checkbox"/>
-                      <label for="checkbox">Públoco externo</label>
+                      <label for="checkbox">Público externo</label>
                     </div>`,
         html : true,
           cancel: true,
