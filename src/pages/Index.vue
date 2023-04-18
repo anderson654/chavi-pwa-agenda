@@ -836,6 +836,7 @@ export default defineComponent({
       eventoOutros: [],
       publicoExterno: false,
       usoDeCreditos: false,
+      custoBase : 0
     };
   },
   computed: {
@@ -1074,9 +1075,8 @@ export default defineComponent({
       }, 200);
       return week;
     },
-    isUsoDeCreditos(){
-      return false
-      if(this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras){
+    isUsoDeCreditos(){      
+      if((this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras) && (this.custoBase > 0) && (this.consumoDeCreditos > 0)){
         return true
       }
     }
@@ -1164,6 +1164,10 @@ export default defineComponent({
   methods: {
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
+
+      console.log('Verificar')
+      console.log(valor)
+
       if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
         let message;
         if(this.isHotmilk){
@@ -1457,6 +1461,7 @@ export default defineComponent({
       let horasMensaisDisponiveis = 0;
       let horasExtras = 0;
       let consumoDeCreditos = 0;
+      let options = [];
 
       if (this.entidadeUsuario) {
         let request = {
@@ -1464,6 +1469,8 @@ export default defineComponent({
           method: "get",
         };
         const response = await this.executeMethod(request, false);
+        console.log(response)
+        console.log('gerenciamentoDeHoras----')
 
         if(response && response.status == 200){
           horasMensaisDisponiveis = response.data.horasMensaisDisponiveis;
@@ -1496,43 +1503,106 @@ export default defineComponent({
 
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const options = this.isHotmilk ? 
-      [
-        { label: "1 hora", value: "1" },
-        { label: "1:30 hora", value: "1.5" },
-        { label: "2 horas", value: "2" },
-        { label: "2:30 horas", value: "2.5" },
-        { label: "3 horas", value: "3" },
-        { label: "4 horas", value: "4" },
-        { label: "5 horas", value: "5" },
-        { label: "6 horas", value: "6" },
-      ]        : [
-        { label: "30 minutos", value: "30" },
-        { label: "45 minutos", value: "45" },
-        { label: "1 hora", value: "60" },
-        { label: "1:30 hora", value: "90" },
-        { label: "2 horas", value: "120" },
-        { label: "2:30 horas", value: "150" },
-        { label: "3 horas", value: "180" },
-        { label: "4 horas", value: "240" },
-        { label: "5 horas", value: "300" },
-        { label: "6 horas", value: "360" },
-      ];
+      // if (this.isHotmilk){
+        let timeH;
+        let contador = 0;        
+        let tempContInterval = this.timeStepMin;
 
-      const inicial = options.find((item) => {
-        return item.value == this.timeStepMin;
-      });
+        console.log(this.timeStepMin);
+        console.log('this.duracao');
 
-      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "0.5" }] : [{ label: "15 minutos", value: "15" }];
+        while (tempContInterval <= this.tempoMaximo){
+          let calcCusto = ( Number(tempContInterval) / 60 ) *  Number(this.custoBase) *  Number(consumoDeCreditos);
+          console.log(calcCusto);
+          console.log(this.custoBase);
+          console.log(tempContInterval);
+    
+          this.usoDeCreditos = true;
+          this.consumoDeCreditos = 2;
+          if (tempContInterval < 60){
+            if(this.usoDeCreditos && consumoDeCreditos > 0){
+              options[contador] = { label: `${tempContInterval + ' Minutos '} (Custo: ${Number(calcCusto)} créditos)`, value : tempContInterval}
+            }
+            else{
+              options[contador] = {  label: `${tempContInterval + ' Minutos '}`, value : tempContInterval}
+            }
+            
+          }
+          else if (tempContInterval < 120){
+            let timeH = moment.duration(tempContInterval,"minutes")//.format('h:mm',{trim:false}); 
+            timeH = moment.utc(timeH.asMilliseconds()).format("HH:mm");
 
+            if(this.usoDeCreditos && consumoDeCreditos > 0){
+              options[contador] = { label: `${tempContInterval + ' Hora '} (Custo: ${Number(calcCusto)} créditos)`, value : tempContInterval}
+            }
+            else{
+              options[contador] = { label: `${timeH.toString() + ' Hora '}`, value : tempContInterval}
+            }    
 
-      const filter = options.filter((item) => {
-        if(this.isHotmilk){
-          return Number(item.value) <= this.tempoMaximo/60;
-          
+          }    
+          else{
+
+            let timeH = moment.duration(tempContInterval,"minutes")//.format('h:mm',{trim:false}); 
+            timeH = moment.utc(timeH.asMilliseconds()).format("HH:mm");
+
+            if(this.usoDeCreditos && consumoDeCreditos > 0){
+              options[contador] = { label: `${tempContInterval + ' Horas '} (Custo: ${Number(calcCusto)} créditos)`, value : tempContInterval}
+            }
+            else{
+              options[contador] = { label: `${timeH.toString() + ' Horas '}`, value : tempContInterval}
+            }   
+           
+          }  
+          //console.log(calcCusto);
+          contador ++;
+          tempContInterval += this.timeStepMin      
         }
-        return Number(item.value) <= this.tempoMaximo;
-      });
+
+
+
+        console.log(options);
+      // }
+
+
+      // const options = this.isHotmilk ? 
+      // [
+      //   { label: "1 hora", value: "1" },
+      //   { label: "1:30 hora", value: "1.5" },
+      //   { label: "2 horas", value: "2" },
+      //   { label: "2:30 horas", value: "2.5" },
+      //   { label: "3 horas", value: "3" },
+      //   { label: "4 horas", value: "4" },
+      //   { label: "5 horas", value: "5" },
+      //   { label: "6 horas", value: "6" },
+      // ]        : [
+      //   { label: "30 minutos", value: "30" },
+      //   { label: "45 minutos", value: "45" },
+      //   { label: "1 hora", value: "60" },
+      //   { label: "1:30 hora", value: "90" },
+      //   { label: "2 horas", value: "120" },
+      //   { label: "2:30 horas", value: "150" },
+      //   { label: "3 horas", value: "180" },
+      //   { label: "4 horas", value: "240" },
+      //   { label: "5 horas", value: "300" },
+      //   { label: "6 horas", value: "360" },
+      // ];
+
+      // const inicial = options.find((item) => {
+      //   return item.value == this.timeStepMin;
+      // });
+
+       //const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "0.5" }] : [{ label: "15 minutos", value: "15" }];
+        
+      let itens = [];
+      // const filter = options.filter((item) => {
+      //   // if(this.isHotmilk){
+      //   //   return Number(item.value) <= this.tempoMaximo/60;
+          
+      //   // }
+      //   return Number(item.value) <= this.tempoMaximo;
+      // });
+      const filter = options;
+      console.log(filter);
 
 
       const date = scope.timestamp.date;
@@ -1558,44 +1628,61 @@ export default defineComponent({
           itens.push(opt);
         }
       }
+      console.log('++++')
+      console.log(itens);
 
-      itens.forEach((element) => {
-        if(this.usoDeCreditos && consumoDeCreditos > 0){
-          if(this.isHotmilk){
-            let value = element.value;
-            element.label = `${element.label} (Custo: ${
-              Number(value) * Number(consumoDeCreditos)
-              } créditos)`;
-        }else {
-          let value = element.label.split(" ")[0];
-        const time = element.label.split(" ")[1];
-        if (time == "hora" || time == "horas") {
-          if (value.charAt(1) == ":") {
-            value.split(":");
-            value = value[0] * 60 + 30;
+      // itens.forEach((element) => {
+      //   if(this.usoDeCreditos && consumoDeCreditos > 0){
+      //     let calcCust = ( Number(tempContInterval) / 60 ) *  Number(this.custoBase) *  Number(consumoDeCreditos);
+      //     console.log(calcCust);
+      //     console.log(this.custoBase);
+      //     console.log(tempContInterval);
 
-            element.label = `${element.label} (Custo: ${
-              Number(value) * Number(consumoDeCreditos)
-            } créditos)`;
-          } else {
-            value = value * 60;
+      //     element.label = `${element.label} (Custo: ${Number(value) * Number(consumoDeCreditos)} créditos)`;
+      //   }
+      // }
 
-            element.label = `${element.label} (Custo: ${
-              Number(value) * Number(consumoDeCreditos)
-            } créditos)`;
-          }
-            }else {
-             element.label = `${element.label} (Custo: ${
-                Number(value) * Number(consumoDeCreditos)
-              } créditos)`;
-            }
-          }
-        } else {
-          element.label = `${element.label}`
-        }
+      // itens.forEach((element) => {
+      //   console.log('++++')
+      //   if(this.usoDeCreditos && consumoDeCreditos > 0){
+      //     if(this.isHotmilk){
+      //       console.log('Veficia isHotmilk')
+      //       console.log(this.isHotmilk)
+      //       let value = element.value;
+      //       element.label = `${element.label} (Custo: ${
+      //         Number(value) * Number(consumoDeCreditos)
+      //         } créditos)`;
+      //     }else {
+      //       console.log('Veficia nao isHotmilk')
+      //         console.log(this.isHotmilk)
+      //       let value = element.label.split(" ")[0];
+      //     const time = element.label.split(" ")[1];
+      //     if (time == "hora" || time == "horas") {
+      //       if (value.charAt(1) == ":") {
+      //         value.split(":");
+      //         value = value[0] * 60 + 30;
+
+      //         element.label = `${element.label} (Custo: ${
+      //           Number(value) * Number(consumoDeCreditos)
+      //         } créditos)`;
+      //       } else {
+      //         value = value * 60;
+
+      //         element.label = `${element.label} (Custo: ${
+      //           Number(value) * Number(consumoDeCreditos)
+      //         } créditos)`;
+      //       }
+      //         }else {
+      //         element.label = `${element.label} (Custo: ${
+      //             Number(value) * Number(consumoDeCreditos)
+      //           } créditos)`;
+      //         }
+      //       }
+      //   } else {
+      //     element.label = `${element.label}`
+      //   }      
         
-        
-      });
+     // });
       let message;
       if(this.usoDeCreditos && consumoDeCreditos > 0){
         message = `<span class='text-black' style='font-size: 1rem'>
@@ -1917,13 +2004,17 @@ export default defineComponent({
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
 
         request.headers = { "Content-Type": "multipart/form-data" };
-        request.data = formData;
+        request.data = formData;   
+        console.log(request.data)
       }
       const response = await this.executeMethod(request, false);
       Loading.hide();
 
       if (response && response.status == 200) {
         const message = response.data.text;
+        console.log('-----' + response.status)
+        console.log('-----' + response.data.text)
+        console.log('-----' + response.data.text)
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
@@ -2110,6 +2201,8 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
+          console.log('*************')
+          console.log(response.data)
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
 
@@ -2147,6 +2240,10 @@ export default defineComponent({
               ? (this.valorDaSala =
                   response.data.entidade.preferenciaVisita.valorDaSala)
               : (this.valorDaSala = 0);
+
+            if (this.cliente){
+              this.custoBase = this.cliente.custoBase ? this.cliente.custoBase : 0;
+            }
 
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
