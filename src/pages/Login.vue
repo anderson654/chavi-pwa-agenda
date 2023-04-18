@@ -203,7 +203,6 @@ export default {
       Loading.hide();
     },
     async checkCode() {
-      console.log("PIAZZETTA user", this.user.name + " - " + this.user.empresa);
       let response;
       const nome = this.user.name + " - " + this.user.empresa;
       if (this.newUser) {
@@ -286,7 +285,6 @@ export default {
       return regexp.test(valor) || regexp2.test(valor) || !this.utilizarEmail;
     },
     onSubmit() {
-      console.log("PIAZZETTA onSumit");
       this.$router.push("/hotmilk");
     },
     onReset() {
