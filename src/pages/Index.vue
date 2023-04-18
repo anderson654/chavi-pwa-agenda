@@ -2230,49 +2230,32 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-
           if (!horario.paraAprovar) {
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
               )
             );
-
-            let finalTemp = horario.timestampInicial + horario.intervalo
-
-            const final = parseTimestamp(
-              moment(parseInt(finalTemp)).format(
-                "YYYY-MM-DD HH:mm"
-              )
-            );
-
             const duracao = horario.intervalo / 60000;
+            const titleBusy = horario.usuario;
+            let formated = titleBusy.split(" ");
 
-            let titleBusy = "Ocupado";
-
-            if (horario.usuario){
-              titleBusy = `
+            console.log(titleBusy, "tittle busy");
+            console.log(formated[formated.length - 1], "tittle busy")
+              ? `
                 <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
-                    <div class="full-width text-center">`;
-
-              if (horario.usuario.indexOf("-") == -1){
-                titleBusy += horario.usuario.trim();
-              }
-              else{
-                titleBusy += `${horario.usuario.split("-")[0].trim()}<br/>`
-
-                if(horario.usuario.split("-")[1]){
-                  titleBusy += horario.usuario.split("-")[1].trim();
-                }
-                else
-                {
-                  titleBusy += "";
-                }
-              }
-
-              titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
-            }
-
+                  <div class="full-width text-center">${
+                    horario.usuario.indexOf("-") == -1
+                      ? horario.usuario.trim()
+                      : `${horario.usuario.split("-")[0].trim()}<br/>${
+                          horario.usuario.split("-")[1]
+                            ? horario.usuario.split("-")[1].trim()
+                            : ""
+                        }`
+                  }</div>
+                </div>
+              `
+              : "Ocupado";
             optionsOff.push({
               title: horario.paraAprovar
                 ? "Pendente"
