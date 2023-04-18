@@ -89,12 +89,12 @@
         </div>
         <!--AQUI-->
         <img
-        
+
           :src="logo"
           spinner-color="#9654ff"
           class="img-salas"
         />
-        
+
       </div>
 
       <!-- CALENDÁRIO -->
@@ -861,7 +861,7 @@ export default defineComponent({
     },
 
     tempoMinimoAprovacaoLabel() {
-      const aux = this.isHotmilk ? 
+      const aux = this.isHotmilk ?
       [
         { value: 30, label: "30 minutos" },
         { value: 60, label: "1 hora" },
@@ -886,7 +886,7 @@ export default defineComponent({
 
       return aux.find((item) => {
         if(this.isHotmilk){
-          return item.value == this.tempoMinimoAprovacao;  
+          return item.value == this.tempoMinimoAprovacao;
         }
         return item.value == this.tempoMinimoAprovacao;
       }).label;
@@ -954,7 +954,7 @@ export default defineComponent({
       );
 //==============================================================================
       //código comentado para iniibir a parte de créditos
-      
+
 //===============================================================================
     },
     isAgora() {
@@ -1109,7 +1109,7 @@ export default defineComponent({
       } else {
         if(this.isHotmilk){
           this.$router.push("/login");
-        }else{ 
+        }else{
           this.inForms = true
           this.parte = 1
         }
@@ -1496,7 +1496,7 @@ export default defineComponent({
 
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const options = this.isHotmilk ? 
+      const options = this.isHotmilk ?
       [
         { label: "1 hora", value: "1" },
         { label: "1:30 hora", value: "1.5" },
@@ -1593,8 +1593,8 @@ export default defineComponent({
         } else {
           element.label = `${element.label}`
         }
-        
-        
+
+
       });
       let message;
       if(this.usoDeCreditos && consumoDeCreditos > 0){
@@ -1641,7 +1641,7 @@ export default defineComponent({
             horasMensaisDisponiveis,
             horasExtras,
             Number(data),
-            consumoDeCreditos) 
+            consumoDeCreditos)
             && this.usoDeCreditos) {
           return;
         }
@@ -1761,7 +1761,7 @@ export default defineComponent({
               const filtro = ["outros", "evento"];
               if (filtro.includes(data)) {
                 this.qualEvento(data, minutos, hora, scope);
-                
+
               } else {
                 this.eventoOutros.push(data);
                 this.escolherHorario(minutos, hora, scope);
@@ -2706,6 +2706,6 @@ export default defineComponent({
 @font-face {
   font-family: 'igualnegrito';
   src: url('../../public/fonts/Igual/Igual-ExtraBold.otf') format('truetype');
-  font-style: normal;  
+  font-style: normal;
 }
 </style>
