@@ -199,7 +199,6 @@ export default {
         {
           foto: "https://baggioimoveis.com.br/baggio-master/assets/images/baggio-imoveis-fachada.jpg",
           nome: "Campo Comprido",
-          nome: "Campo Comprido",
           andares: {},
         },
       ],
