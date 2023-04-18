@@ -1462,7 +1462,6 @@ export default defineComponent({
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
-        console.log("PIAZZETTA requst", request)
         const response = await this.executeMethod(request, false);
 
         if(response && response.status == 200){
@@ -1542,8 +1541,8 @@ export default defineComponent({
       ).getTime();
       let multiplicaMs = 60 * 1000;
       for (const opt of filter) {
-        const inteiro = parseInt(opt.value) % parseInt(this.timeStepMin) == 0;
-        const ms = parseInt(opt.value) * 60 * 1000;
+        const inteiro = this.isHotmilk ? Number(opt.value) % Number(this.timeStepMin/60) == 0 : Number(opt.value) % Number(this.timeStepMin) == 0
+        const ms = Number(opt.value) * multiplicaMs;
 
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
@@ -2273,9 +2272,7 @@ export default defineComponent({
             }         
            
             optionsOff.push({
-              title: horario.paraAprovar
-                ? "Pendente"
-                : `${formated[0]} - ${formated[formated.length - 1]}`,
+              title: horario.paraAprovar ? "Pendente" : titleBusy,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
