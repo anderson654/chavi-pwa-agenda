@@ -1561,7 +1561,10 @@ export default defineComponent({
       itens.forEach((element) => {
         if(this.usoDeCreditos && consumoDeCreditos > 0){
           if(this.isHotmilk){
-            let value = (Number(element.value) * Number(consumoDeCreditos)).toFixed(2)
+            let value = (Number(element.value) * Number(consumoDeCreditos))
+            if(Math.abs(value * 100 % 1) !== 0 ){
+              value = value.toFixed(2)
+            }
             element.label = `${element.label} (Custo: ${
               value } créditos)`;
         }else {
