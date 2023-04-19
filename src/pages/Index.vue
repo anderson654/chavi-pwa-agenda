@@ -1561,10 +1561,9 @@ export default defineComponent({
       itens.forEach((element) => {
         if(this.usoDeCreditos && consumoDeCreditos > 0){
           if(this.isHotmilk){
-            let value = element.value;
+            let value = (Number(element.value) * Number(consumoDeCreditos)).toFixed(2)
             element.label = `${element.label} (Custo: ${
-              Number(value) * Number(consumoDeCreditos)
-              } créditos)`;
+              value } créditos)`;
         }else {
           let value = element.label.split(" ")[0];
         const time = element.label.split(" ")[1];
@@ -1596,11 +1595,12 @@ export default defineComponent({
 
       });
       let message;
+      let horasTotais = horasMensaisDisponiveis + horasExtras
       if(this.usoDeCreditos && consumoDeCreditos > 0){
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
             <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
-              ${ horasMensaisDisponiveis + horasExtras }
+              ${ horasTotais }
               </strong></p>
             </span>
           ${
