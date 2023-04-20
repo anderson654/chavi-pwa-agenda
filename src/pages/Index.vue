@@ -1461,9 +1461,6 @@ export default defineComponent({
       return opcaoPasso;
 
     },
-    validaIntervaloTempo(){
-
-    },
     escreveItemHorario(contadorTempoIntervalo){
       let opcao = this.criaItemListaHorarios(contadorTempoIntervalo);
       return this.adicionaTempoPorExtenso(opcao);
@@ -1482,54 +1479,27 @@ export default defineComponent({
       }
     
     },  
-    // tempoMinimoAprovacaoLabel() {
-    //   const aux = this.isHotmilk ? 
-    //   [
-    //     { value: 30, label: "30 minutos" },
-    //     { value: 60, label: "1 hora" },
-    //     { value: 90, label: "1 hora e 30 min" },
-    //     { value: 120, label: "2 hora" },
-    //     { value: 180, label: "3 hora" },
-    //     { value: 240, label: "4 hora" },
-    //     { value: 300, label: "5 hora" },
-    //     { value: 360, label: "6 hora" },
-    //   ] : [
-    //     { value: 15, label: "15 minutos" },
-    //     { value: 30, label: "30 minutos" },
-    //     { value: 45, label: "45 minutos" },
-    //     { value: 60, label: "1 hora" },
-    //     { value: 90, label: "1 hora e 30 min" },
-    //     { value: 120, label: "2 hora" },
-    //     { value: 180, label: "3 hora" },
-    //     { value: 240, label: "4 hora" },
-    //     { value: 300, label: "5 hora" },
-    //     { value: 360, label: "6 hora" },
-    //   ];
+    
 
-    //   return aux.find((item) => {
-    //     if(this.isHotmilk){
-    //       console.log(item)
-    //       return item.value == this.tempoMinimoAprovacao;  
-    //     }
-    //     return item.value == this.tempoMinimoAprovacao;
-    //   }).label;
-    // },
+    tempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao) {
 
-    tempoMinimoAprovacaoLabel(aux, tempoMinimoAprovacao) {
+      if(itens.length == 0){
+        return '';
+      }
 
-      const tempoMinimo = aux.find((item) => {
-        return item.value == tempoMinimoAprovacao;
-      }).value;
-      const tempo = this.escreveItemHorario(tempoMinimo);
-      console.log('tempo');
-      console.log(tempo);
-      console.log(tempoMinimo);
-      return tempo.label;
-       
+      let tempoMinimo;
+      itens.forEach(element => {
+        if (element?.value <= tempoMinimoAprovacao){
+          tempoMinimo = element?.value;
+        }
+      });
+     
+      return this.escreveItemHorario(tempoMinimo).label;
+  
     }, 
     validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita){
 
-      if ((!tempoMinimoAprovacao) || (!aprovarVisita))
+      if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined"))
       {
         return "";
       }
@@ -1540,17 +1510,12 @@ export default defineComponent({
       else if (!aprovarVisita){
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
-      return "";    
+      return "";      
     },  
    
     construirOpcoesAgendamento(timeStepMin,tempoMaximo,consumoCreditos,consomeHoras, custoBase){
 
-      console.log("timeStepMin " + timeStepMin);
-      console.log("tempoMaximo " + tempoMaximo);
-      console.log("consumoCreditos " + consumoCreditos);
-      console.log("consomeHoras " + consomeHoras);
-      console.log("custoBase " + custoBase);
-
+   
       if((timeStepMin <= 0)&&(tempoMaximo <=0)){
         return [];
       }
@@ -1559,9 +1524,7 @@ export default defineComponent({
       let contadorTempoIntervalo = timeStepMin;
 
       while (contadorTempoIntervalo <= tempoMaximo){
-        //let opcao = this.criaItemListaHorarios(contadorTempoIntervalo);
         let opcao = this.escreveItemHorario(contadorTempoIntervalo);
-        //opcao = this.adicionaTempoPorExtenso(opcao);
         opcao = this.adicionaCreditoExtenso(opcao,consumoCreditos,consomeHoras, custoBase);
         opcoes.push(opcao);
         contadorTempoIntervalo += this.timeStepMin ;
@@ -1585,8 +1548,6 @@ export default defineComponent({
 
         if(response && response.status == 200){
           gerenciamentoHoras = response.data;
-          console.log('gerenciamentoHoras')
-          console.log(gerenciamentoHoras)
         }
       }
 
@@ -1612,15 +1573,11 @@ export default defineComponent({
           : minutos - this.timeStepMin
         ).toString();
 
-        console.log('horario')
-        console.log(horario)
-
       if (minutos == 60) hora = parseInt(hora) + 1;
 
       const consomeHoras = this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras;
       const custoBase = this.custoBase;
       const options = this.construirOpcoesAgendamento(this.timeStepMin,this.tempoMaximo,gerenciamentoHoras.consumoCreditos,consomeHoras,custoBase);
-
       const date = scope.timestamp.date;
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
@@ -1647,9 +1604,6 @@ export default defineComponent({
           itens.push(opt);
         }
       }
-      console.log('tempoMinimoAprovacao');
-      console.log(this.tempoMinimoAprovacao);
-    
 
       let message;
       if(this.usoDeCreditos && gerenciamentoHoras.consumoCreditos > 0){
@@ -1660,16 +1614,9 @@ export default defineComponent({
               </strong></p>
             </span>`;
             
+  
         message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
-          // ${
-            
-          //   this.tempoMinimoAprovacao != 0 && this.aprovarVisita
-          //     ? `<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao)} os agendamentos estão sugeitos a aprovação. </span>`
-          //     : !this.aprovarVisita
-          //     ? "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>"
-          //     : ""
-          // }
-          // `
+       
       } else {
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
@@ -1947,6 +1894,7 @@ export default defineComponent({
 
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
+
       if (!this.user.hasDocs) {
 
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
@@ -1974,16 +1922,13 @@ export default defineComponent({
 
         request.headers = { "Content-Type": "multipart/form-data" };
         request.data = formData;   
-        console.log(request.data)
       }
       const response = await this.executeMethod(request, false);
       Loading.hide();
 
       if (response && response.status == 200) {
         const message = response.data.text;
-        console.log('-----' + response.status)
-        console.log('-----' + response.data.text)
-        console.log('-----' + response.data.text)
+ 
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
@@ -2170,8 +2115,7 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
-          console.log('*************')
-          console.log(response.data)
+    
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
 
