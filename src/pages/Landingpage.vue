@@ -124,7 +124,9 @@ export default {
   data() {
     return {};
   },
-  async mounted() {},
+  async mounted() {
+    this.logout(true)
+  },
   methods: {
     openLink(url, target) {
       window.open(url, target);

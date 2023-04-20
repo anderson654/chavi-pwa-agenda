@@ -169,6 +169,52 @@ export default ({ app, router, store }) => {
           value: imovel,
         });
         return;
+      },
+      async logout(force) {
+        if (force) {
+          this.user.name = "";
+          this.user.empresa = "";
+          this.user.phone = "";
+          this.user.cpf = "";
+          this.user.email = "";
+          await this.$store.dispatch("setarDados", {
+            key: "setLogin",
+            value: [],
+          });
+  
+          this.$store.dispatch("setarDados", {
+            key: "setEstadoInicial",
+            value: true,
+          });
+  
+          return;
+        }
+        Dialog.create({
+          title: "Aviso",
+          message: `<p>Retornar para a tela inicial?</p> <p>Você irá deslogar</p>`,
+          html:true,
+          ok: {
+            label: "Sim",
+            color: "positive",
+          },
+          cancel: {
+            label: "Não",
+            color: "negative",
+          },
+        }).onOk(async () => {
+          this.user.name = "";
+          this.user.empresa = "";
+          this.user.phone = "";
+          this.user.cpf = "";
+          this.user.email = "";
+          await this.$store.dispatch("setarDados", {
+            key: "setLogin",
+            value: [],
+          });
+          this.parte = 1;
+          this.inForms = true;
+          this.$router.push("/");
+        });
       }
     },
   });
