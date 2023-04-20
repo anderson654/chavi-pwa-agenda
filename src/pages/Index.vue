@@ -1071,7 +1071,6 @@ export default defineComponent({
           terms: false,
           use: false,
         };
-        console.log("PIAZZETTA cowork mounted", this.isCoworking)
         this.maximoPessoas =
           this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
         if (this.user.email.includes("@chaviuser")) this.user.email = "";
@@ -1783,7 +1782,6 @@ export default defineComponent({
       }
     },
     filtraValor(valorDaSala) {
-      console.log("Piazzetta valorSala", valorDaSala)
       if (valorDaSala) {
         let filtroValorDaSala = valorDaSala.toString();
         if (filtroValorDaSala.length == 1 || filtroValorDaSala.length == 2) {
@@ -1811,7 +1809,6 @@ export default defineComponent({
     },
     //não existe nescessita pagamento - Verficar se é pra tirar
     async onSubmit() {
-      console.log("Piazzetta pagamento?", this.necessitaPagamento )
       if (this.necessitaPagamento) {
         this.checkoutPagamento();
         return;
@@ -2132,7 +2129,6 @@ export default defineComponent({
               ? (this.necessitaAprovacao = true)
               : (this.necessitaAprovacao = false);
 
-            console.log("PIAZzETTA preferências",response.data.entidade.preferenciaVisita)
               response.data.imovel.opcoesAgendamentoIndividual.necessitaPagamento
               ? (this.necessitaPagamento = true)
               : (this.necessitaPagamento = false);
@@ -2229,7 +2225,6 @@ export default defineComponent({
             this.semImovel = true;
           }
         }
-        console.log("PIAZZETTA cowork getImovel", this.isCoworking)
       } catch (e) {
         console.log(e);
       } finally {
