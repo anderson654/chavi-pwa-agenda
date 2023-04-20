@@ -836,6 +836,7 @@ export default defineComponent({
       eventoOutros: [],
       publicoExterno: false,
       usoDeCreditos: false,
+      custoBase : 0
     };
   },
   computed: {
@@ -858,39 +859,7 @@ export default defineComponent({
         return this.seMesmoDia;
       }
       return "";
-    },
-
-    tempoMinimoAprovacaoLabel() {
-      const aux = this.isHotmilk ?
-      [
-        { value: 30, label: "30 minutos" },
-        { value: 60, label: "1 hora" },
-        { value: 90, label: "1 hora e 30 min" },
-        { value: 120, label: "2 hora" },
-        { value: 180, label: "3 hora" },
-        { value: 240, label: "4 hora" },
-        { value: 300, label: "5 hora" },
-        { value: 360, label: "6 hora" },
-      ] : [
-        { value: 15, label: "15 minutos" },
-        { value: 30, label: "30 minutos" },
-        { value: 45, label: "45 minutos" },
-        { value: 60, label: "1 hora" },
-        { value: 90, label: "1 hora e 30 min" },
-        { value: 120, label: "2 hora" },
-        { value: 180, label: "3 hora" },
-        { value: 240, label: "4 hora" },
-        { value: 300, label: "5 hora" },
-        { value: 360, label: "6 hora" },
-      ];
-
-      return aux.find((item) => {
-        if(this.isHotmilk){
-          return item.value == this.tempoMinimoAprovacao;
-        }
-        return item.value == this.tempoMinimoAprovacao;
-      }).label;
-    },
+    },    
     logo() {
       let path = `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/`;
       if (
@@ -1074,11 +1043,13 @@ export default defineComponent({
       }, 200);
       return week;
     },
-    isUsoDeCreditos(){
-      if(this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras){
+    isUsoDeCreditos(){      
+      if((this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras)){
         return true
       }
-    }
+      return false;
+    },
+  
   },
   mounted() {
     try {
@@ -1161,8 +1132,16 @@ export default defineComponent({
     if (this.semImovel) this.$router.push("/");
   },
   methods: {
+    validaUsoCredito(consumoCreditos,consomeHoras,custoBase){    
+ 
+      if((consomeHoras) && (custoBase > 0)&& (consumoCreditos > 0) ){//
+        return true
+      }
+      return false;
+    },
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
+
       if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
         let message;
         if(this.isHotmilk){
@@ -1451,23 +1430,124 @@ export default defineComponent({
         });
     },
 
+    adicionaTempoPorExtenso(opcaoPasso){
+
+      const delimitadorHora = 60;
+
+      if (opcaoPasso.value < delimitadorHora){
+        opcaoPasso.label = `${opcaoPasso.label  + ' Minutos '}`;
+      }
+      else if (opcaoPasso.value > delimitadorHora){
+        opcaoPasso.label = `${opcaoPasso.label + ' Horas '}`;
+      }
+      else{
+        opcaoPasso.label = `${opcaoPasso.label + ' Hora '}`;
+      }
+      
+      return opcaoPasso;
+    },
+    adicionaCreditoExtenso(opcaoPasso,consumoCreditos,consomeHoras, custoBase){
+
+      if ((!consumoCreditos) || (!custoBase))
+      {
+        return opcaoPasso;
+      }
+
+      if(this.validaUsoCredito(consumoCreditos,consomeHoras,custoBase)){
+        const calculoCusto = ( Number(opcaoPasso.value) / 60 ) *  Number(custoBase) *  consumoCreditos;
+        opcaoPasso.label += `(${Number(calculoCusto)} créditos)`;   
+      }
+
+      return opcaoPasso;
+
+    },
+    escreveItemHorario(contadorTempoIntervalo){
+      let opcao = this.criaItemListaHorarios(contadorTempoIntervalo);
+      return this.adicionaTempoPorExtenso(opcao);
+    },
+    criaItemListaHorarios(contadorTempoIntervalo){      
+      
+      const tempoDelimitador = 60;
+
+      if (contadorTempoIntervalo < tempoDelimitador){
+        return {  label: contadorTempoIntervalo.toString(), value : contadorTempoIntervalo};
+      }
+      else{
+        let timeHora = moment.duration(contadorTempoIntervalo,"minutes") ;
+        timeHora = moment.utc(timeHora.asMilliseconds()).format("HH:mm");
+        return { label: timeHora.toString(), value : contadorTempoIntervalo};        
+      }
+    
+    },  
+    
+
+    tempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao) {
+
+      if(itens.length == 0){
+        return '';
+      }
+
+      let tempoMinimo;
+      itens.forEach(element => {
+        if (element?.value <= tempoMinimoAprovacao){
+          tempoMinimo = element?.value;
+        }
+      });
+     
+      return this.escreveItemHorario(tempoMinimo).label;
+  
+    }, 
+    validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita){
+
+      if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined"))
+      {
+        return "";
+      }
+
+      if(tempoMinimoAprovacao != 0 && aprovarVisita){
+        return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;   
+      }
+      else if (!aprovarVisita){
+        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
+      }
+      return "";      
+    },  
+   
+    construirOpcoesAgendamento(timeStepMin,tempoMaximo,consumoCreditos,consomeHoras, custoBase){
+
+   
+      if((timeStepMin <= 0)&&(tempoMaximo <=0)){
+        return [];
+      }
+
+      let opcoes = [];
+      let contadorTempoIntervalo = timeStepMin;
+
+      while (contadorTempoIntervalo <= tempoMaximo){
+        let opcao = this.escreveItemHorario(contadorTempoIntervalo);
+        opcao = this.adicionaCreditoExtenso(opcao,consumoCreditos,consomeHoras, custoBase);
+        opcoes.push(opcao);
+        contadorTempoIntervalo += this.timeStepMin ;
+      }
+
+      return opcoes;
+  
+    },
     async escolherHorario(minutos, hora, scope) {
       //aqui começa a parte de escolher horário
-      let horasMensaisDisponiveis = 0;
-      let horasExtras = 0;
-      let consumoDeCreditos = 0;
+     
+      let gerenciamentoHoras = {};
 
       if (this.entidadeUsuario) {
         let request = {
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
+        
         const response = await this.executeMethod(request, false);
 
         if(response && response.status == 200){
-          horasMensaisDisponiveis = response.data.horasMensaisDisponiveis;
-          horasExtras = response.data.horasExtras;
-          consumoDeCreditos = response.data.consumoCreditos;
+          gerenciamentoHoras = response.data;
         }
       }
 
@@ -1495,62 +1575,29 @@ export default defineComponent({
 
       if (minutos == 60) hora = parseInt(hora) + 1;
 
-      const options = this.isHotmilk ?
-      [
-        { label: "1 hora", value: "1" },
-        { label: "1:30 hora", value: "1.5" },
-        { label: "2 horas", value: "2" },
-        { label: "2:30 horas", value: "2.5" },
-        { label: "3 horas", value: "3" },
-        { label: "4 horas", value: "4" },
-        { label: "5 horas", value: "5" },
-        { label: "6 horas", value: "6" },
-      ]        : [
-        { label: "30 minutos", value: "30" },
-        { label: "45 minutos", value: "45" },
-        { label: "1 hora", value: "60" },
-        { label: "1:30 hora", value: "90" },
-        { label: "2 horas", value: "120" },
-        { label: "2:30 horas", value: "150" },
-        { label: "3 horas", value: "180" },
-        { label: "4 horas", value: "240" },
-        { label: "5 horas", value: "300" },
-        { label: "6 horas", value: "360" },
-      ];
-
-      const inicial = options.find((item) => {
-        return item.value == this.timeStepMin;
-      });
-
-      const itens = inicial ? [] : this.isHotmilk ? [{ label: "30 minutos", value: "0.5" }] : [{ label: "15 minutos", value: "15" }];
-
-
-      const filter = options.filter((item) => {
-        if(this.isHotmilk){
-          return Number(item.value) <= this.tempoMaximo/60;
-          
-        }
-        return Number(item.value) <= this.tempoMaximo;
-      });
-
-
+      const consomeHoras = this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras;
+      const custoBase = this.custoBase;
+      const options = this.construirOpcoesAgendamento(this.timeStepMin,this.tempoMaximo,gerenciamentoHoras.consumoCreditos,consomeHoras,custoBase);
       const date = scope.timestamp.date;
-
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
       ).getTime();
+  
+      let itens = [];
       let multiplicaMs = 60 * 1000;
-      for (const opt of filter) {
-        const inteiro = this.isHotmilk ? Number(opt.value) % Number(this.timeStepMin/60) == 0 : Number(opt.value) % Number(this.timeStepMin) == 0
+
+      for (const opt of options) {
+        const inteiro = Number(opt.value) % Number(this.timeStepMin) == 0
         const ms = Number(opt.value) * multiplicaMs;
 
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
         });
-
+    
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
-          if (eventFilter.timestampInicial >= dateTimeFinal && inteiro) {
+  
+          if ((eventFilter.timestampInicial >= dateTimeFinal) && inteiro) {
             itens.push(opt);
           }
         } else if (inteiro) {
@@ -1558,62 +1605,18 @@ export default defineComponent({
         }
       }
 
-      itens.forEach((element) => {
-        if(this.usoDeCreditos && consumoDeCreditos > 0){
-          if(this.isHotmilk){
-            let value = (Number(element.value) * Number(consumoDeCreditos))
-            if(Math.abs(value * 100 % 1) !== 0 ){
-              value = value.toFixed(2)
-            }
-            element.label = `${element.label} (Custo: ${
-              value } créditos)`;
-        }else {
-          let value = element.label.split(" ")[0];
-        const time = element.label.split(" ")[1];
-        if (time == "hora" || time == "horas") {
-          if (value.charAt(1) == ":") {
-            value.split(":");
-            value = value[0] * 60 + 30;
-
-            element.label = `${element.label} (Custo: ${
-              Number(value) * Number(consumoDeCreditos)
-            } créditos)`;
-          } else {
-            value = value * 60;
-
-            element.label = `${element.label} (Custo: ${
-              Number(value) * Number(consumoDeCreditos)
-            } créditos)`;
-          }
-            }else {
-             element.label = `${element.label} (Custo: ${
-                Number(value) * Number(consumoDeCreditos)
-              } créditos)`;
-            }
-          }
-        } else {
-          element.label = `${element.label}`
-        }
-
-
-      });
       let message;
-      let horasTotais = horasMensaisDisponiveis + horasExtras
-      if(this.usoDeCreditos && consumoDeCreditos > 0){
+      if(this.usoDeCreditos && gerenciamentoHoras.consumoCreditos > 0){
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
             <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
-              ${ horasTotais }
+              ${ gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras }
               </strong></p>
-            </span>
-          ${
-            this.tempoMinimoAprovacao != 0 && this.aprovarVisita
-              ? `<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel} os agendamentos estão sugeitos a aprovação. </span>`
-              : !this.aprovarVisita
-              ? "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>"
-              : ""
-          }
-          `
+            </span>`;
+            
+  
+        message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
+       
       } else {
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
@@ -1640,16 +1643,14 @@ export default defineComponent({
         persistent: true,
       }).onOk((data) => {
         if (!this.verificarCreditos(
-            horasMensaisDisponiveis,
-            horasExtras,
+            gerenciamentoHoras.horasMensaisDisponiveis,
+            gerenciamentoHoras.horasExtras,
             Number(data),
-            consumoDeCreditos)
+            gerenciamentoHoras.consumoCreditos) 
             && this.usoDeCreditos) {
           return;
         }
-        if(this.isHotmilk){
-          data = data *60
-        }
+       
         const visita = {
           title: "Horário Selecionado",
           date: scope.timestamp.date,
@@ -1893,6 +1894,7 @@ export default defineComponent({
 
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
+
       if (!this.user.hasDocs) {
 
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
@@ -1919,13 +1921,14 @@ export default defineComponent({
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
 
         request.headers = { "Content-Type": "multipart/form-data" };
-        request.data = formData;
+        request.data = formData;   
       }
       const response = await this.executeMethod(request, false);
       Loading.hide();
 
       if (response && response.status == 200) {
         const message = response.data.text;
+ 
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
@@ -2112,6 +2115,7 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
+    
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
 
@@ -2149,6 +2153,10 @@ export default defineComponent({
               ? (this.valorDaSala =
                   response.data.entidade.preferenciaVisita.valorDaSala)
               : (this.valorDaSala = 0);
+
+            if (this.cliente){
+              this.custoBase = this.cliente.custoBase ? this.cliente.custoBase : 0;
+            }
 
             if (this.cliente && this.cliente.preferenciaUsuario) {
               this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
