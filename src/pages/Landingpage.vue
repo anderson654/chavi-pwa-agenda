@@ -120,18 +120,20 @@
 </template>
 
 <script>
+import { Dialog } from "quasar";
 export default {
   data() {
     return {};
   },
-  async mounted() {
-    this.logout(true)
-  },
+  async mounted() {},
   methods: {
     openLink(url, target) {
       window.open(url, target);
     },
   },
+  created() {
+    this.logoutForce()
+  }
 };
 </script>
 

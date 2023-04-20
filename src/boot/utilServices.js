@@ -3,6 +3,7 @@ import Compressor from "compressorjs";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { Loading, Notify } from "quasar";
 import internet from "await-internet";
+import { Dialog } from "quasar";
 
 export default ({ app, router, store }) => {
   app.component(VueQrcode.name, VueQrcode);
@@ -13,6 +14,11 @@ export default ({ app, router, store }) => {
         getLogin: "getLogin",
         getEstadoInicial: "getEstadoInicial",
       }),
+      login: {
+        get() {
+          return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
+        },
+      },
     },
     methods: {
       capitalizeFirstLetter(string) {
@@ -170,13 +176,9 @@ export default ({ app, router, store }) => {
         });
         return;
       },
-      async logout(force) {
-        if (force) {
-          this.user.name = "";
-          this.user.empresa = "";
-          this.user.phone = "";
-          this.user.cpf = "";
-          this.user.email = "";
+      async logoutForce() {
+        console.log("PIAZZETTA login", this.getLogin.user)
+        if (this.getLogin.user) {
           await this.$store.dispatch("setarDados", {
             key: "setLogin",
             value: [],
@@ -189,32 +191,6 @@ export default ({ app, router, store }) => {
   
           return;
         }
-        Dialog.create({
-          title: "Aviso",
-          message: `<p>Retornar para a tela inicial?</p> <p>Você irá deslogar</p>`,
-          html:true,
-          ok: {
-            label: "Sim",
-            color: "positive",
-          },
-          cancel: {
-            label: "Não",
-            color: "negative",
-          },
-        }).onOk(async () => {
-          this.user.name = "";
-          this.user.empresa = "";
-          this.user.phone = "";
-          this.user.cpf = "";
-          this.user.email = "";
-          await this.$store.dispatch("setarDados", {
-            key: "setLogin",
-            value: [],
-          });
-          this.parte = 1;
-          this.inForms = true;
-          this.$router.push("/");
-        });
       }
     },
   });
