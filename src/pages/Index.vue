@@ -1517,27 +1517,35 @@ export default defineComponent({
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
       return "";      
-    },  
+    },
    
-    construirOpcoesAgendamento(timeStepMin,tempoMaximo,consumoCreditos,consomeHoras, custoBase){
+    construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,consumoCreditos,consomeHoras, custoBase){
 
-   
-      if((timeStepMin <= 0)&&(tempoMaximo <=0)){
+      if((timeStepMin <= 0)&&(tempoMaximo <=0)&&(!timeHoraFinal)&&(!validadInicial)){
         return [];
       }
 
       let opcoes = [];
       let contadorTempoIntervalo = timeStepMin;
 
-      while (contadorTempoIntervalo <= tempoMaximo){
-        let opcao = this.escreveItemHorario(contadorTempoIntervalo);
-        opcao = this.adicionaCreditoExtenso(opcao,consumoCreditos,consomeHoras, custoBase);
-        opcoes.push(opcao);
-        contadorTempoIntervalo += this.timeStepMin ;
+      const horaMomentInicial = moment(validadInicial);
+   
+      const horaMomentFinal = moment(validadInicial).set({hour:timeHoraFinal});
+      let horaIntervalo = horaMomentInicial.clone();
+      horaIntervalo.add(contadorTempoIntervalo, 'minutes');
+  
+      while ((contadorTempoIntervalo <= tempoMaximo)&&((horaMomentFinal.isAfter(horaIntervalo))||horaMomentFinal.isSame(horaIntervalo))){
+
+            let opcao = this.escreveItemHorario(contadorTempoIntervalo);
+            opcao = this.adicionaCreditoExtenso(opcao,consumoCreditos,consomeHoras, custoBase);
+            opcoes.push(opcao);
+      
+        contadorTempoIntervalo += timeStepMin ;
+        horaIntervalo.add(timeStepMin, 'minutes');
       }
 
       return opcoes;
-  
+
     },
     async escolherHorario(minutos, hora, scope) {
       //aqui começa a parte de escolher horário
@@ -1581,9 +1589,17 @@ export default defineComponent({
 
       if (minutos == 60) hora = parseInt(hora) + 1;
 
+      const validadeInicial = new Date(
+          (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
+        );
+
       const consomeHoras = this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras;
       const custoBase = this.custoBase;
-      const options = this.construirOpcoesAgendamento(this.timeStepMin,this.tempoMaximo,gerenciamentoHoras.consumoCreditos,consomeHoras,custoBase);
+      const horaFinal = this.horaFinal;
+      const timeStepMin =this.timeStepMin;
+      const tempoMaximo = this.tempoMaximo;
+      const options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,gerenciamentoHoras.consumoCreditos,consomeHoras,custoBase);
+      
       const date = scope.timestamp.date;
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
@@ -2122,7 +2138,7 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
-    
+       
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
 
@@ -2210,7 +2226,9 @@ export default defineComponent({
                 this.horaFinal = this.cliente.preferenciaVisita.horaFinal
                   .toString()
                   .split(":")[0];
+                
               }
+              
               if (this.cliente.preferenciaVisita.liberarAgendamento) {
                 this.liberarAgendamento = this.cliente.preferenciaVisita
                   .liberarAgendamento
