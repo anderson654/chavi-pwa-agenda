@@ -1141,7 +1141,13 @@ export default defineComponent({
     },
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
-
+      console.log("PIAZZETTA verificar créditos", horasMensaisDisponiveis,
+            horasExtras,
+            valor,
+            consumoCreditos)
+        console.log("Piazzetta verificar créddito calculo", horasMensaisDisponiveis + horasExtras)
+        console.log("Piazzetta verificar créddito condição", valor * consumoCreditos)
+        if(this.isHotmilk)valor = valor/60
       if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
         let message;
         if(this.isHotmilk){
@@ -1642,11 +1648,13 @@ export default defineComponent({
         html: true,
         persistent: true,
       }).onOk((data) => {
+          
         if (!this.verificarCreditos(
             gerenciamentoHoras.horasMensaisDisponiveis,
             gerenciamentoHoras.horasExtras,
             Number(data),
-            gerenciamentoHoras.consumoCreditos) 
+            gerenciamentoHoras.consumoCreditos,
+            ) 
             && this.usoDeCreditos) {
           return;
         }
