@@ -1141,12 +1141,6 @@ export default defineComponent({
     },
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
-      console.log("PIAZZETTA verificar créditos", horasMensaisDisponiveis,
-            horasExtras,
-            valor,
-            consumoCreditos)
-        console.log("Piazzetta verificar créddito calculo", horasMensaisDisponiveis + horasExtras)
-        console.log("Piazzetta verificar créddito condição", valor * consumoCreditos)
         if(this.isHotmilk)valor = valor/60
       if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
         let message;
@@ -1545,7 +1539,7 @@ export default defineComponent({
       }
 
       return opcoes;
-
+  
     },
     async escolherHorario(minutos, hora, scope) {
       //aqui começa a parte de escolher horário
@@ -2138,7 +2132,7 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
-       
+    
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
 
@@ -2226,9 +2220,7 @@ export default defineComponent({
                 this.horaFinal = this.cliente.preferenciaVisita.horaFinal
                   .toString()
                   .split(":")[0];
-                
               }
-              
               if (this.cliente.preferenciaVisita.liberarAgendamento) {
                 this.liberarAgendamento = this.cliente.preferenciaVisita
                   .liberarAgendamento
