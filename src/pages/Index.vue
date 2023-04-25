@@ -1529,8 +1529,12 @@ export default defineComponent({
       let contadorTempoIntervalo = timeStepMin;
 
       const horaMomentInicial = moment(validadInicial);
-   
-      const horaMomentFinal = moment(validadInicial).set({hour:timeHoraFinal});
+      
+      let horaMomentFinal = moment(timeHoraFinal, 'HH:mm')
+      horaMomentFinal.set('year', validadInicial.getFullYear());
+      horaMomentFinal.set('month',validadInicial.getMonth());
+      horaMomentFinal.set('date',validadInicial.getDate());
+
       let horaIntervalo = horaMomentInicial.clone();
       horaIntervalo.add(contadorTempoIntervalo, 'minutes');
   
