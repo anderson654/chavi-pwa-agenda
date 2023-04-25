@@ -1129,7 +1129,13 @@ export default defineComponent({
       console.log("Erro ao carregar ", e);
       this.semImovel = true;
     }
-    if (this.semImovel) this.$router.push("/");
+    if (this.semImovel){
+      this.$store.dispatch("setarDados", {
+          key: "setLogin",
+          value: [],
+        });
+      this.$router.push("/");
+    } 
   },
   methods: {
     validaUsoCredito(consumoCreditos,consomeHoras,custoBase){    

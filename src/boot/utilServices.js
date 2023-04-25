@@ -177,7 +177,6 @@ export default ({ app, router, store }) => {
         return;
       },
       async logoutForce() {
-        console.log("PIAZZETTA login", this.getLogin.user)
         if (this.getLogin.user) {
           await this.$store.dispatch("setarDados", {
             key: "setLogin",
