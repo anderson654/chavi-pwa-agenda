@@ -859,7 +859,7 @@ export default defineComponent({
         return this.seMesmoDia;
       }
       return "";
-    },    
+    },
     logo() {
       let path = `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/`;
       if (
@@ -952,6 +952,7 @@ export default defineComponent({
       const mesNum = this.selectedDate
         ? this.selectedDate.split("-")[1]
         : moment().format("MM");
+
       return mes[parseInt(mesNum)];
     },
     isDesktop() {
@@ -1043,17 +1044,21 @@ export default defineComponent({
       }, 200);
       return week;
     },
-    isUsoDeCreditos(){      
+    isUsoDeCreditos(){
       if((this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras)){
         return true
       }
       return false;
     },
-  
+
   },
   mounted() {
     try {
+   
+
       this.selectedDate = today();
+      
+
       if (this.login && this.login.user) {
         const vetor = this.login.user.nome.split("-");
         const nome = vetor[0].trim();
@@ -1125,15 +1130,17 @@ export default defineComponent({
       if (!params || !params.entidadeId || !params.imovelRef)
         this.semImovel = true;
       this.setHoliday(new Date().getFullYear());
+
     } catch (e) {
       console.log("Erro ao carregar ", e);
       this.semImovel = true;
     }
     if (this.semImovel) this.$router.push("/");
+
   },
   methods: {
-    validaUsoCredito(consumoCreditos,consomeHoras,custoBase){    
- 
+    validaUsoCredito(consumoCreditos,consomeHoras,custoBase){
+
       if((consomeHoras) && (custoBase > 0)&& (consumoCreditos > 0) ){//
         return true
       }
@@ -1273,7 +1280,6 @@ export default defineComponent({
     },
     async nextStep() {
       if (!this.$refs.forms.validate()) {
-        console.log("cai aqui");
         return;
       }
       const nome = this.isCoworking
@@ -1309,14 +1315,11 @@ export default defineComponent({
         }
       }
       this.montarQrcode();
-      console.log("montar qrcode");
-      console.log(this.utilizarDocumentos, this.user.hasDocs);
 
       this.utilizarDocumentos && !this.user.hasDocs
         ? (this.parte += 1)
         : (this.parte += 2);
 
-      console.log("Parte:", this.parte);
     },
     badgeClasses(event, type) {
       const isHeader = type === "header";
@@ -1443,7 +1446,7 @@ export default defineComponent({
       else{
         opcaoPasso.label = `${opcaoPasso.label + ' Hora '}`;
       }
-      
+
       return opcaoPasso;
     },
     adicionaCreditoExtenso(opcaoPasso,consumoCreditos,consomeHoras, custoBase){
@@ -1455,7 +1458,7 @@ export default defineComponent({
 
       if(this.validaUsoCredito(consumoCreditos,consomeHoras,custoBase)){
         const calculoCusto = ( Number(opcaoPasso.value) / 60 ) *  Number(custoBase) *  consumoCreditos;
-        opcaoPasso.label += `(${Number(calculoCusto)} créditos)`;   
+        opcaoPasso.label += `(${Number(calculoCusto)} créditos)`;
       }
 
       return opcaoPasso;
@@ -1465,8 +1468,8 @@ export default defineComponent({
       let opcao = this.criaItemListaHorarios(contadorTempoIntervalo);
       return this.adicionaTempoPorExtenso(opcao);
     },
-    criaItemListaHorarios(contadorTempoIntervalo){      
-      
+    criaItemListaHorarios(contadorTempoIntervalo){
+
       const tempoDelimitador = 60;
 
       if (contadorTempoIntervalo < tempoDelimitador){
@@ -1475,11 +1478,11 @@ export default defineComponent({
       else{
         let timeHora = moment.duration(contadorTempoIntervalo,"minutes") ;
         timeHora = moment.utc(timeHora.asMilliseconds()).format("HH:mm");
-        return { label: timeHora.toString(), value : contadorTempoIntervalo};        
+        return { label: timeHora.toString(), value : contadorTempoIntervalo};
       }
-    
-    },  
-    
+
+    },
+
 
     tempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao) {
 
@@ -1493,10 +1496,10 @@ export default defineComponent({
           tempoMinimo = element?.value;
         }
       });
-     
+
       return this.escreveItemHorario(tempoMinimo).label;
-  
-    }, 
+
+    },
     validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita){
 
       if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined"))
@@ -1505,14 +1508,14 @@ export default defineComponent({
       }
 
       if(tempoMinimoAprovacao != 0 && aprovarVisita){
-        return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;   
+        return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
       }
       else if (!aprovarVisita){
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
-      return "";      
+      return "";
     },
-   
+
     construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,consumoCreditos,consomeHoras, custoBase){
 
       if((timeStepMin <= 0)&&(tempoMaximo <=0)&&(!timeHoraFinal)&&(!validadInicial)){
@@ -1523,7 +1526,7 @@ export default defineComponent({
       let contadorTempoIntervalo = timeStepMin;
 
       const horaMomentInicial = moment(validadInicial);
-      
+
       let horaMomentFinal = moment(timeHoraFinal, 'HH:mm')
       horaMomentFinal.set('year', validadInicial.getFullYear());
       horaMomentFinal.set('month',validadInicial.getMonth());
@@ -1531,23 +1534,23 @@ export default defineComponent({
 
       let horaIntervalo = horaMomentInicial.clone();
       horaIntervalo.add(contadorTempoIntervalo, 'minutes');
-  
+
       while ((contadorTempoIntervalo <= tempoMaximo)&&((horaMomentFinal.isAfter(horaIntervalo))||horaMomentFinal.isSame(horaIntervalo))){
 
             let opcao = this.escreveItemHorario(contadorTempoIntervalo);
             opcao = this.adicionaCreditoExtenso(opcao,consumoCreditos,consomeHoras, custoBase);
             opcoes.push(opcao);
-      
+
         contadorTempoIntervalo += timeStepMin ;
         horaIntervalo.add(timeStepMin, 'minutes');
       }
 
       return opcoes;
-  
+
     },
     async escolherHorario(minutos, hora, scope) {
       //aqui começa a parte de escolher horário
-     
+
       let gerenciamentoHoras = {};
 
       if (this.entidadeUsuario) {
@@ -1555,7 +1558,7 @@ export default defineComponent({
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
           method: "get",
         };
-        
+
         const response = await this.executeMethod(request, false);
 
         if(response && response.status == 200){
@@ -1597,12 +1600,12 @@ export default defineComponent({
       const timeStepMin =this.timeStepMin;
       const tempoMaximo = this.tempoMaximo;
       const options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,gerenciamentoHoras.consumoCreditos,consomeHoras,custoBase);
-      
+
       const date = scope.timestamp.date;
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
       ).getTime();
-  
+
       let itens = [];
       let multiplicaMs = 60 * 1000;
 
@@ -1613,10 +1616,10 @@ export default defineComponent({
         const eventFilter = this.events.find((item) => {
           return item.timestampInicial > dateTime;
         });
-    
+
         if (eventFilter) {
           const dateTimeFinal = dateTime + ms;
-  
+
           if ((eventFilter.timestampInicial >= dateTimeFinal) && inteiro) {
             itens.push(opt);
           }
@@ -1633,10 +1636,10 @@ export default defineComponent({
               ${ gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras }
               </strong></p>
             </span>`;
-            
-  
+
+
         message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
-       
+
       } else {
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>
@@ -1662,17 +1665,17 @@ export default defineComponent({
         html: true,
         persistent: true,
       }).onOk((data) => {
-          
+
         if (!this.verificarCreditos(
             gerenciamentoHoras.horasMensaisDisponiveis,
             gerenciamentoHoras.horasExtras,
             Number(data),
             gerenciamentoHoras.consumoCreditos,
-            ) 
+            )
             && this.usoDeCreditos) {
           return;
         }
-       
+
         const visita = {
           title: "Horário Selecionado",
           date: scope.timestamp.date,
@@ -1711,6 +1714,7 @@ export default defineComponent({
     },
     //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
     async onTimeClick({ event, scope }) {
+      
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
       const dia = moment(scope.timestamp.date);
@@ -1943,14 +1947,14 @@ export default defineComponent({
         formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
 
         request.headers = { "Content-Type": "multipart/form-data" };
-        request.data = formData;   
+        request.data = formData;
       }
       const response = await this.executeMethod(request, false);
       Loading.hide();
 
       if (response && response.status == 200) {
         const message = response.data.text;
- 
+
         if (
           response.data.responseWpp &&
           response.data.responseWpp.statusCode &&
@@ -2136,7 +2140,7 @@ export default defineComponent({
               imovelRef: imovel,
             },
           });
-    
+
           if (response && response.status == 200) {
             this.cliente = response.data.entidade;
 
@@ -2260,13 +2264,13 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-          
+
           if (!horario.paraAprovar) {
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
               )
-            );           
+            );
 
             let finalTemp = horario.timestampInicial + horario.intervalo
 
@@ -2275,7 +2279,7 @@ export default defineComponent({
                 "YYYY-MM-DD HH:mm"
               )
             );
-            
+
             const duracao = horario.intervalo / 60000;
 
             let titleBusy = "Ocupado";
@@ -2286,7 +2290,7 @@ export default defineComponent({
                     <div class="full-width text-center">`;
 
               if (horario.usuario.indexOf("-") == -1){
-                titleBusy += horario.usuario.trim();                      
+                titleBusy += horario.usuario.trim();
               }
               else{
                 titleBusy += `${horario.usuario.split("-")[0].trim()}<br/>`
@@ -2301,8 +2305,8 @@ export default defineComponent({
               }
 
               titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
-            }         
-           
+            }
+
             optionsOff.push({
               title: horario.paraAprovar ? "Pendente" : titleBusy,
               date: inicio.date,
