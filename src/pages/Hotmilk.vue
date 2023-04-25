@@ -70,6 +70,7 @@
                 :label="'Bloco ' + bloco.num"
                 @click="
                   selecionarBloco = false;
+                  selecionarAndar = true;
                   blocoSelecionado = bloco;
                 "
               />
@@ -90,6 +91,7 @@
                 label="Selecionar outro bloco"
                 @click="
                   selecionarBloco = true;
+                  selecionarAndar = true;
                   blocoSelecionado = undefined;
                 "
               />
@@ -307,21 +309,12 @@ export default {
       window.open(url, target);
     },
     voltarOndeEstava() {
-      if (this.$store.getters.getEstadoInicial) {
-        this.selecionarBloco = false;
-        this.selecionarAndar = false;
-        this.andarSelecionado = "Térreo";
-        this.blocoSelecionado = {
-          andares: { 0: "Térreo", 1: 1, 2: 2 },
-          foto: "bloco_1.png",
-          num: 1,
-        };
-      } else {
-        this.selecionarBloco = true;
-        this.selecionarAndar = true;
-        this.andarSelecionado = undefined;
-        this.blocoSelecionado = undefined;
-      }
+   
+      this.selecionarBloco = true;
+      this.selecionarAndar = true;
+      this.andarSelecionado = undefined;
+      this.blocoSelecionado = undefined;
+    
     },
     getImage(image) {
       if (image && image.indexOf("https://") > -1) return image;
