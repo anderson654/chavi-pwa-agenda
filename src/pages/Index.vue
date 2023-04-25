@@ -1134,7 +1134,7 @@ export default defineComponent({
   methods: {
     validaUsoCredito(consumoCreditos,consomeHoras,custoBase){    
  
-      if((consomeHoras) && (custoBase > 0)&& (consumoCreditos > 0) ){//
+      if((custoBase > 0)&& (consumoCreditos > 0) ){//
         return true
       }
       return false;
@@ -1452,7 +1452,7 @@ export default defineComponent({
       {
         return opcaoPasso;
       }
-
+      
       if(this.validaUsoCredito(consumoCreditos,consomeHoras,custoBase)){
         const calculoCusto = ( Number(opcaoPasso.value) / 60 ) *  Number(custoBase) *  consumoCreditos;
         opcaoPasso.label += `(${Number(calculoCusto)} créditos)`;   
@@ -1825,7 +1825,6 @@ export default defineComponent({
       }
       return filtro;
     },
-    //não existe nescessita pagamento - Verficar se é pra tirar
     async onSubmit() {
       if (this.necessitaPagamento) {
         this.checkoutPagamento();
@@ -1887,6 +1886,8 @@ export default defineComponent({
       let user = {
         ...this.user,
       };
+
+      user.entidadeUsuario = this.getLogin.user.entidadeId
 
       if (this.necessitaAprovacao) {
         user.necessitaAprovacao = true;
@@ -2036,7 +2037,6 @@ export default defineComponent({
           ) /
             15),
       };
-
       let request = {
         url: "Entidades/checkoutPagamento",
         method: "post",
