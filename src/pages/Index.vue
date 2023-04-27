@@ -1023,6 +1023,7 @@ export default defineComponent({
       return week;
     },
     isUsoDeCreditos(){
+      console.log(this.getLogin.user)
       if((this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras)){
         return true
       }
@@ -1099,36 +1100,77 @@ export default defineComponent({
     } 
   },
   methods: {
-    validaUsoCredito(consumoCreditos,consomeHoras,custoBase){    
- 
-      if((custoBase > 0)&& (consumoCreditos > 0) ){//
+    validaConsomeHorasCredito(consumoCreditos,consomeHoras,custoBase){
+      if((consomeHoras)&&(custoBase > 0)&& (consumoCreditos > 0)){//
         return true
       }
       return false;
     },
+    validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras){
+
+      return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras);//
+      
+    
+
+      // if((custoBase > 0)&& (consumoCreditos > 0) ){//
+      //   return true
+      // }
+      // return false;
+    },
     //verificar créditos retorna false se não tiver créditos
-    verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, consumoCreditos) {
-        if(this.isHotmilk)valor = valor/60
-      if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
+    verificarCreditos(horasMensaisDisponiveis, horasExtras, valor,coworking, consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos) {
+    console.log('ttttttttttttttttttttttttttttt')
+      if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){// if(this.validaUsoCredito(consumoCreditos,consomeHoras,custoBase)){
+        const calculoCusto = this.calcularCusto(valor,consumoCreditos, custoBase);
+        console.log("🚀 ~ file: Index.vue:1170 ~ custoBase:", custoBase)
+        console.log("🚀 ~ file: Index.vue:1170 ~ consumoCreditos:", consumoCreditos)
+        console.log("🚀 ~ file: Index.vue:1170 ~ valor:", valor)
+        console.log("🚀 ~ file: Index.vue:1170 ~ calculoCusto:", calculoCusto)
+        // console.log("🚀 ~ file: Index.vue:1170 ~ verificarCreditos ~ calculoCusto:", calculoCusto)
+      
         let message;
-        if(this.isHotmilk){
-          message = "<p>Você não possui créditos suficientes</p>" + "<a href='#'> Clique aqui para solicitar mais créditos</a>"
-        }else{
-          message = "<p>Você não possui créditos suficientes</p>"
+        if ((horasMensaisDisponiveis + horasExtras) < calculoCusto) {
+         
+          message = "<p>Você não possui créditos suficientes</p>";
+          Dialog.create({
+            title: "Aviso",
+            //link ainda não implemenado
+            message:message,
+            html: true,
+            ok: {
+              label: "ok",
+              color: "positive",
+            },
+          }).onOk(() => {});
+          return false;
         }
-        Dialog.create({
-          title: "Aviso",
-          //link ainda não implemenado
-          message:message,
-          html: true,
-          ok: {
-            label: "ok",
-            color: "positive",
-          },
-        }).onOk(() => {});
-        return false;
+        return true;
       }
       return true;
+
+
+
+
+      // if (horasMensaisDisponiveis + horasExtras < valor * consumoCreditos) {
+      //   let message;
+      //   if(this.isHotmilk){
+      //     message = "<p>Você não possui créditos suficientes</p>" + "<a href='#'> Clique aqui para solicitar mais créditos</a>"
+      //   }else{
+      //     message = "<p>Você não possui créditos suficientes</p>"
+      //   }
+      //   Dialog.create({
+      //     title: "Aviso",
+      //     //link ainda não implemenado
+      //     message:message,
+      //     html: true,
+      //     ok: {
+      //       label: "ok",
+      //       color: "positive",
+      //     },
+      //   }).onOk(() => {});
+      //   return false;
+      // }
+      // return true;
     },
 
     async telaInicial() {
@@ -1412,17 +1454,29 @@ export default defineComponent({
 
       return opcaoPasso;
     },
-    adicionaCreditoExtenso(opcaoPasso,consumoCreditos,consomeHoras, custoBase){
+    calcularCusto(opcaoPasso,consumoCreditos, custoBase){
+      // if(this.validaUsoCredito(consumoCreditos,consomeHoras,custoBase)){
+        return ( Number(opcaoPasso) / 60 ) *  Number(custoBase) *  consumoCreditos;
+      // }
+    
+    },
+    adicionaCreditoExtenso(opcaoPasso,funcionamentoIndividual,custaCreditos,consumoCreditos,coworking,consomeHoras,custoBase){
 
       if ((!consumoCreditos) || (!custoBase))
       {
         return opcaoPasso;
+      }    
+
+      if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){
+  
+        const calculoCusto = this.calcularCusto(opcaoPasso.value,consumoCreditos, custoBase)  
+        opcaoPasso.label += `(${parseFloat(calculoCusto.toFixed(2))} créditos)`;
       }
-      
-      if(this.validaUsoCredito(consumoCreditos,consomeHoras,custoBase)){
-        const calculoCusto = ( Number(opcaoPasso.value) / 60 ) *  Number(custoBase) *  consumoCreditos;
-        opcaoPasso.label += `(${Number(calculoCusto)} créditos)`;
-      }
+
+      // if(this.validaUsoCredito(consumoCreditos,consomeHoras,custoBase)){
+      //   const calculoCusto = this.calcularCusto(opcaoPasso.value,consumoCreditos, custoBase)       
+      //   opcaoPasso.label += `(${Number(calculoCusto)} créditos)`;
+      // }
 
       return opcaoPasso;
 
@@ -1479,7 +1533,7 @@ export default defineComponent({
       return "";
     },
 
-    construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,consumoCreditos,consomeHoras, custoBase){
+    construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos){
 
       if((timeStepMin <= 0)&&(tempoMaximo <=0)&&(!timeHoraFinal)&&(!validadInicial)){
         return [];
@@ -1501,7 +1555,9 @@ export default defineComponent({
       while ((contadorTempoIntervalo <= tempoMaximo)&&((horaMomentFinal.isAfter(horaIntervalo))||horaMomentFinal.isSame(horaIntervalo))){
 
             let opcao = this.escreveItemHorario(contadorTempoIntervalo);
-            opcao = this.adicionaCreditoExtenso(opcao,consumoCreditos,consomeHoras, custoBase);
+            console.log("🚀 ~ file: Index.vue:1599 ~ construirOpcoesAgendamento ~ opcao:", opcao.value)
+            
+            opcao = this.adicionaCreditoExtenso(opcao,funcionamentoIndividual,custaCreditos,consumoCreditos,coworking,consomeHoras,custoBase);
             opcoes.push(opcao);
 
         contadorTempoIntervalo += timeStepMin ;
@@ -1515,7 +1571,6 @@ export default defineComponent({
       //aqui começa a parte de escolher horário
 
       let gerenciamentoHoras = {};
-
       if (this.entidadeUsuario) {
         let request = {
           url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
@@ -1526,6 +1581,19 @@ export default defineComponent({
 
         if(response && response.status == 200){
           gerenciamentoHoras = response.data;
+        }
+      }
+      let gerenciamentoCreditos = {};
+      if (this.imovel) {
+        let request = {
+          url: `entidades/gerenciamentoDeCreditos/${this.imovel.entidadeId}/${this.idImovel}`,
+          method: "get",
+        };
+
+        const response = await this.executeMethod(request, false);
+
+        if(response && response.status == 200){
+          gerenciamentoCreditos = response.data;
         }
       }
 
@@ -1556,13 +1624,22 @@ export default defineComponent({
       const validadeInicial = new Date(
           (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
         );
+      /* Dados da Entidade */
+      const coworking =  gerenciamentoCreditos.coworking;
+      const consomeHoras = gerenciamentoCreditos.consomeHoras;//this.usoDeCreditos;//this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras;
+      const custoBase = gerenciamentoCreditos.custoBase;//this.custoBase;
+      /* Dados do Imovel */
+      const funcionamentoIndividual = gerenciamentoCreditos.funcionamentoIndividual;
+      const custaCreditos = gerenciamentoCreditos.custaCreditos;
+      const consumoCreditos = gerenciamentoCreditos.consumoCreditos;
 
-      const consomeHoras = this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras;
-      const custoBase = this.custoBase;
+      console.log("🚀 ~ file: Index.vue:1666 ~ escolherHorario ~ consomeHoras:", consomeHoras)
+      
       const horaFinal = this.horaFinal;
       const timeStepMin =this.timeStepMin;
       const tempoMaximo = this.tempoMaximo;
-      const options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,gerenciamentoHoras.consumoCreditos,consomeHoras,custoBase);
+      
+      const options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
 
       const date = scope.timestamp.date;
       const dateTime = new Date(
@@ -1590,18 +1667,31 @@ export default defineComponent({
           itens.push(opt);
         }
       }
+      console.log('gerenciamentoHoras.consumoCreditos')
+      console.log(gerenciamentoHoras.consumoCreditos)
+      console.log(consomeHoras)
+      console.log(custoBase)
 
       let message;
-      if(this.usoDeCreditos && gerenciamentoHoras.consumoCreditos > 0){
+      if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){//if(this.validaConsomeHorasCredito(gerenciamentoHoras.consumoCreditos,consomeHoras,custoBase)){//if(this.usoDeCreditos && gerenciamentoHoras.consumoCreditos > 0){
         message = `<span class='text-black' style='font-size: 1rem'>
-            <center>Selecione a duração da sua utilização</center>
-            <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
-              ${ gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras }
-              </strong></p>
-            </span>`;
+            <center>Selecione a duração da sua utilização</center>`          
+
+            if((!isNaN( gerenciamentoHoras.horasMensaisDisponiveis))&&(!isNaN( gerenciamentoHoras.horasExtras))){
+              const creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras ;
+              message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
+                      ${ parseFloat(creditoUsuario.toFixed(2))}
+                      </strong></p>
+                    </span>`;
+            }
+            else{
+              message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos:
+                 <strong> 0 </strong></p>
+                </span>`;
+            }
 
 
-        message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
+          message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
 
       } else {
         message = `<span class='text-black' style='font-size: 1rem'>
@@ -1629,13 +1719,8 @@ export default defineComponent({
         persistent: true,
       }).onOk((data) => {
 
-        if (!this.verificarCreditos(
-            gerenciamentoHoras.horasMensaisDisponiveis,
-            gerenciamentoHoras.horasExtras,
-            Number(data),
-            gerenciamentoHoras.consumoCreditos,
-            )
-            && this.usoDeCreditos) {
+        if (!this.verificarCreditos(gerenciamentoHoras.horasMensaisDisponiveis,gerenciamentoHoras.horasExtras,
+          Number(data),coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos)) {
           return;
         }
 
@@ -1796,6 +1881,7 @@ export default defineComponent({
       }
       return filtro;
     },
+    //não existe nescessita pagamento - Verficar se é pra tirar
     async onSubmit() {
       if (this.necessitaPagamento) {
         this.checkoutPagamento();
@@ -2010,6 +2096,7 @@ export default defineComponent({
             15),
         imovel: this.idImovel
       };
+
       let request = {
         url: "Entidades/checkoutPagamento",
         method: "post",
@@ -2097,6 +2184,8 @@ export default defineComponent({
           message: "Carregando dados",
         });
         const cliente = this.user.entidadeId;
+        console.log("🚀 ~ file: Index.vue:2216 ~ carregarHorarios ~ cliente:", cliente)
+        
         const imovel = this.user.imovelRef;
         if (cliente) {
           const response = await this.executeMethod({
