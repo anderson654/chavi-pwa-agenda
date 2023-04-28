@@ -123,9 +123,10 @@ export default {
   async mounted() {
     this.mensagem = this.catalogoMensagens(this.$route.query.collection_status);
     this.visita = this.$store.getters.getConvite;
-    let filtro = this.visita.name;
-    this.nome = filtro.charAt(0).toUpperCase() + filtro.slice(1);
+    this.nome = this.visita.name.charAt(0).toUpperCase() + this.visita.name.slice(1);
+
     if (this.$route.query.collection_status === "approved") {
+
       let request = {
         url: "Visitas/validarVisita",
         method: "post",

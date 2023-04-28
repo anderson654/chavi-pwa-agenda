@@ -257,17 +257,6 @@
             lazy-rules
             :rules="[(val) => (val && val.length > 0) || 'Insira o seu nome']"
           />
-          <!-- NOME DA EMPRESA TODO: IMPLEMENTAR UM CAMPO SERVER SIDE PRA ISSO-->
-          <q-input
-            v-if="isCoworking"
-            class="parte1 full-width text-h5"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-model="user.empresa"
-            label="Sua empresa ou instituição*"
-            lazy-rules
-            :rules="[(val) => (val && val.length > 0) || 'Complete esse campo']"
-          />
           <!-- LOGIN TELEFONE -->
           <q-input
             v-if="!loginEmail"
@@ -352,17 +341,6 @@
             lazy-rules
             clearable
             :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
-          />
-          <!-- NOME DA EMPRESA TODO: IMPLEMENTAR UM CAMPO SERVER SIDE PRA ISSO-->
-          <q-input
-            v-if="isCoworking"
-            class="parte1 full-width text-h5"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-model="user.empresa"
-            label="Sua empresa ou instituição*"
-            lazy-rules
-            :rules="[(val) => (val && val.length > 0) || 'Complete esse campo']"
           />
           <!-- TELEFONE -->
           <q-input
@@ -1102,29 +1080,6 @@ export default defineComponent({
           : "";
         this.carregarHorarios();
         this.montarQrcode();
-        if (this.login.validadeInicial && this.login.validadeFinal) {
-          // Pula para preencher o formulário
-          this.inForms = true;
-          this.parte = 2;
-          // Define horário selecionado quando no browser
-          const data = moment(this.login.validadeInicial);
-          const visita = {
-            title: "Horário Selecionado",
-            date: data.format("YYYY-MM-DD"),
-            time: data.format("HH:mm"),
-            duration: this.timeStepMin,
-            bgcolor: "green-10",
-            textColor: "text-white",
-          };
-          this.events.push(visita);
-          // Limpa a escolha do horário no localstorage para n dar problema nas próximas vezes
-          delete this.login.validadeInicial;
-          delete this.login.validadeFinal;
-          this.$store.dispatch("setarDados", {
-            key: "setLogin",
-            value: this.login,
-          });
-        }
       }
       this.semImovel = false;
       if (!params || !params.entidadeId || !params.imovelRef)
@@ -1288,7 +1243,7 @@ export default defineComponent({
         return;
       }
       const nome = this.isCoworking
-        ? this.user.name + " - " + this.user.empresa
+        ? this.user.name + " - " + this.getLogin.user.entidade.nome
         : this.user.name;
       if (
         this.login &&
@@ -1299,7 +1254,7 @@ export default defineComponent({
           this.user.name != this.login.user.nome)
       ) {
         const nome = this.isCoworking
-          ? this.user.name + " - " + this.user.empresa
+          ? this.user.name + " - " + this.getLogin.user.entidade.nome
           : this.user.name;
         let dados = {
           id: this.login.userId,
@@ -1426,9 +1381,12 @@ export default defineComponent({
                 (this.isCoworking
                   ? this.user.empresa && this.user.empresa != ""
                   : true)
-              )
+              ){
                 this.parte = 4;
-              else this.parte = 2;
+              } else {
+                this.user.empresa = this.getLogin.user.entidade.nome
+                this.parte = 4
+              }
             }
             Loading.hide();
           }, 1500);
@@ -1932,6 +1890,7 @@ export default defineComponent({
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
+        console.log("PIAZZETTA ~ file: Index.vue:1893 ~ onSubmit ~ this.user.fotoSelfie:", this.user.fotoSelfie)
 
         const blobFrente = {
           blob: new Blob([this.user.fotoFrente]),
@@ -2049,6 +2008,7 @@ export default defineComponent({
             this.user.validadeFinal
           ) /
             15),
+        imovel: this.idImovel
       };
       let request = {
         url: "Entidades/checkoutPagamento",
@@ -2059,9 +2019,11 @@ export default defineComponent({
       const response = await this.executeMethod(request, false);
       this.user.entidadeUsuario = this.entidadeUsuario;
 
+      let convite = await this.criarVisita()
+      
       this.$store.dispatch("setarDados", {
         key: "setConvite",
-        value: this.user,
+        value: convite,
       });
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
@@ -2371,9 +2333,7 @@ export default defineComponent({
     },
     async checkCode() {
       let response;
-      const nome = this.isCoworking
-        ? this.user.name + " - " + this.user.empresa
-        : this.user.name;
+      const nome = this.user.name
       if (this.newUser) {
         Loading.show({ delay: 400 });
         if (this.loginEmail)
@@ -2434,6 +2394,7 @@ export default defineComponent({
           value: response.data,
         });
 
+        this.user.empresa = this.getLogin.user.entidade.nome
         this.user.cpf = response.data.user.cpf;
         this.user.email = response.data.user.email;
         this.user.hasDocs =
@@ -2447,6 +2408,7 @@ export default defineComponent({
         if(this.isUsoDeCreditos){
           this.usoDeCreditos = true
         }
+        this.user.name = this.user.name + " - " + this.getLogin.user.entidade.name
       } else {
         Notify.create({
           message: "Número de Telefone inválido ou Código SMS incorreto.",
@@ -2455,11 +2417,37 @@ export default defineComponent({
       }
     },
     async criarVisita() {
+      this.user.numeroVisitantesExternos = parseInt(
+        this.numeroVisitantesExternos
+      );
+
       let user = {
         ...this.user,
       };
 
+      user.entidadeUsuario = this.getLogin.user.entidadeId
+
+      if (this.necessitaAprovacao) {
+        user.necessitaAprovacao = true;
+      }
+
+      if (this.whatsappAvisoAgendamento) {
+        user.whatsappAvisoAgendamento = this.whatsappAvisoAgendamento;
+      }
+
+      if (this.emailAvisoAgendamento) {
+        user.emailAvisoAgendamento = this.emailAvisoAgendamento;
+      }
+
+      if (this.eventoOutros) {
+        user.eventoOutros = this.eventoOutros;
+      }
+
+      this.user.paraAprovar =
+        this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
+
       if (!this.user.hasDocs) {
+
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
@@ -2477,14 +2465,7 @@ export default defineComponent({
           name: this.user.fotoSelfie.name,
         };
 
-        let formData = new FormData();
-        Object.keys(user).forEach((key) => formData.append(key, user[key]));
-        formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
-        formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
-        formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
-
-        request.headers = { "Content-Type": "multipart/form-data" };
-        request.data = formData;
+        user.fotos = {blobFrente, blobAtras, blobSelfie}
       }
 
       return user;
