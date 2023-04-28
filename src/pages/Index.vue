@@ -1416,11 +1416,6 @@ export default defineComponent({
     },
     adicionaCreditoExtenso(opcaoPasso,funcionamentoIndividual,custaCreditos,consumoCreditos,coworking,consomeHoras,custoBase){
 
-      if ((!consumoCreditos) || (!custoBase))
-      {
-        return opcaoPasso;
-      }    
-
       if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){
     
         let calculoCusto = this.calcularCusto(opcaoPasso.value,consumoCreditos, custoBase);
@@ -1515,6 +1510,7 @@ export default defineComponent({
       return opcoes;
 
     },
+      
     async escolherHorario(minutos, hora, scope) {
      let gerenciamentoHoras = {};
       if (this.entidadeUsuario) {
