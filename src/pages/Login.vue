@@ -248,34 +248,6 @@ export default {
       this.user.email = "";
     },
     async nextStep() {
-      const nome = this.user.name + " - " + this.user.empresa;
-      if (
-        this.login &&
-        this.login.user &&
-        (this.login.user.nome != nome ||
-          this.user.email != this.login.user.email ||
-          this.user.cpf != this.login.user.cpf ||
-          this.user.name != this.login.user.nome)
-      ) {
-        const nome = this.user.name + " - " + this.user.empresa;
-        let dados = {
-          id: this.login.userId,
-          email: this.user.email,
-          cpf: this.user.cpf,
-          nome: nome,
-        };
-        if (!this.user.email) delete dados.email;
-        const response = await this.executeMethod({
-          url: "Usuarios/atualizar",
-          method: "POST",
-          data: {
-            dados: dados,
-          },
-        });
-        if (response.status == 200) {
-          this.login.user = response.data;
-        }
-      }
       this.$router.push("/hotmilk");
     },
   },
