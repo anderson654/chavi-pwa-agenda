@@ -247,16 +247,6 @@
       >
         <!-- LOGIN -->
         <div v-show="parte == 1" class="full-width">
-          <!-- NOME DO USUÁRIO -->
-          <q-input
-            class="parte1 full-width text-h5"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-model="user.name"
-            label="Seu nome*"
-            lazy-rules
-            :rules="[(val) => (val && val.length > 0) || 'Insira o seu nome']"
-          />
           <!-- LOGIN TELEFONE -->
           <q-input
             v-if="!loginEmail"
@@ -331,16 +321,6 @@
         <!-- DADOS DO USER -->
         <div v-show="parte == 2" class="full-width">
           <!-- NOME -->
-          <q-input
-            class="parte1 full-width"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-model="user.name"
-            label="Seu nome *"
-            hint="Nome e sobrenome"
-            lazy-rules
-            clearable
-            :rules="[(val) => (val && val.length > 0) || 'Insira um nome']"
           />
           <!-- TELEFONE -->
           <q-input
@@ -1038,12 +1018,9 @@ export default defineComponent({
       
 
       if (this.login && this.login.user) {
-        const vetor = this.login.user.nome.split("-");
-        const nome = vetor[0].trim();
-        const empresa = vetor.length > 1 ? vetor[1].trim() : "";
         this.user = {
-          name: nome,
-          empresa: empresa,
+          name: this.login.user.nome.split("-")[0].trim(),
+          empresa: this.getLogin.user.entidade.name,
           phone: this.login.user.telefone,
           email: this.login.user.email,
           cpf: this.login.user.cpf,
@@ -1252,14 +1229,11 @@ export default defineComponent({
           this.user.cpf != this.login.user.cpf ||
           this.user.name != this.login.user.nome)
       ) {
-        const nome = this.isCoworking
-          ? this.user.name + " - " + this.getLogin.user.entidade.nome
-          : this.user.name;
         let dados = {
           id: this.login.userId,
           email: this.user.email,
           cpf: this.user.cpf,
-          nome: nome,
+          nome: this.getLogin.user.name
         };
         if (!this.user.email) delete dados.email;
         const response = await this.executeMethod({
@@ -2233,6 +2207,9 @@ export default defineComponent({
                 : false;
             }
             this.events = response.data.horarios;/////
+            console.log("PIAZZETTA ~ file: Index.vue:2236 ~ carregarHorarios ~ response.data:", response.data)
+            console.log("PIAZZETTA ~ file: Index.vue:2236 ~ carregarHorarios ~ this.events:", this.events)
+            
             this.formatData();
           } else {
             Notify.create({
@@ -2433,7 +2410,7 @@ export default defineComponent({
         if(this.isUsoDeCreditos){
           this.usoDeCreditos = true
         }
-        this.user.name = this.user.name + " - " + this.getLogin.user.entidade.name
+        this.user.name = this.getLogin.user.nome
       } else {
         Notify.create({
           message: "Número de Telefone inválido ou Código SMS incorreto.",

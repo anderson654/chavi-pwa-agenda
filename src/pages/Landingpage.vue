@@ -132,7 +132,7 @@ export default {
     },
   },
   created() {
-    this.logoutForce()
+    //this.logoutForce()
   }
 };
 </script>

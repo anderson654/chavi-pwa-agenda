@@ -15,28 +15,6 @@
           style="width: 90vw; max-width: 500px"
         >
           <div class="full-width">
-            <!-- NOME DO USUÁRIO -->
-            <q-input
-              class="parte1 full-width text-h5"
-              label-color="primary"
-              style="font-size: 1.2rem"
-              v-model="user.name"
-              label="Seu nome*"
-              lazy-rules
-              :rules="[(val) => (val && val.length > 0) || 'Insira o seu nome']"
-            />
-            <!-- NOME DA EMPRESA TODO: IMPLEMENTAR UM CAMPO SERVER SIDE PRA ISSO-->
-            <q-input
-              class="parte1 full-width text-h5"
-              label-color="primary"
-              style="font-size: 1.2rem"
-              v-model="user.empresa"
-              label="Sua empresa ou instituição*"
-              lazy-rules
-              :rules="[
-                (val) => (val && val.length > 0) || 'Complete esse campo',
-              ]"
-            />
             <!-- LOGIN TELEFONE -->
             <q-input
               v-if="!loginEmail"
@@ -57,26 +35,6 @@
                 (val) =>
                   (val && val.length == 15) ||
                   'Por favor, insira seu telefone no formato (41) 91122-3344.',
-              ]"
-            />
-            <!-- LOGIN EMAIL -->
-            <q-input
-              v-else
-              class="parte1 full-width"
-              type="email"
-              label-color="primary"
-              style="font-size: 1.2rem"
-              v-model="user.email"
-              label="Seu Email *"
-              lazy-rules
-              :debounce="1000"
-              :rules="[
-                (val) =>
-                  (val !== null && val !== '') ||
-                  'Por favor, insira seu e-mail.',
-                (val) =>
-                  verificarEmail(val) ||
-                  'Por favor, insira seu email em um formato correto.',
               ]"
             />
             <!-- CÓDIGO DE VERIFICAÇÃO -->
@@ -203,7 +161,6 @@ export default {
     },
     async checkCode() {
       let response;
-      const nome = this.user.name + " - " + this.user.empresa;
       if (this.newUser) {
         Loading.show({ delay: 400 });
         if (this.loginEmail)
@@ -214,7 +171,6 @@ export default {
               data: {
                 dados: {
                   email: this.user.email,
-                  nome: nome.trim(),
                   codigo: this.user.codigo,
                 },
               },
@@ -228,7 +184,6 @@ export default {
               method: "post",
               data: {
                 telefone: this.user.phone,
-                nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
               },
             },
