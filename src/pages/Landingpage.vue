@@ -56,7 +56,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('/login')"
+          @click="$router.push('/hotmilk')"
         />
       </div>
 

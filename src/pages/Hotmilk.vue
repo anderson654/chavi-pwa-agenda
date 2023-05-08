@@ -300,9 +300,9 @@ export default {
     },
   },
   mounted() {
-    if (!(this.login && this.login.user)) {
-      this.$router.push("/login");
-    }
+    // if (!(this.login && this.login.user)) {
+    //   this.$router.push("/login");
+    // }
   },
   methods: {
     openLink(url, target) {
