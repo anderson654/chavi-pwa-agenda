@@ -1077,12 +1077,12 @@ export default defineComponent({
   },
   methods: {   
     validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras){
-      return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras);      
+      return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras && (this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId));      
     },
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor,coworking, consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos) {
   
-      if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){
+      if((this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras))){
         const calculoCusto = this.calcularCusto(valor,consumoCreditos, custoBase);
       
         let message;
@@ -1559,19 +1559,21 @@ export default defineComponent({
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>`          
 
-            if((!isNaN( gerenciamentoHoras.horasMensaisDisponiveis))&&(!isNaN( gerenciamentoHoras.horasExtras))){
-              let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras ;
-              
-              message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
-                      ${creditoUsuario.toFixed(2)}
-                      </strong></p>
-                    </span>`;
-            }
-            else{
-              message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos:
-                 <strong> 0 </strong></p>
-                </span>`;
-            }
+            // if(this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId){
+              if((!isNaN( gerenciamentoHoras.horasMensaisDisponiveis))&&(!isNaN( gerenciamentoHoras.horasExtras))){
+                let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras ;
+                
+                message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
+                        ${creditoUsuario.toFixed(2)}
+                        </strong></p>
+                      </span>`;
+              }
+              else{
+                message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos:
+                   <strong> 0 </strong></p>
+                  </span>`;
+              }
+           //}
 
           message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
 
@@ -1861,7 +1863,6 @@ export default defineComponent({
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
-        console.log("PIAZZETTA ~ file: Index.vue:1893 ~ onSubmit ~ this.user.fotoSelfie:", this.user.fotoSelfie)
 
         const blobFrente = {
           blob: new Blob([this.user.fotoFrente]),
