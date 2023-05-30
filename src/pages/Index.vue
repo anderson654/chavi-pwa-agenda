@@ -1233,6 +1233,7 @@ export default defineComponent({
         "left-side": !isHeader && event.side === "left",
         "right-side": !isHeader && event.side === "right",
         "rounded-border": true,
+        "borderDivCalendar" : true,
       };
     },
     badgeStyles(event, timeStartPos, timeDurationHeight) {
@@ -1850,8 +1851,11 @@ export default defineComponent({
         data: user,
       };
 
-      this.user.paraAprovar =
-        this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
+      // this.user.paraAprovar =
+      //   this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
+
+      let duracao = (this.user.validadeFinal - this.user.validadeInicial) / 60000
+			this.user.paraAprovar = duracao > this.tempoMinimoAprovacao;
 
       if (!this.user.hasDocs) {
 
@@ -2178,8 +2182,6 @@ export default defineComponent({
                 : false;
             }
             this.events = response.data.horarios;/////
-            console.log("PIAZZETTA ~ file: Index.vue:2236 ~ carregarHorarios ~ response.data:", response.data)
-            console.log("PIAZZETTA ~ file: Index.vue:2236 ~ carregarHorarios ~ this.events:", this.events)
             
             this.formatData();
           } else {
@@ -2205,14 +2207,13 @@ export default defineComponent({
         let optionsOff = [];
         for (let horario of this.events) {
 
-          if (!horario.paraAprovar) {
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
               )
             );
 
-            let finalTemp = horario.timestampInicial + horario.intervalo
+            let finalTemp = parseInt(horario.timestampInicial) + parseInt(horario.intervalo)
 
             const final = parseTimestamp(
               moment(parseInt(finalTemp)).format(
@@ -2248,17 +2249,18 @@ export default defineComponent({
             }
 
             optionsOff.push({
-              title: horario.paraAprovar ? "Pendente" : titleBusy,
+              title: titleBusy,// horario.paraAprovar ? "Pendente" : titleBusy,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
-              bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
+              bgcolor: horario.paraAprovar ? "yellow-9" : "red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
             });
-          }
+
         }
         this.events = optionsOff;
+
       }
     },
     async sendCode() {
@@ -2582,6 +2584,12 @@ export default defineComponent({
   z-index: 9999999;
   right: 20px;
   top: 20px;
+}
+
+.borderDivCalendar{
+  border-color : black;
+  border-style : solid;
+  border-width: 0.1rem;
 }
 
 .descritivo {
