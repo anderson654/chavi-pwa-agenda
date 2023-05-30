@@ -669,7 +669,7 @@
               label="Solicitar"
               color="positive"
               type="submit"
-              v-if="necessitaAprovacao && !necessitaPagamento"
+              v-if="necessitaAprovacao"
             />
 
             <q-btn
@@ -1077,12 +1077,12 @@ export default defineComponent({
   },
   methods: {   
     validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras){
-      return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras);      
+      return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras && (this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId));      
     },
     //verificar créditos retorna false se não tiver créditos
     verificarCreditos(horasMensaisDisponiveis, horasExtras, valor,coworking, consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos) {
   
-      if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){
+      if((this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras))){
         const calculoCusto = this.calcularCusto(valor,consumoCreditos, custoBase);
       
         let message;
@@ -1560,19 +1560,21 @@ export default defineComponent({
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>`          
 
-            if((!isNaN( gerenciamentoHoras.horasMensaisDisponiveis))&&(!isNaN( gerenciamentoHoras.horasExtras))){
-              let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras ;
-              
-              message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
-                      ${creditoUsuario.toFixed(2)}
-                      </strong></p>
-                    </span>`;
-            }
-            else{
-              message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos:
-                 <strong> 0 </strong></p>
-                </span>`;
-            }
+            // if(this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId){
+              if((!isNaN( gerenciamentoHoras.horasMensaisDisponiveis))&&(!isNaN( gerenciamentoHoras.horasExtras))){
+                let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras ;
+                
+                message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
+                        ${creditoUsuario.toFixed(2)}
+                        </strong></p>
+                      </span>`;
+              }
+              else{
+                message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos:
+                   <strong> 0 </strong></p>
+                  </span>`;
+              }
+           //}
 
           message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
 
@@ -1844,15 +1846,17 @@ export default defineComponent({
       if (this.eventoOutros) {
         user.eventoOutros = this.eventoOutros;
       }
+      this.user.paraAprovar =
+        this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
 
+      console.log("PIAZZETTA 🦝 ~ file: Index.vue:1849 ~ onSubmit ~ this.user:", user)
+        
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
         data: user,
       };
 
-      // this.user.paraAprovar =
-      //   this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
 
       let duracao = (this.user.validadeFinal - this.user.validadeInicial) / 60000
 			this.user.paraAprovar = duracao > this.tempoMinimoAprovacao;
@@ -1862,7 +1866,6 @@ export default defineComponent({
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
-        console.log("PIAZZETTA ~ file: Index.vue:1893 ~ onSubmit ~ this.user.fotoSelfie:", this.user.fotoSelfie)
 
         const blobFrente = {
           blob: new Blob([this.user.fotoFrente]),
@@ -1916,7 +1919,7 @@ export default defineComponent({
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
             this.semImovel = true;
-            this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+            this.openURL("https://agenda.chavi.com.br", "_self");
             if (response.data && response.data.url)
               this.openURL(response.data.url, "_self");
           })
@@ -1944,7 +1947,7 @@ export default defineComponent({
               this.semImovel = true;
               if (response.data && response.data.url)
                 this.openURL(response.data.url, "_self");
-              else this.openURL("https://agenda.chavi.com.br/hotmilk", "_self");
+              else this.openURL("https://agenda.chavi.com.br", "_self");
             });
           });
       } else if (response && response.status) {
@@ -2083,6 +2086,7 @@ export default defineComponent({
           });
 
           if (response && response.status == 200) {
+            console.log("PIAZZETTA 🦝 ~ file: Index.vue:2082 ~ carregarHorarios ~ response:", response)
             this.cliente = response.data.entidade;
 
             this.idImovel = response.data.idImovel;
@@ -2092,23 +2096,36 @@ export default defineComponent({
               value: this.cliente.logo,
             });
             //Verifica se a sala necessita aprovacao
-            response.data.entidade.preferenciaVisita.necessitaAprovacao
-              ? (this.necessitaAprovacao = true)
-              : (this.necessitaAprovacao = false);
+            if (response.data.entidade.preferenciaVisita.necessitaAprovacao || response.data.imovel.opcoesAgendamentoIndividual.necessitaAprovacao){
+              this.necessitaAprovacao = true
+            }else{
+              this.necessitaAprovacao = false
+            }
 
               response.data.imovel.opcoesAgendamentoIndividual.necessitaPagamento
               ? (this.necessitaPagamento = true)
               : (this.necessitaPagamento = false);
 
-            response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento
-              ? (this.whatsappAvisoAgendamento =
-                  response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento)
-              : (this.whatsappAvisoAgendamento = "");
 
-            response.data.entidade.preferenciaVisita.emailAvisoAgendamento
-              ? (this.emailAvisoAgendamento =
-                  response.data.entidade.preferenciaVisita.emailAvisoAgendamento)
-              : (this.emailAvisoAgendamento = "");
+            if(response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento || response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento){
+              if(response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento){
+                this.whatsappAvisoAgendamento =
+                  response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento
+              }else{
+                this.whatsappAvisoAgendamento =
+                  response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento
+              }
+            }
+
+            if(response.data.entidade.preferenciaVisita.emailAvisoAgendamento || response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento){
+              if(response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento){
+                this.emailAvisoAgendamento =
+                  response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento
+              }else{
+                this.emailAvisoAgendamento =
+                  response.data.entidade.preferenciaVisita.emailAvisoAgendamento
+              }
+            }
 
             response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento
               ? (this.chaveAgendamento =
