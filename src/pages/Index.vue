@@ -888,7 +888,9 @@ export default defineComponent({
       return this.cliente.nome == "Ágora Tech Park";
     },
     routeCoworking() {
-      return this.cliente.nome == "Ágora Tech Park" ? "agora" : "hotmilk";
+      let nome = this.cliente.nome
+      nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
+      return nome
     },
 
     getMonth() {
@@ -1154,14 +1156,18 @@ export default defineComponent({
         this.user.phone = "";
         this.user.cpf = "";
         this.user.email = "";
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:1158 ~ logout ~ entidadeNome:", this.cliente)
         await this.$store.dispatch("setarDados", {
           key: "setLogin",
           value: [],
         });
         this.parte = 1;
         this.inForms = true;
-        this.$router.push("/");
+        this.telaInicial()
       });
+    },
+    nomeEntidadeId(){
+      return "hotmilk"
     },
     montarQrcode() {
       let url = "";
@@ -2083,7 +2089,6 @@ export default defineComponent({
           });
 
           if (response && response.status == 200) {
-            console.log("PIAZZETTA 🦝 ~ file: Index.vue:2082 ~ carregarHorarios ~ response:", response)
             this.cliente = response.data.entidade;
 
             this.idImovel = response.data.idImovel;
