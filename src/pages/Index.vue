@@ -692,6 +692,23 @@
           <div class="cho-container"></div>
         </div>
       </q-form>
+
+      <template>
+        <div>
+          <q-dialog v-model="modalComprarCreditos.dialogAtivo">
+            <q-card>
+              <q-card-section>
+                <q-input v-model="modalComprarCreditos.creditos" label="Valor Monetário" type="number"></q-input>
+              </q-card-section>
+              <q-card-actions align="right">
+                <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
+                <q-btn label="Confirmar" color="positive" @click="gerarBoleto" :disable="!modalComprarCreditos.creditos"></q-btn>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+        </div>
+      </template>
+
     </div>
     <q-dialog v-model="cardVisita">
         <div
@@ -805,6 +822,8 @@
   </footer>
 </template>
 
+
+
 <script>
 import { defineComponent } from "vue";
 import { Loading, Notify, } from "quasar";
@@ -840,6 +859,10 @@ export default defineComponent({
   },
   data() {
     return {
+      modalComprarCreditos: {
+        dialogAtivo: false,
+        creditos: 0
+      },
       contador: 0,
       idImovel: "",
       seMesmoDia: "",
@@ -1277,7 +1300,8 @@ export default defineComponent({
         let message;
         if ((horasMensaisDisponiveis + horasExtras) < calculoCusto) {
          
-          message = "<p>Você não possui créditos suficientes</p>";
+          message = `<p>Você não possui créditos suficientes</p>
+                      <p>Gostaria de comprar créditos?</p>`;
           Dialog.create({
             title: "Aviso",
             //link ainda não implemenado
@@ -1287,7 +1311,10 @@ export default defineComponent({
               label: "ok",
               color: "positive",
             },
-          }).onOk(() => {});
+          }).onOk(() => {
+            //modalComprarCreditos( calculoCusto - (horasMensaisDisponiveis + horasExtras))
+            this.abrirDialogo()
+          });
           return false;
         }
         return true;
@@ -1295,6 +1322,20 @@ export default defineComponent({
       return true;
 
     },
+    abrirDialogo() {
+    this.modalComprarCreditos.dialogAtivo = true;
+  },
+  
+  fecharDialogo() {
+    this.modalComprarCreditos.dialogAtivo = false;
+  },
+  
+  gerarBoleto() {
+    // Aqui você pode chamar a função para gerar o boleto via API
+    // Use this.valorMonetario e this.explicacao para obter os valores inseridos pelo usuário
+    // Exemplo: this.$api.gerarBoleto(this.valorMonetario, this.explicacao)
+    this.fecharDialogo();
+  },
 
     async telaInicial() {
       await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
