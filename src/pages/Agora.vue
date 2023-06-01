@@ -17,7 +17,7 @@
 
         <div class="header-logo" @click="$router.push('/')">
           <q-img
-            src="agora_logo.png"
+            src="agora.png"
             fit="contain"
             width="100px"
             :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"

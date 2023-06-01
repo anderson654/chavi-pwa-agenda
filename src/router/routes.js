@@ -6,13 +6,14 @@ const routes = [
   },
 
   {
-    path: "/",
+    path: "/coworkings",
     component: () => import("pages/Landingpage.vue"),
   },
 
   {
-    path: "/hotmilk",
-    component: () => import("pages/Hotmilk.vue"),
+    path: "/hotmilk/agenda",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Hotmilk.vue") }]
   },
   {
     path: "/galvao",

@@ -22,11 +22,6 @@
         style="width: 200px; min-width: 150px; height: 125px"
         @click="$router.push(`${routeCoworking}`)"
       >
-        <q-img
-          src="hotmilk.png"
-          style="filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg) brightness(96%) contrast(81%);
-          "
-        />
       </q-btn>
     </div>
     <!-- <div v-if="parte == 4">
@@ -39,8 +34,8 @@
       <div class="text-center q-my-lg" style="width: 70vw">
         <div v-if="inForms">
           <span style="font-size: 1.4rem" v-if="parte == 1">
-            Agora, insira seu nome e telefone.<br />
-            Em seguida, aguarde receber um código SMS e insira no campo
+            Agora, insira seu telefone.<br />
+            Em seguida, aguarde receber um código por SMS ou whatsapp e insira no campo
             indicado.
           </span>
           <span style="font-size: 1.4rem" v-if="parte == 2">
@@ -693,6 +688,37 @@
       </q-form>
     </div>
   </q-page>
+  <footer>
+      <div
+      style="
+          height: 40px;
+          width: 100%;
+          color: white;
+          text-align: center; 
+          background-color: 
+          rgba(240, 240, 240, 0.9);"
+      >
+      <div class="bg-grey-3 footer flex flex-center">
+        <div class="footer-content">
+          <span style="color: #505050;">Desenvolvido por</span>
+          <q-img
+            src="chavi_marca.png"
+            fit="contain"
+            width="100px"
+            :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'"
+            no-spinner
+            class="q-my-sm"
+            style="
+              cursor: pointer;
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
+            @click="openLink('https://chavi.com.br', '_blank')"
+          />
+        </div>
+      </div>
+      </div>
+    </footer>
 </template>
 
 <script>
@@ -890,7 +916,11 @@ export default defineComponent({
     routeCoworking() {
       let nome = this.cliente.nome
       nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
-      return nome
+      if(nome == "hotmilk"){
+        return nome +"/agenda"
+      }else{
+        return nome
+      }
     },
 
     getMonth() {
@@ -1013,9 +1043,7 @@ export default defineComponent({
 
   },
   mounted() {
-    try {
-   
-
+    try { 
       this.selectedDate = today();
       
 
@@ -1070,12 +1098,22 @@ export default defineComponent({
       this.semImovel = true;
     }
     if (this.semImovel){
-      this.$store.dispatch("setarDados", {
-          key: "setLogin",
-          value: [],
-        });
-      this.$router.push("/");
-    } 
+      let nomeCoworking = this.$store.getters.getCoworkingNome
+      console.log("PIAZZETTA 🦝 ~ file: Index.vue:1100 ~ mounted ~ this.getLogin.user.entidade.nome:", nomeCoworking)
+      if(nomeCoworking){
+        if(nomeCoworking == "hotmilk"){
+          this.$router.push(`/${nomeCoworking}/agenda`)
+        }else{
+          this.$router.push(`/${nomeCoworking}`) 
+        }
+      }else{
+        this.$store.dispatch("setarDados", {
+            key: "setLogin",
+            value: [],
+          });
+          this.$router.push("/");
+      }
+    }
   },
   methods: {   
     validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras){
@@ -1156,7 +1194,6 @@ export default defineComponent({
         this.user.phone = "";
         this.user.cpf = "";
         this.user.email = "";
-        console.log("PIAZZETTA 🦝 ~ file: Index.vue:1158 ~ logout ~ entidadeNome:", this.cliente)
         await this.$store.dispatch("setarDados", {
           key: "setLogin",
           value: [],
@@ -1855,7 +1892,6 @@ export default defineComponent({
       this.user.paraAprovar =
         this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
 
-      console.log("PIAZZETTA 🦝 ~ file: Index.vue:1849 ~ onSubmit ~ this.user:", user)
         
       let request = {
         url: "Visitas/validarVisita",
@@ -1950,7 +1986,7 @@ export default defineComponent({
               this.semImovel = true;
               if (response.data && response.data.url)
                 this.openURL(response.data.url, "_self");
-              else this.openURL("https://agenda.chavi.com.br", "_self");
+              else this.openURL("https://agenda.chavi.com.br/"+ this.routeCoworking, "_self");
             });
           });
       } else if (response && response.status) {
@@ -2201,8 +2237,6 @@ export default defineComponent({
                 : false;
             }
             this.events = response.data.horarios;/////
-            console.log("PIAZZETTA ~ file: Index.vue:2236 ~ carregarHorarios ~ response.data:", response.data)
-            console.log("PIAZZETTA ~ file: Index.vue:2236 ~ carregarHorarios ~ this.events:", this.events)
             
             this.formatData();
           } else {

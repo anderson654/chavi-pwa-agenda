@@ -3,7 +3,7 @@
     <q-header>
       <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
         <q-img
-          src="agora_logo.png"
+          src="agora.png"
           fit="contain"
           width="100px"
           :style="

@@ -16,3 +16,6 @@ export function setEstadoInicial(state, estadoInicial) {
 export function setImovelAgendamento(state, imovelAgendamento){
   state.imovelAgendamento = imovelAgendamento;
 }
+export function setCoworkingNome(state, coworkingNome){
+  state.coworkingNome = coworkingNome;
+}

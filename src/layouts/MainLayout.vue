@@ -2,34 +2,16 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <q-img
-          v-if="logo"
-          :src="logo"
-          fit="contain"
-          width="10vw"
-          :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
-          style="
-            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-              brightness(96%) contrast(81%);
-          "
-          no-spinner
-          class="q-my-sm"
-        />
-        <div class="bar"></div>
-        <q-img
-          style="
-            cursor: pointer;
-            min-width: 150px;
-            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-              brightness(96%) contrast(81%);
-          "
-          src="chavi_marca.png"
-          fit="contain"
-          :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
-          no-spinner
-          class="q-my-sm"
-          @click="open('https://chavi.com.br', '_system')"
-        />
+        <div class="header">
+          <q-img
+            :src="coworkingNome"
+            fit="contain"
+            width="150px"
+            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
+            no-spinner
+            class="q-my-sm"
+          />
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -44,29 +26,52 @@ import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "MainLayout",
+  data(){
+    return{
+      coworkingNome: ""
+    }
+  },
   computed: {
     logo: {
       set(value) {
         this.$store.dispatch("setarDados", { key: "setLogo", value: value });
       },
       get() {
-        const logo = this.$store.getters.getLogo;
+        const logo = this.$store.getters.getCowokingNome;
         if (!logo) return false;
-        return !logo.includes("http")
-          ? `${process.env.VUE_APP_API_URL}/StorageContainers/logoEntidade/download/` +
-              logo
-          : logo;
+        if(logo){
+          return `${logo}.png`
+        }else{
+          return ""
+        }
       },
     },
+  },
+  mounted(){
+    this.pegarCoworkingNome()
   },
   methods: {
     open(url, target) {
       window.open(url, target);
     },
+    pegarCoworkingNome(){
+      let nome = this.$store.getters.getCoworkingNome
+      if(nome && "home" == this.$route.path.split("/")[1]){
+        this.coworkingNome = nome + ".png";
+      }else{
+        this.coworkingNome = this.$route.path.split("/")[1] +".png"
+      }
+    }
   },
 });
 </script>
 <style scoped>
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .bar {
   height: 40px;
   width: 2px;
