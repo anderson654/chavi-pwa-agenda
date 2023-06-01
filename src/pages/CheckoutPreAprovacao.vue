@@ -1,37 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <!-- <q-img
-          src="agora_logo.png"
-          fit="contain"
-          width="100px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          class="q-my-sm"
-        /> -->
-        <q-img
-          src="chavi_marca.png"
-          fit="contain"
-          width="150px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          style="
-            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-              brightness(96%) contrast(81%);
-          "
-          class="q-my-sm"
-        />
-      </q-toolbar>
-    </q-header>
+    
 
     <q-page-container style="padding-top: 10px">
       <q-page padding>
@@ -52,15 +21,15 @@
           >
             <div class="container">
               <div class="box">
-                <h1>Olá, {{ nome }}.</h1>
                 <div
                   style="width: 300px; padding-left: 8px; padding-right: 8px"
                 >
-                  <p>Para o agendamento da sala {{ mensagem }}.</p>
-
+                  <p>Para o agendamento da sala.</p>
+                  <p>{{ nomeImovel }}</p>
                   <p>
                     Atenciosamente,
-                    <br />
+                  </p> 
+                   <p>
                     Equipe Chavi.
                   </p>
                 </div>
@@ -69,6 +38,7 @@
             <div>
               <form action="https://chavi.com.br/app">
                 <q-btn
+                  :disable=!liberarPagamento
                   class="q-pa-sm text-bold"
                   color="primary"
                   text-color="white"
@@ -103,9 +73,11 @@
 
 <script>
 import * as moment from "moment";
+import { Loading, Notify, } from "quasar";
 export default {
   data() {
     return {   
+      liberarPagamento : false,
       nomeImovel : "",
       chaveAgendamento : "",
       convite : {},
@@ -121,68 +93,33 @@ export default {
     let idConvite = this.$route.query.convite_id;
     if (this.$store.getters.getLogin.user) {
       this.user = this.$store.getters.getLogin.user;
-      // let response = await this.executeMethod({
-			// 	url: 'Convites/obtem/' + idConvite,
-			// 	method: 'get',
-			// })
+ 
       let response = await this.executeMethod({
-				url: 'Convites/' + idConvite,
+				url: 'Convites/obtem/' + idConvite,
 				method: 'get',
 			})
 
       if (response && response.status == 200) {
         this.convite = response.data;
         this.visita = response.data.dadosVisita;
-       // this.imovelId = visita.imovelId;
+        this.nomeImovel = response.data.nome;
+ 
         this.getImovel( this.visita.imovelId)
    
         console.log("🚀 ~ file: CheckoutPreAprovacao.vue:135 ~ mounted ~ response:", response)       
       }
       else{
-        console.log("🚀 ~ file: CheckoutPreAprovacao.vue:135 ~ mounted ~ response:", response) 
+        Notify.create({
+            message:
+              "Ocorreu um erro ao procurar convite!",
+          });
       }
     } else {
       this.$router.push("/login?redirect_to=pagamento_agendamento&redirect_param="+idConvite);
     }
-    console.log("Ddddddddddddddddd")
-    //http://localhost:8080/feedbackAprovacao?convite_id=63e65653ffd6bb0365bb44c6
-  
-    //let idImovel = this.catalogoMensagens(this.$route.query.imovel_id);
 
+    //http://localhost:8080/feedbackAprovacao?convite_id=63e65653ffd6bb0365bb44c6  
 
-
-
-    // const response = await this.executeMethod({
-    //         url: "Visitas/horariosOcupados",
-    //         method: "GET",
-    //         params: {
-    //           clienteId: cliente,
-    //           imovelRef: imovel,
-    //         },
-    // });
-
-    // if (response && response.status == 200) {
-
-    // }
-     
-
-    // this.mensagem = this.catalogoMensagens(this.$route.query.collection_status);
-    // this.visita = this.$store.getters.getConvite;
-    // this.nome = this.visita.name.charAt(0).toUpperCase() + this.visita.name.slice(1);
-
-    // if (this.$route.query.collection_status === "approved") {
-
-    //   let request = {
-    //     url: "Visitas/validarVisita",
-    //     method: "post",
-    //     data: {
-    //       ...this.visita,
-    //       pagamentoAutorizado: true,
-    //     },
-    //   };
-    //   const response = await this.executeMethod(request, false);
-    //   this.codigo = response.data.codigo;
-    // }
   },
   methods: {
     openLink(url, target) {
@@ -192,7 +129,7 @@ export default {
     async getImovel(idImovel){    
   
       let response = await this.executeMethod({
-				url: 'Imoveis/' + idImovel,
+				url: 'Imoveis/obtem/' + idImovel,
 				method: 'get',
 			})
          
@@ -200,8 +137,15 @@ export default {
         this.nomeImovel = response.data.nome;
         this.chaveAgendamento = response.data.opcoesAgendamentoIndividual.chaveAgendamento;
         this.valorDaSala = response.data.opcoesAgendamentoIndividual.valorDaSala;
+        this.liberarPagamento = true;
         console.log("🚀 ~ file: CheckoutPreAprovacao.vue:135 ~ mounted ~ response:", response)  
         //await this.checkoutPagamento()        
+      }
+      else{
+        Notify.create({
+            message:
+              "Ocorreu um erro ao procurar Equipamento!",
+        });
       }
     },
     async getEntidade(){
@@ -233,17 +177,7 @@ export default {
       const response = await this.executeMethod(request, false);
       console.log("🚀 ~ file: CheckoutPreAprovacao.vue:238 ~ checkoutPagamento ~ response:", response)
 
-      // let convite = {
-      //     id : "",
-      //     name: "string",
-      //     empresa: "string",
-      //     phone: "string",
-      //     cpf: "string",
-      //     email: "string",
-      //     terms: true,
-      //     use: true,
-      //     hasDocs: true,
-      // }
+     
       this.$store.dispatch("setarDados", {
         key: "setConvite",
         value: this.convite,
@@ -283,14 +217,7 @@ export default {
       return calcula;
     },
 
-    // catalogoMensagens(param) {
-    //   let catalogo = {
-    //     approved: "foi aprovado",
-    //     in_process: "ainda está com o pagamento pendente",
-    //   };
 
-    //   return catalogo[param] || "";
-    // },
   },
 };
 </script>

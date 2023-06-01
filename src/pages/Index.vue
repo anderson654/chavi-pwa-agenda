@@ -677,7 +677,7 @@
               label="Enviar"
               type="submit"
               color="positive"
-              v-if="!validaNecessitaAprovacao && !necessitaPagamento"
+              v-if="!validaNecessitaAprovacao&&!necessitaPagamento"
             />
 
             <q-btn
@@ -1411,20 +1411,28 @@ export default defineComponent({
       return this.escreveItemHorario(tempoMinimo).label;
 
     },
-    validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita, necessitaAprovacao){
+    validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita, necessitaAprovacao, funcionamentoIndividual){
 
       if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined") || (typeof necessitaAprovacao === "undefined"))
       {
         return "";
       }
 
-      if(tempoMinimoAprovacao != 0 && (aprovarVisita || necessitaAprovacao)) {
+      if (necessitaAprovacao && tempoMinimoAprovacao <= 0){
+        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
+      }	
+      else if (necessitaAprovacao && tempoMinimoAprovacao >0 ){
+        return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
+      }	 
+      else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
         return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
       }
-      else if (!aprovarVisita || necessitaAprovacao){
+      else if (!funcionamentoIndividual &&  !aprovarVisita) {
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
-      return "";
+      else{
+        return "";
+      }
     },
 
     construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos){
@@ -1583,13 +1591,13 @@ export default defineComponent({
                   </span>`;
               }
            //}
-
-           message +=  "</span> <center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao) + "<center>"
+       
+           message +=  "</span> <center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
            message += `</span>`
       } else {
           message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>`
-          message +=  "<center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao) + "<center>"
+          message +=  "<center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
           message += `</span>`
         }
       Dialog.create({
@@ -1785,6 +1793,11 @@ export default defineComponent({
       return filtro;
     },
     validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial, validadeFinal, tempoMinimoAprovacao){
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ tempoMinimoAprovacao:", tempoMinimoAprovacao)
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ validadeFinal:", validadeFinal)
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ validadeInicial:", validadeInicial)
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ aprovarVisita:", aprovarVisita)
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ necessitaAprovacao:", necessitaAprovacao)
       let paraAprovarPorTempoMinimo = false
 
       if (this.necessitaAprovacao && tempoMinimoAprovacao > 0){
@@ -1799,12 +1812,18 @@ export default defineComponent({
         paraAprovarPorTempoMinimo = duracao > tempoMinimoAprovacao
       }
 
-      if (necessitaAprovacao || !aprovarVisita || paraAprovarPorTempoMinimo) {
-          this.user.paraAprovar = true;
-          return true
+      if (necessitaAprovacao && ((paraAprovarPorTempoMinimo)||(!paraAprovarPorTempoMinimo))){
+        this.user.paraAprovar = true;
+			  return true;
+      }	
+      else if (necessitaAprovacao == undefined && (!aprovarVisita || paraAprovarPorTempoMinimo)) {
+        this.user.paraAprovar = true;
+        return true;
       }
-      this.user.paraAprovar = false;
-      return false;
+      else{
+        this.user.paraAprovar = false;
+        return false;
+      }
     },
 
     //não existe nescessita pagamento - Verficar se é pra tirar
@@ -1959,6 +1978,7 @@ export default defineComponent({
         ...this.user,
       };
 
+ 
       user.entidadeUsuario = this.getLogin.user.entidadeId
 
       if (this.necessitaAprovacao) {

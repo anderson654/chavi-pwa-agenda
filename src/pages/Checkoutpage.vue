@@ -109,6 +109,7 @@
 </template>
 
 <script>
+import { Loading, Notify, } from "quasar";
 export default {
   data() {
     return {
@@ -129,6 +130,11 @@ export default {
     if (visita.name)
     {
       this.nome = visita.name.charAt(0).toUpperCase() + visita.name.slice(1);
+    }
+    else{
+      if (this.$store.getters.getLogin.user) {
+        this.nome = this.$store.getters.getLogin.user.name;
+      }
     }
 
     if (this.$route.query.collection_status === "approved") {
@@ -153,6 +159,19 @@ export default {
                         conviteId: this.convite.codigo,
                         pagamentoRealizado: true,
                         }})
+
+        if (response && response.status == 200) {
+           Notify.create({
+              message:
+                "A visita foi aprovada!",
+            });
+        }
+        else{
+          Notify.create({
+              message:
+                "Ocorreu um erro no processo!",
+            });
+        }
    
         this.codigo = response.data.codigo;
       }
