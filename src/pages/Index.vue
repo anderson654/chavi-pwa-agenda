@@ -2129,6 +2129,11 @@ export default defineComponent({
 
             this.idImovel = response.data.idImovel;
             this.imovel = response.data.imovel;
+            if(this.imovel.opcoesDeCredito.descritivo && this.imovel.opcoesDeCredito.descritivo.length > 0){
+              this.imovel.opcoesDeCredito.descritivo = this.imovel.opcoesDeCredito.descritivo.filter(e => {
+                return e.trim().length > 0
+              })
+            }
             this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
