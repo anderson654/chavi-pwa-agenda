@@ -85,7 +85,8 @@ export default {
       username: "",
       password: "",
       loading: false,
-
+      redirecionar: '',
+      redirecionar_parametro : "",
       loginEmail: false,
       user: {
         name: "",
@@ -106,6 +107,9 @@ export default {
     },
   },
   mounted() {
+    this.redirecionar = this.$route.query.redirect_to;
+    this.redirecionar_parametro = this.$route.query.redirect_param;
+    console.log("🚀 ~ file: Login.vue:110 ~ mounted ~ redirecionar:",this.redirecionar_parametro)
     if (this.$store.getters.getLogin.user) {
       this.$router.push("/hotmilk");
     } else {
@@ -239,7 +243,21 @@ export default {
       return regexp.test(valor) || regexp2.test(valor) || !this.utilizarEmail;
     },
     onSubmit() {
-      this.$router.push("/hotmilk");
+      if (this.redirecionar )
+      {
+        let caminho = this.redirecionar
+        if (caminho == "pagamento_agendamento" && this.redirecionar_parametro != ""){
+          let param = this.redirecionar_parametro
+          console.log("🚀 ~ file: Login.vue:251 ~ onSubmit ~ param:", param)
+          this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
+        } 
+        else{
+          this.$router.push("/");
+        }      
+      }
+      else{
+        this.$router.push("/");
+      }     
     },
     onReset() {
       this.user.name = "";
@@ -248,7 +266,21 @@ export default {
       this.user.email = "";
     },
     async nextStep() {
-      this.$router.push("/hotmilk");
+      if (this.redirecionar )
+      {
+        let caminho = this.redirecionar
+        if (caminho == "pagamento_agendamento" && this.redirecionar_parametro != ""){
+          let param = this.redirecionar_parametro
+          console.log("🚀 ~ file: Login.vue:274 ~ nextStep ~ param:", param)
+          this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
+        } 
+        else{
+          this.$router.push("/");
+        }      
+      }
+      else{
+        this.$router.push("/");
+      }
     },
   },
 };

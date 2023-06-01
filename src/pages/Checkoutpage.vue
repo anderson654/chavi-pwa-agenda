@@ -122,21 +122,40 @@ export default {
   },
   async mounted() {
     this.mensagem = this.catalogoMensagens(this.$route.query.collection_status);
-    this.visita = this.$store.getters.getConvite;
-    this.nome = this.visita.name.charAt(0).toUpperCase() + this.visita.name.slice(1);
+    this.convite = this.$store.getters.getConvite;
+    console.log("🚀 ~ file: Checkoutpage.vue:126 ~ mounted ~ this.convite:", this.convite)
+    let visita = this.$store.getters.getConvite.dadosVisita;
+    console.log("🚀 ~ file: Checkoutpage.vue:127 ~ mounted ~ visita:", visita)
+    if (visita.name)
+    {
+      this.nome = visita.name.charAt(0).toUpperCase() + visita.name.slice(1);
+    }
 
     if (this.$route.query.collection_status === "approved") {
 
-      let request = {
-        url: "Visitas/validarVisita",
-        method: "post",
-        data: {
-          ...this.visita,
-          pagamentoAutorizado: true,
-        },
-      };
-      const response = await this.executeMethod(request, false);
-      this.codigo = response.data.codigo;
+      if (!this.convite.id){
+        let request = {
+          url: "Visitas/validarVisita",
+          method: "post",
+          data: {
+            ...visita,
+            pagamentoAutorizado: true,
+          },
+        };
+        const response = await this.executeMethod(request, false);
+        this.codigo = response.data.codigo;
+      }
+      else{
+        const response = await this.executeMethod({
+                        url: "Convites/aprovar",
+                        method: 'post',
+                        data: {
+                        conviteId: this.convite.codigo,
+                        pagamentoRealizado: true,
+                        }})
+   
+        this.codigo = response.data.codigo;
+      }
     }
   },
   methods: {

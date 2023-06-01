@@ -24,6 +24,11 @@ const routes = [
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Checkoutpage.vue") }],
   },
+  {
+    path: "/feedbackAprovacao",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/CheckoutPreAprovacao.vue") }],
+  },
 
   {
     path: "/dormakaba",
