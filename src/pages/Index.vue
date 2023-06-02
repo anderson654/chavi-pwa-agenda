@@ -581,7 +581,7 @@
 
               <div class="col-9 text-bold" v-html="getEnderecoHtml"></div>
             </div>
-            <div v-if="necessitaPagamento">
+            <div v-if="!validaNecessitaCredito&&!validaNecessitaAprovacao&&necessitaPagamento">
               <div class="row">
                 <div class="col-5">Preço 15 minutos:</div>
                 <div class="col-7 text-bold">
@@ -664,7 +664,7 @@
               label="Solicitar"
               color="positive"
               type="submit"
-              v-if="necessitaAprovacao"
+              v-if="validaNecessitaAprovacao"
             />
 
             <q-btn
@@ -672,15 +672,15 @@
               label="Enviar"
               type="submit"
               color="positive"
-              v-if="!necessitaAprovacao && !necessitaPagamento"
+              v-if="!validaNecessitaAprovacao&&!necessitaPagamento"
             />
 
             <q-btn
               class="col-6 q-ml-xs"
               label="Pagamento"
-              @click="checkoutPagamento"
+              @click="validaCriacaoVisita"
               color="positive"
-              v-if="necessitaPagamento"
+              v-if="!validaNecessitaCredito&&!validaNecessitaAprovacao&&necessitaPagamento"
             />
           </q-btn-group>
           <div class="cho-container"></div>
@@ -774,6 +774,7 @@ export default defineComponent({
       fotoFrente: [],
       fotoSelfie: [],
       fotoVerso: [],
+      gerenciamentoCreditos : {},
       user: {
         name: "",
         empresa: "",
@@ -802,6 +803,8 @@ export default defineComponent({
       horaInicial: 0,
       timeStepMin: 15,
       necessitaAprovacao: false,
+      validaNecessitaCredito : false,
+      validaNecessitaAprovacao : false,
       chaveAgendamento: "",
       liberarAgendamento: -1,
       sabado: false,
@@ -1276,6 +1279,7 @@ export default defineComponent({
         "left-side": !isHeader && event.side === "left",
         "right-side": !isHeader && event.side === "right",
         "rounded-border": true,
+        "borderDivCalendar" : true,
       };
     },
     badgeStyles(event, timeStartPos, timeDurationHeight) {
@@ -1450,20 +1454,28 @@ export default defineComponent({
       return this.escreveItemHorario(tempoMinimo).label;
 
     },
-    validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita){
+    validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita, necessitaAprovacao, funcionamentoIndividual){
 
-      if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined"))
+      if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined") || (typeof necessitaAprovacao === "undefined"))
       {
         return "";
       }
 
-      if(tempoMinimoAprovacao != 0 && aprovarVisita){
+      if (necessitaAprovacao && tempoMinimoAprovacao <= 0){
+        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
+      }	
+      else if (necessitaAprovacao && tempoMinimoAprovacao >0 ){
+        return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
+      }	 
+      else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
         return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
       }
-      else if (!aprovarVisita){
+      else if (!funcionamentoIndividual &&  !aprovarVisita) {
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
-      return "";
+      else{
+        return "";
+      }
     },
 
     construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos){
@@ -1513,7 +1525,7 @@ export default defineComponent({
           gerenciamentoHoras = response.data;
         }
       }
-      let gerenciamentoCreditos = {};
+      //let gerenciamentoCreditos = {};
       if (this.imovel) {
         let request = {
           url: `entidades/gerenciamentoDeCreditos/${this.user.entidadeId}/${this.idImovel}`,
@@ -1523,7 +1535,7 @@ export default defineComponent({
         const response = await this.executeMethod(request, false);
 
         if(response && response.status == 200){
-          gerenciamentoCreditos = response.data;
+          this.gerenciamentoCreditos = response.data;
         }
       }
 
@@ -1555,19 +1567,24 @@ export default defineComponent({
           (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
         );
 
+      this.user.validadeInicial = validadeInicial.getTime();;
+      
+
       /* Dados da Entidade */
-      const coworking =  gerenciamentoCreditos.coworking;
-      const consomeHoras = gerenciamentoCreditos.consomeHoras;
-      const custoBase = gerenciamentoCreditos.custoBase;
+      const coworking =  this.gerenciamentoCreditos .coworking;
+      const consomeHoras = this.gerenciamentoCreditos .consomeHoras;
+      const custoBase = this.gerenciamentoCreditos .custoBase;
       /* Dados do Imovel */
-      const funcionamentoIndividual = gerenciamentoCreditos.funcionamentoIndividual;
-      const custaCreditos = gerenciamentoCreditos.custaCreditos;
-      const consumoCreditos = gerenciamentoCreditos.consumoCreditos;
+      const funcionamentoIndividual = this.gerenciamentoCreditos .funcionamentoIndividual;
+      const custaCreditos = this.gerenciamentoCreditos .custaCreditos;
+      const consumoCreditos = this.gerenciamentoCreditos .consumoCreditos;
    
       const horaFinal = this.horaFinal;
       const timeStepMin =this.timeStepMin;
-      const tempoMaximo = this.tempoMaximo;
+      const tempoMaximo = this.tempoMaximo; 
       
+      this.validaNecessitaCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
+ 
       const options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
 
       const date = scope.timestamp.date;
@@ -1598,7 +1615,7 @@ export default defineComponent({
       }
   
       let message;
-      if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){
+      if(this.validaNecessitaCredito){
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>`          
 
@@ -1617,14 +1634,15 @@ export default defineComponent({
                   </span>`;
               }
            //}
-
-          message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
-
+       
+           message +=  "</span> <center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
+           message += `</span>`
       } else {
-        message = `<span class='text-black' style='font-size: 1rem'>
-            <center>Selecione a duração da sua utilização</center>
-          </span>`
-      }
+          message = `<span class='text-black' style='font-size: 1rem'>
+            <center>Selecione a duração da sua utilização</center>`
+          message +=  "<center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
+          message += `</span>`
+        }
       Dialog.create({
         title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
         message: message,
@@ -1646,6 +1664,15 @@ export default defineComponent({
         persistent: true,
       }).onOk((data) => {
 
+        const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
+        const necessitaAprovacao = this.necessitaAprovacao;
+        const aprovarVisita = this.aprovarVisita;
+
+        const validadeFinal = this.user.validadeInicial + Number(data) * 60000;
+        this.user.validadeFinal = validadeFinal;
+        this.validaNecessitaAprovacao = this.validaAprovacao(necessitaAprovacao,aprovarVisita,this.user.validadeInicial,validadeFinal, tempoMinimoAprovacao)
+       
+
         if (!this.verificarCreditos(gerenciamentoHoras.horasMensaisDisponiveis,gerenciamentoHoras.horasExtras,
           Number(data),coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos)) {
           return;
@@ -1660,11 +1687,11 @@ export default defineComponent({
           textColor: "text-white",
         };
         this.events.push(visita);
-        const validadeInicial = new Date(
-          (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
-        ).getTime();
-        this.user.validadeInicial = validadeInicial;
-        this.user.validadeFinal = validadeInicial + Number(data) * 60000;
+        // const validadeInicial = new Date(
+        //   (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
+        // ).getTime();
+        // this.user.validadeInicial = validadeInicial;
+        // this.user.validadeFinal = validadeInicial + Number(data) * 60000;
         this.montarQrcode();
 
         if (this.habilitarPublicoExterno) {
@@ -1808,12 +1835,135 @@ export default defineComponent({
       }
       return filtro;
     },
-    //não existe nescessita pagamento - Verficar se é pra tirar
-    async onSubmit() {
-      if (this.necessitaPagamento) {
-        this.checkoutPagamento();
-        return;
+    validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial, validadeFinal, tempoMinimoAprovacao){
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ tempoMinimoAprovacao:", tempoMinimoAprovacao)
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ validadeFinal:", validadeFinal)
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ validadeInicial:", validadeInicial)
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ aprovarVisita:", aprovarVisita)
+      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ necessitaAprovacao:", necessitaAprovacao)
+      let paraAprovarPorTempoMinimo = false
+
+      if (this.necessitaAprovacao && tempoMinimoAprovacao > 0){
+
+        let duracao = (validadeFinal - validadeInicial) / 60000
+        paraAprovarPorTempoMinimo = duracao > tempoMinimoAprovacao
       }
+      else if ( this.necessitaAprovacao == undefined
+        && entidadeUserOptions.aprovarVisita && tempoMinimoAprovacao > 0) {
+
+        let duracao = (validadeFinal - validadeInicial) / 60000
+        paraAprovarPorTempoMinimo = duracao > tempoMinimoAprovacao
+      }
+
+      if (necessitaAprovacao && ((paraAprovarPorTempoMinimo)||(!paraAprovarPorTempoMinimo))){
+        this.user.paraAprovar = true;
+			  return true;
+      }	
+      else if (necessitaAprovacao == undefined && (!aprovarVisita || paraAprovarPorTempoMinimo)) {
+        this.user.paraAprovar = true;
+        return true;
+      }
+      else{
+        this.user.paraAprovar = false;
+        return false;
+      }
+    },
+
+    //não existe nescessita pagamento - Verficar se é pra tirar
+    async validaCriacaoVisita(){
+     
+      /* Dados da Entidade */
+      const coworking =  this.gerenciamentoCreditos.coworking;
+      const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+      const custoBase = this.gerenciamentoCreditos.custoBase;
+      /* Dados do Imovel */
+      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+      const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+      const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
+
+      const necessitaPagamento = this.necessitaPagamento;
+
+      const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
+      const necessitaAprovacao = this.necessitaAprovacao;
+      const aprovarVisita = this.aprovarVisita;
+      const validadeInicial = this.user.validadeInicial;
+      const validadeFinal = this.user.validadeFinal;
+
+      let validaUsoCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
+      let validaAprovacao = this.validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial,validadeFinal, tempoMinimoAprovacao)
+      
+      if (!validaAprovacao&&!validaUsoCredito&&necessitaPagamento){
+        console.log("!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
+        this.checkoutPagamento();
+      }
+      else{     
+        this.criacaoVisita();
+           // !validaAprovacao&&validaUsoCredito&&this.necessitaPagamento
+        // console.log("!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
+        // console.log("validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
+        // console.log("validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento")
+        //  console.log("validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
+      }
+
+//  if (!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento){
+//         console.log("!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
+//         this.criacaoVisita();
+//       }
+//       else if (validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento){
+//         // fluxo novo link
+//         console.log("validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
+//         this.criacaoVisita();
+//       }  
+//       else if (validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento){
+//         // convite
+//         console.log("validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento")
+//        // this.criacaoVisita();
+//       }      
+//       else if (validaAprovacao&&validaUsoCredito&&this.necessitaPagamento){
+//         // CONVITE
+//         console.log("validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
+//         this.criacaoVisita();
+//       }
+//       else if (!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento){
+//         console.log("!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
+//         this.checkoutPagamento();
+//       }
+
+
+      // if (!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento){
+      //   console.log("!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
+      //   this.criacaoVisita();
+      // }
+      // else if (validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento){
+      //   // fluxo novo link
+      //   console.log("validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
+      //   this.criacaoVisita();
+      // }  
+      // else if (validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento){
+      //   // convite
+      //   console.log("validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento")
+      //  // this.criacaoVisita();
+      // }      
+      // else if (validaAprovacao&&validaUsoCredito&&this.necessitaPagamento){
+      //   // CONVITE
+      //   console.log("validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
+      //   this.criacaoVisita();
+      // }
+      // else if (!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento){
+      //   console.log("!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
+      //   this.checkoutPagamento();
+      // }
+
+    },
+    async onSubmit() {
+      this.validaCriacaoVisita();
+    },
+    async criacaoVisita(){
+      // if (this.necessitaPagamento) {
+      //   this.checkoutPagamento();
+      //   return;
+      // }
+      // else if (validaAprovacao)
 
       if (
         this.fotoFrente &&
@@ -1870,7 +2020,7 @@ export default defineComponent({
       let user = {
         ...this.user,
       };
-
+ 
       user.entidadeUsuario = this.getLogin.user.entidadeId
 
       if (this.necessitaAprovacao) {
@@ -1888,17 +2038,12 @@ export default defineComponent({
       if (this.eventoOutros) {
         user.eventoOutros = this.eventoOutros;
       }
-
-      this.user.paraAprovar =
-        this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
-
-        
+      
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
         data: user,
       };
-
 
       if (!this.user.hasDocs) {
 
@@ -2024,6 +2169,7 @@ export default defineComponent({
             15),
         imovel: this.idImovel
       };
+      console.log("🚀 ~ file: Index.vue:1988 ~ checkoutPagamento ~ data:", data)
 
       let request = {
         url: "Entidades/checkoutPagamento",
@@ -2032,9 +2178,13 @@ export default defineComponent({
       };
 
       const response = await this.executeMethod(request, false);
+     
       this.user.entidadeUsuario = this.entidadeUsuario;
-
-      let convite = await this.criarVisita()
+      console.log("🚀 ~ file: Index.vue:1996 ~ checkoutPagamento ~ response:", response)
+      let convite = {
+        dadosVisita : await this.criarVisita(),
+      }
+      console.log("🚀 ~ file: Index.vue:2000 ~ checkoutPagamento ~ convite:", convite)
       
       this.$store.dispatch("setarDados", {
         key: "setConvite",
@@ -2267,14 +2417,13 @@ export default defineComponent({
         let optionsOff = [];
         for (let horario of this.events) {
 
-          if (!horario.paraAprovar) {
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
               )
             );
 
-            let finalTemp = horario.timestampInicial + horario.intervalo
+            let finalTemp = parseInt(horario.timestampInicial) + parseInt(horario.intervalo)
 
             const final = parseTimestamp(
               moment(parseInt(finalTemp)).format(
@@ -2310,17 +2459,18 @@ export default defineComponent({
             }
 
             optionsOff.push({
-              title: horario.paraAprovar ? "Pendente" : titleBusy,
+              title: titleBusy,// horario.paraAprovar ? "Pendente" : titleBusy,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
-              bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
+              bgcolor: horario.paraAprovar ? "yellow-9" : "red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
             });
-          }
+
         }
         this.events = optionsOff;
+
       }
     },
     async sendCode() {
@@ -2477,9 +2627,6 @@ export default defineComponent({
       if (this.eventoOutros) {
         user.eventoOutros = this.eventoOutros;
       }
-
-      this.user.paraAprovar =
-        this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
 
       if (!this.user.hasDocs) {
 
@@ -2644,6 +2791,12 @@ export default defineComponent({
   z-index: 9999999;
   right: 20px;
   top: 20px;
+}
+
+.borderDivCalendar{
+  border-color : black;
+  border-style : solid;
+  border-width: 0.1rem;
 }
 
 .descritivo {
