@@ -4,7 +4,7 @@
       <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
         <div class="header">
           <q-img
-            :src="coworkingNome"
+            :src="nomeCoworkingLocal"
             fit="contain"
             width="150px"
             :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
@@ -23,6 +23,7 @@
 
 <script>
 import { defineComponent, ref } from "vue";
+import { mapGetters } from 'vuex';
 
 export default defineComponent({
   name: "MainLayout",
@@ -32,6 +33,11 @@ export default defineComponent({
     }
   },
   computed: {
+    ...mapGetters(['coworkingNome']),
+    nomeCoworkingLocal() {
+      this.pegarCoworkingNome()
+      return this.coworkingNome;
+    },
     logo: {
       set(value) {
         this.$store.dispatch("setarDados", { key: "setLogo", value: value });
@@ -58,10 +64,12 @@ export default defineComponent({
       let nome = this.$store.getters.getCoworkingNome
       if(nome && "home" == this.$route.path.split("/")[1]){
         this.coworkingNome = nome + ".png";
+      }else if(nome){
+        this.coworkingNome = nome + ".png";
       }else{
         this.coworkingNome = this.$route.path.split("/")[1] +".png"
       }
-    }
+    },
   },
 });
 </script>

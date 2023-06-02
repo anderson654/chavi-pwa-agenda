@@ -1,9 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-      </q-toolbar>
-    </q-header>
 
     <q-page-container>
       <q-page class="flex-center column">
@@ -109,7 +105,6 @@ export default {
   mounted() {
     this.redirecionar = this.$route.query.redirect_to;
     this.redirecionar_parametro = this.$route.query.redirect_param;
-    console.log("🚀 ~ file: Login.vue:110 ~ mounted ~ redirecionar:",this.redirecionar_parametro)
     if (this.$store.getters.getLogin.user) {
       this.$router.push("/hotmilk");
     } else {
@@ -248,7 +243,6 @@ export default {
         let caminho = this.redirecionar
         if (caminho == "pagamento_agendamento" && this.redirecionar_parametro != ""){
           let param = this.redirecionar_parametro
-          console.log("🚀 ~ file: Login.vue:251 ~ onSubmit ~ param:", param)
           this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
         } 
         else{
@@ -271,7 +265,6 @@ export default {
         let caminho = this.redirecionar
         if (caminho == "pagamento_agendamento" && this.redirecionar_parametro != ""){
           let param = this.redirecionar_parametro
-          console.log("🚀 ~ file: Login.vue:274 ~ nextStep ~ param:", param)
           this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
         } 
         else{

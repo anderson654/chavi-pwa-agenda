@@ -718,7 +718,7 @@
         </div>
       </div>
       </div>
-    </footer>
+  </footer>
 </template>
 
 <script>
@@ -1102,7 +1102,6 @@ export default defineComponent({
     }
     if (this.semImovel){
       let nomeCoworking = this.$store.getters.getCoworkingNome
-      console.log("PIAZZETTA 🦝 ~ file: Index.vue:1100 ~ mounted ~ this.getLogin.user.entidade.nome:", nomeCoworking)
       if(nomeCoworking){
         if(nomeCoworking == "hotmilk"){
           this.$router.push(`/${nomeCoworking}/agenda`)
@@ -1836,11 +1835,6 @@ export default defineComponent({
       return filtro;
     },
     validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial, validadeFinal, tempoMinimoAprovacao){
-      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ tempoMinimoAprovacao:", tempoMinimoAprovacao)
-      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ validadeFinal:", validadeFinal)
-      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ validadeInicial:", validadeInicial)
-      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ aprovarVisita:", aprovarVisita)
-      console.log("🚀 ~ file: Index.vue:1788 ~ validaAprovacao ~ necessitaAprovacao:", necessitaAprovacao)
       let paraAprovarPorTempoMinimo = false
 
       if (this.necessitaAprovacao && tempoMinimoAprovacao > 0){
@@ -1898,61 +1892,9 @@ export default defineComponent({
       }
       else{     
         this.criacaoVisita();
-           // !validaAprovacao&&validaUsoCredito&&this.necessitaPagamento
-        // console.log("!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
-        // console.log("validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
-        // console.log("validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento")
-        //  console.log("validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
       }
 
-//  if (!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento){
-//         console.log("!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
-//         this.criacaoVisita();
-//       }
-//       else if (validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento){
-//         // fluxo novo link
-//         console.log("validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
-//         this.criacaoVisita();
-//       }  
-//       else if (validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento){
-//         // convite
-//         console.log("validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento")
-//        // this.criacaoVisita();
-//       }      
-//       else if (validaAprovacao&&validaUsoCredito&&this.necessitaPagamento){
-//         // CONVITE
-//         console.log("validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
-//         this.criacaoVisita();
-//       }
-//       else if (!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento){
-//         console.log("!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
-//         this.checkoutPagamento();
-//       }
 
-
-      // if (!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento){
-      //   console.log("!validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
-      //   this.criacaoVisita();
-      // }
-      // else if (validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento){
-      //   // fluxo novo link
-      //   console.log("validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
-      //   this.criacaoVisita();
-      // }  
-      // else if (validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento){
-      //   // convite
-      //   console.log("validaAprovacao&&validaUsoCredito&&!this.necessitaPagamento")
-      //  // this.criacaoVisita();
-      // }      
-      // else if (validaAprovacao&&validaUsoCredito&&this.necessitaPagamento){
-      //   // CONVITE
-      //   console.log("validaAprovacao&&validaUsoCredito&&this.necessitaPagamento")
-      //   this.criacaoVisita();
-      // }
-      // else if (!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento){
-      //   console.log("!validaAprovacao&&!validaUsoCredito&&this.necessitaPagamento")
-      //   this.checkoutPagamento();
-      // }
 
     },
     async onSubmit() {
@@ -2103,7 +2045,7 @@ export default defineComponent({
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
             this.semImovel = true;
-            this.openURL("https://agenda.chavi.com.br", "_self");
+            this.openURL(`https://agenda.chavi.com.br/${this.routeCoworking}`, "_self");
             if (response.data && response.data.url)
               this.openURL(response.data.url, "_self");
           })
@@ -2169,7 +2111,6 @@ export default defineComponent({
             15),
         imovel: this.idImovel
       };
-      console.log("🚀 ~ file: Index.vue:1988 ~ checkoutPagamento ~ data:", data)
 
       let request = {
         url: "Entidades/checkoutPagamento",
@@ -2180,11 +2121,9 @@ export default defineComponent({
       const response = await this.executeMethod(request, false);
      
       this.user.entidadeUsuario = this.entidadeUsuario;
-      console.log("🚀 ~ file: Index.vue:1996 ~ checkoutPagamento ~ response:", response)
       let convite = {
         dadosVisita : await this.criarVisita(),
       }
-      console.log("🚀 ~ file: Index.vue:2000 ~ checkoutPagamento ~ convite:", convite)
       
       this.$store.dispatch("setarDados", {
         key: "setConvite",
@@ -2264,6 +2203,7 @@ export default defineComponent({
         const cliente = this.user.entidadeId;
         
         const imovel = this.user.imovelRef;
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:2214 ~ carregarHorarios ~ cliente:", cliente)
         if (cliente) {
           const response = await this.executeMethod({
             url: "Visitas/horariosOcupados",
@@ -2281,7 +2221,6 @@ export default defineComponent({
             this.imovel = response.data.imovel;
             if(this.imovel.opcoesDeCredito.descritivo && this.imovel.opcoesDeCredito.descritivo.length > 0){
               this.imovel.opcoesDeCredito.descritivo = this.imovel.opcoesDeCredito.descritivo.filter(e => {
-                console.log("PIAZZETTA 🦝 ~ file: Index.vue:2287 ~ carregarHorarios ~ e:", typeof(e))
                 if(typeof(e) == "string"){
                   let descricao = e.trim()
                   return descricao.length > 0
@@ -2798,9 +2737,10 @@ export default defineComponent({
 }
 
 .borderDivCalendar{
-  border-color : black;
+  border-color : white;
   border-style : solid;
   border-width: 0.1rem;
+  border-radius: 10px;
 }
 
 .descritivo {

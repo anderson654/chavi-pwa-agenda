@@ -38,15 +38,18 @@ const routes = [
 
   {
     path: "/agora",
-    component: () => import("pages/Agora.vue"),
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Agora.vue") }]
   },
   {
     path: "/mindhub",
-    component: () => import("pages/Mindhub.vue"),
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Mindhub.vue") }]
   },
   {
     path: "/login",
-    component: () => import("pages/Login.vue"),
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Login.vue") }]
   },
   {
     path: "/baggio",

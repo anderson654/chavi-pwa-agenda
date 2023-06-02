@@ -51,23 +51,37 @@
         </div>
       </q-page>
     </q-page-container>
-
-    <q-footer v-model="footer" reveal elevated>
+    <footer>
       <div
-        class="full-width text-center justify-center"
-        style="height: 30px; background-color: white"
+      style="
+          height: 40px;
+          width: 100%;
+          color: white;
+          text-align: center; 
+          background-color: 
+          rgba(240, 240, 240, 0.9);"
       >
-        <div>
-          <span
+      <div class="bg-grey-3 footer flex flex-center">
+        <div class="footer-content">
+          <span style="color: #505050;">Desenvolvido por</span>
+          <q-img
+            src="chavi_marca.png"
+            fit="contain"
+            width="100px"
+            :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'"
+            no-spinner
+            class="q-my-sm"
+            style="
+              cursor: pointer;
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
             @click="openLink('https://chavi.com.br', '_blank')"
-            class="text-black text-h6"
-            style="cursor: pointer"
-          >
-            Visite nosso site
-          </span>
+          />
         </div>
       </div>
-    </q-footer>
+      </div>
+  </footer>
   </q-layout>
 </template>
 
@@ -87,6 +101,7 @@ export default {
       validadeInicial : "",
       validadeFinal : "",
       valorDaSala : "",
+      entidadeId: "",
     };
   },
   async mounted() {
@@ -102,11 +117,8 @@ export default {
       if (response && response.status == 200) {
         this.convite = response.data;
         this.visita = response.data.dadosVisita;
-        this.nomeImovel = response.data.nome;
  
         this.getImovel( this.visita.imovelId)
-   
-        console.log("🚀 ~ file: CheckoutPreAprovacao.vue:135 ~ mounted ~ response:", response)       
       }
       else{
         Notify.create({
@@ -125,6 +137,29 @@ export default {
     openLink(url, target) {
       window.open(url, target);
     },
+    async atualizarCoworkingNome(){
+      if(this.$store.getters.getCoworkingNome){
+        return
+      }else{
+        let nome
+        const response = await this.executeMethod({
+            url: "Visitas/horariosOcupados",
+            method: "GET",
+            params: {
+              clienteId: this.entidadeId,
+              imovelRef: this.nomeImovel,
+            },
+          });
+          if(response && response.status == 200){
+            nome = response.data.entidade.nome
+            nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
+            this.$store.dispatch("setarDados", {
+              key: "setCoworkingNome",
+              value: nome,
+            });
+          }
+      }
+    },
 
     async getImovel(idImovel){    
   
@@ -138,7 +173,8 @@ export default {
         this.chaveAgendamento = response.data.opcoesAgendamentoIndividual.chaveAgendamento;
         this.valorDaSala = response.data.opcoesAgendamentoIndividual.valorDaSala;
         this.liberarPagamento = true;
-        console.log("🚀 ~ file: CheckoutPreAprovacao.vue:135 ~ mounted ~ response:", response)  
+        this.entidadeId = response.data.entidadeId;
+        this.atualizarCoworkingNome()
         //await this.checkoutPagamento()        
       }
       else{
@@ -175,7 +211,6 @@ export default {
       };
 
       const response = await this.executeMethod(request, false);
-      console.log("🚀 ~ file: CheckoutPreAprovacao.vue:238 ~ checkoutPagamento ~ response:", response)
 
      
       this.$store.dispatch("setarDados", {
@@ -200,23 +235,17 @@ export default {
       return;
     },
     diferencaEmMinutos(inicial, final) {
-      console.log("🚀 ~ file: CheckoutPreAprovacao.vue:270 ~ diferencaEmMinutos ~ final:", final)
-      console.log("🚀 ~ file: CheckoutPreAprovacao.vue:270 ~ diferencaEmMinutos ~ inicial:", inicial)
 
       let validadeInicial = parseInt(inicial)
       let validadeFinal = parseInt(final)
 
       const dataInicio = moment(validadeInicial);
-      console.log("🚀 ~ file: CheckoutPreAprovacao.vue:280 ~ diferencaEmMinutos ~ dataInicio:", dataInicio)
       const dataFim = moment(validadeFinal);
-      console.log("🚀 ~ file: CheckoutPreAprovacao.vue:282 ~ diferencaEmMinutos ~ dataFim:", dataFim)
 
       const calcula = dataFim.diff(dataInicio, "minutes");
-      console.log("🚀 ~ file: CheckoutPreAprovacao.vue:279 ~ diferencaEmMinutos ~ calcula:", calcula)
 
       return calcula;
     },
-
 
   },
 };

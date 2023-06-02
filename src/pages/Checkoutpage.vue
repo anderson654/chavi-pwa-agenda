@@ -1,37 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <q-img
-          src="agora.png"
-          fit="contain"
-          width="100px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          class="q-my-sm"
-        />
-        <q-img
-          src="chavi_marca.png"
-          fit="contain"
-          width="150px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          style="
-            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-              brightness(96%) contrast(81%);
-          "
-          class="q-my-sm"
-        />
-      </q-toolbar>
-    </q-header>
 
     <q-page-container style="padding-top: 10px">
       <q-page padding>
@@ -89,22 +57,37 @@
       </q-page>
     </q-page-container>
 
-    <q-footer v-model="footer" reveal elevated>
+    <footer>
       <div
-        class="full-width text-center justify-center"
-        style="height: 30px; background-color: white"
+      style="
+          height: 40px;
+          width: 100%;
+          color: white;
+          text-align: center; 
+          background-color: 
+          rgba(240, 240, 240, 0.9);"
       >
-        <div>
-          <span
+      <div class="bg-grey-3 footer flex flex-center">
+        <div class="footer-content">
+          <span style="color: #505050;">Desenvolvido por</span>
+          <q-img
+            src="chavi_marca.png"
+            fit="contain"
+            width="100px"
+            :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'"
+            no-spinner
+            class="q-my-sm"
+            style="
+              cursor: pointer;
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
             @click="openLink('https://chavi.com.br', '_blank')"
-            class="text-black text-h6"
-            style="cursor: pointer"
-          >
-            Visite nosso site
-          </span>
+          />
         </div>
       </div>
-    </q-footer>
+      </div>
+  </footer>
   </q-layout>
 </template>
 
@@ -124,9 +107,7 @@ export default {
   async mounted() {
     this.mensagem = this.catalogoMensagens(this.$route.query.collection_status);
     this.convite = this.$store.getters.getConvite;
-    console.log("🚀 ~ file: Checkoutpage.vue:126 ~ mounted ~ this.convite:", this.convite)
     let visita = this.$store.getters.getConvite.dadosVisita;
-    console.log("🚀 ~ file: Checkoutpage.vue:127 ~ mounted ~ visita:", visita)
     if (visita.name)
     {
       this.nome = visita.name.charAt(0).toUpperCase() + visita.name.slice(1);
