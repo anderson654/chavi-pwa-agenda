@@ -2281,7 +2281,11 @@ export default defineComponent({
             this.imovel = response.data.imovel;
             if(this.imovel.opcoesDeCredito.descritivo && this.imovel.opcoesDeCredito.descritivo.length > 0){
               this.imovel.opcoesDeCredito.descritivo = this.imovel.opcoesDeCredito.descritivo.filter(e => {
-                return e.trim().length > 0
+                console.log("PIAZZETTA 🦝 ~ file: Index.vue:2287 ~ carregarHorarios ~ e:", typeof(e))
+                if(typeof(e) == "string"){
+                  let descricao = e.trim()
+                  return descricao.length > 0
+                }
               })
             }
             this.$store.dispatch("setarDados", {
