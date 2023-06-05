@@ -1108,9 +1108,6 @@ export default defineComponent({
   methods: {   
     validarStatusProcesso(){
 
-      console.log("🚀 ~ file: Index.vue:1124 ~ validarStatusProcesso ~ this.necessitaPagamento:", this.necessitaPagamento)
-      console.log("🚀 ~ file: Index.vue:1124 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
-      console.log("🚀 ~ file: Index.vue:1124 ~ validarStatusProcesso ~ this.validaNecessitaCredito:", this.validaNecessitaCredito)
 
       if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito) return "Pagamento";
 
@@ -1477,12 +1474,16 @@ export default defineComponent({
       else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
         return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
       }
+      else if (funcionamentoIndividual  && !necessitaAprovacao  &&  !aprovarVisita) {
+        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
+      }
       else if (!funcionamentoIndividual &&  !aprovarVisita) {
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
       else{
         return "";
       }
+
     },
 
     construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos){
@@ -1868,7 +1869,7 @@ export default defineComponent({
 
 			  return true;
       } 
-      if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao > 0 
+      else if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao > 0 
         && !paraAprovarPorTempoMinimo){
         this.user.paraAprovar = false;
  
@@ -1890,12 +1891,15 @@ export default defineComponent({
     
         return false;
       }
-      else if (funcionamentoIndividual == false && !aprovarVisita){
-        
+      else if (funcionamentoIndividual == true && necessitaAprovacao == false && !aprovarVisita){
         this.user.paraAprovar = true;
-
         return true;
       }
+      else if (funcionamentoIndividual == false && !aprovarVisita){
+        this.user.paraAprovar = true;
+        return true;
+      }
+
     },
 
     //não existe nescessita pagamento - Verficar se é pra tirar
@@ -2230,7 +2234,7 @@ export default defineComponent({
         const cliente = this.user.entidadeId;
         
         const imovel = this.user.imovelRef;
-        console.log("PIAZZETTA 🦝 ~ file: Index.vue:2214 ~ carregarHorarios ~ cliente:", cliente)
+       
         if (cliente) {
           const response = await this.executeMethod({
             url: "Visitas/horariosOcupados",
@@ -2429,7 +2433,7 @@ export default defineComponent({
             }
 
             optionsOff.push({
-              title: titleBusy,// horario.paraAprovar ? "Pendente" : titleBusy,
+              title: horario.paraAprovar ? "PENDENTE" : titleBusy,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
