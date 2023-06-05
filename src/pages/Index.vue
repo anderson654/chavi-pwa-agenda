@@ -22,11 +22,6 @@
         style="width: 200px; min-width: 150px; height: 125px"
         @click="$router.push(`${routeCoworking}`)"
       >
-        <q-img
-          src="hotmilk.png"
-          style="filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg) brightness(96%) contrast(81%);
-          "
-        />
       </q-btn>
     </div>
     <!-- <div v-if="parte == 4">
@@ -39,8 +34,8 @@
       <div class="text-center q-my-lg" style="width: 70vw">
         <div v-if="inForms">
           <span style="font-size: 1.4rem" v-if="parte == 1">
-            Agora, insira seu nome e telefone.<br />
-            Em seguida, aguarde receber um código SMS e insira no campo
+            Agora, insira seu telefone.<br />
+            Em seguida, aguarde receber um código por SMS ou whatsapp e insira no campo
             indicado.
           </span>
           <span style="font-size: 1.4rem" v-if="parte == 2">
@@ -586,7 +581,9 @@
 
               <div class="col-9 text-bold" v-html="getEnderecoHtml"></div>
             </div>
-            <div v-if="necessitaPagamento">
+            <div v-if="(!validaNecessitaCredito&&validaNecessitaAprovacao&&necessitaPagamento)
+             || (!validaNecessitaCredito&&!validaNecessitaAprovacao&&necessitaPagamento)  
+             || (validaNecessitaCredito&&validaNecessitaAprovacao&&necessitaPagamento) ">
               <div class="row">
                 <div class="col-5">Preço 15 minutos:</div>
                 <div class="col-7 text-bold">
@@ -662,37 +659,52 @@
                   ? (parte -= 1)
                   : this.$router.back()
               "
-            />
+            />          
 
             <q-btn
               class="col-6 q-ml-xs"
-              label="Solicitar"
-              color="positive"
+              :label="validarStatusProcesso()"
               type="submit"
-              v-if="necessitaAprovacao"
+              color="positive"            
             />
 
-            <q-btn
-              class="col-6 q-ml-xs"
-              label="Enviar"
-              type="submit"
-              color="positive"
-              v-if="!necessitaAprovacao && !necessitaPagamento"
-            />
-
-            <q-btn
-              class="col-6 q-ml-xs"
-              label="Pagamento"
-              @click="checkoutPagamento"
-              color="positive"
-              v-if="necessitaPagamento"
-            />
           </q-btn-group>
           <div class="cho-container"></div>
         </div>
       </q-form>
     </div>
   </q-page>
+  <footer>
+      <div
+      style="
+          height: 40px;
+          width: 100%;
+          color: white;
+          text-align: center; 
+          background-color: 
+          rgba(240, 240, 240, 0.9);"
+      >
+      <div class="bg-grey-3 footer flex flex-center">
+        <div class="footer-content">
+          <span style="color: #505050;">Desenvolvido por</span>
+          <q-img
+            src="chavi_marca.png"
+            fit="contain"
+            width="100px"
+            :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'"
+            no-spinner
+            class="q-my-sm"
+            style="
+              cursor: pointer;
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
+            @click="openLink('https://chavi.com.br', '_blank')"
+          />
+        </div>
+      </div>
+      </div>
+  </footer>
 </template>
 
 <script>
@@ -748,6 +760,7 @@ export default defineComponent({
       fotoFrente: [],
       fotoSelfie: [],
       fotoVerso: [],
+      gerenciamentoCreditos : {},
       user: {
         name: "",
         empresa: "",
@@ -776,6 +789,8 @@ export default defineComponent({
       horaInicial: 0,
       timeStepMin: 15,
       necessitaAprovacao: false,
+      validaNecessitaCredito : false,
+      validaNecessitaAprovacao : false,
       chaveAgendamento: "",
       liberarAgendamento: -1,
       sabado: false,
@@ -798,6 +813,8 @@ export default defineComponent({
     };
   },
   computed: {
+    
+  
     parseData() {
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial));
@@ -888,7 +905,13 @@ export default defineComponent({
       return this.cliente.nome == "Ágora Tech Park";
     },
     routeCoworking() {
-      return this.cliente.nome == "Ágora Tech Park" ? "agora" : "hotmilk";
+      let nome = this.cliente.nome
+      nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
+      if(nome == "hotmilk"){
+        return nome +"/agenda"
+      }else{
+        return nome
+      }
     },
 
     getMonth() {
@@ -1011,9 +1034,7 @@ export default defineComponent({
 
   },
   mounted() {
-    try {
-   
-
+    try { 
       this.selectedDate = today();
       
 
@@ -1068,14 +1089,43 @@ export default defineComponent({
       this.semImovel = true;
     }
     if (this.semImovel){
-      this.$store.dispatch("setarDados", {
-          key: "setLogin",
-          value: [],
-        });
-      this.$router.push("/");
-    } 
+      let nomeCoworking = this.$store.getters.getCoworkingNome
+      if(nomeCoworking){
+        if(nomeCoworking == "hotmilk"){
+          this.$router.push(`/${nomeCoworking}/agenda`)
+        }else{
+          this.$router.push(`/${nomeCoworking}`) 
+        }
+      }else{
+        this.$store.dispatch("setarDados", {
+            key: "setLogin",
+            value: [],
+          });
+          this.$router.push("/");
+      }
+    }
   },
   methods: {   
+    validarStatusProcesso(){
+
+      console.log("🚀 ~ file: Index.vue:1124 ~ validarStatusProcesso ~ this.necessitaPagamento:", this.necessitaPagamento)
+      console.log("🚀 ~ file: Index.vue:1124 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
+      console.log("🚀 ~ file: Index.vue:1124 ~ validarStatusProcesso ~ this.validaNecessitaCredito:", this.validaNecessitaCredito)
+
+      if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito) return "Pagamento";
+
+      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && this.necessitaPagamento) return "Solicitar";
+      else if (!this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Enviar";
+
+      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Solicitar";    
+      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && !this.necessitaPagamento) return "Solicitar";
+      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && this.necessitaPagamento) return "Solicitar";
+
+      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && !this.necessitaPagamento) return "Enviar";
+      // if (validaNecessitaCredito || (validaNecessitaAprovacao && !necessitaPagamento)) return "Enviar";
+      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.necessitaPagamento) return "Enviar";
+
+    },      
     validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras){
       return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras && (this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId));      
     },
@@ -1160,8 +1210,11 @@ export default defineComponent({
         });
         this.parte = 1;
         this.inForms = true;
-        this.$router.push("/");
+        this.telaInicial()
       });
+    },
+    nomeEntidadeId(){
+      return "hotmilk"
     },
     montarQrcode() {
       let url = "";
@@ -1233,6 +1286,7 @@ export default defineComponent({
         "left-side": !isHeader && event.side === "left",
         "right-side": !isHeader && event.side === "right",
         "rounded-border": true,
+        "borderDivCalendar" : true,
       };
     },
     badgeStyles(event, timeStartPos, timeDurationHeight) {
@@ -1407,20 +1461,28 @@ export default defineComponent({
       return this.escreveItemHorario(tempoMinimo).label;
 
     },
-    validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita){
+    validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita, necessitaAprovacao, funcionamentoIndividual){
 
-      if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined"))
+      if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined") || (typeof necessitaAprovacao === "undefined"))
       {
         return "";
       }
 
-      if(tempoMinimoAprovacao != 0 && aprovarVisita){
+      if (funcionamentoIndividual && necessitaAprovacao && tempoMinimoAprovacao <= 0){
+        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
+      }	
+      else if (funcionamentoIndividual && necessitaAprovacao && tempoMinimoAprovacao >0 ){
+        return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
+      }	 
+      else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
         return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
       }
-      else if (!aprovarVisita){
+      else if (!funcionamentoIndividual &&  !aprovarVisita) {
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
-      return "";
+      else{
+        return "";
+      }
     },
 
     construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos){
@@ -1470,7 +1532,7 @@ export default defineComponent({
           gerenciamentoHoras = response.data;
         }
       }
-      let gerenciamentoCreditos = {};
+      //let gerenciamentoCreditos = {};
       if (this.imovel) {
         let request = {
           url: `entidades/gerenciamentoDeCreditos/${this.user.entidadeId}/${this.idImovel}`,
@@ -1480,7 +1542,7 @@ export default defineComponent({
         const response = await this.executeMethod(request, false);
 
         if(response && response.status == 200){
-          gerenciamentoCreditos = response.data;
+          this.gerenciamentoCreditos = response.data;
         }
       }
 
@@ -1512,19 +1574,24 @@ export default defineComponent({
           (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
         );
 
+      this.user.validadeInicial = validadeInicial.getTime();;
+      
+
       /* Dados da Entidade */
-      const coworking =  gerenciamentoCreditos.coworking;
-      const consomeHoras = gerenciamentoCreditos.consomeHoras;
-      const custoBase = gerenciamentoCreditos.custoBase;
+      const coworking =  this.gerenciamentoCreditos .coworking;
+      const consomeHoras = this.gerenciamentoCreditos .consomeHoras;
+      const custoBase = this.gerenciamentoCreditos .custoBase;
       /* Dados do Imovel */
-      const funcionamentoIndividual = gerenciamentoCreditos.funcionamentoIndividual;
-      const custaCreditos = gerenciamentoCreditos.custaCreditos;
-      const consumoCreditos = gerenciamentoCreditos.consumoCreditos;
+      const funcionamentoIndividual = this.gerenciamentoCreditos .funcionamentoIndividual;
+      const custaCreditos = this.gerenciamentoCreditos .custaCreditos;
+      const consumoCreditos = this.gerenciamentoCreditos .consumoCreditos;
    
       const horaFinal = this.horaFinal;
       const timeStepMin =this.timeStepMin;
-      const tempoMaximo = this.tempoMaximo;
+      const tempoMaximo = this.tempoMaximo; 
       
+      this.validaNecessitaCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
+ 
       const options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
 
       const date = scope.timestamp.date;
@@ -1555,7 +1622,7 @@ export default defineComponent({
       }
   
       let message;
-      if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){
+      if(this.validaNecessitaCredito){
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>`          
 
@@ -1574,14 +1641,15 @@ export default defineComponent({
                   </span>`;
               }
            //}
-
-          message += this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita);
-
+       
+           message +=  "</span> <center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
+           message += `</span>`
       } else {
-        message = `<span class='text-black' style='font-size: 1rem'>
-            <center>Selecione a duração da sua utilização</center>
-          </span>`
-      }
+          message = `<span class='text-black' style='font-size: 1rem'>
+            <center>Selecione a duração da sua utilização</center>`
+          message +=  "<center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
+          message += `</span>`
+        }
       Dialog.create({
         title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
         message: message,
@@ -1603,6 +1671,15 @@ export default defineComponent({
         persistent: true,
       }).onOk((data) => {
 
+        const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
+        const necessitaAprovacao = this.necessitaAprovacao;
+        const aprovarVisita = this.aprovarVisita;
+
+        const validadeFinal = this.user.validadeInicial + Number(data) * 60000;
+        this.user.validadeFinal = validadeFinal;
+        this.validaNecessitaAprovacao = this.validaAprovacao(necessitaAprovacao,aprovarVisita,this.user.validadeInicial,validadeFinal, tempoMinimoAprovacao, funcionamentoIndividual)
+       
+
         if (!this.verificarCreditos(gerenciamentoHoras.horasMensaisDisponiveis,gerenciamentoHoras.horasExtras,
           Number(data),coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos)) {
           return;
@@ -1617,11 +1694,11 @@ export default defineComponent({
           textColor: "text-white",
         };
         this.events.push(visita);
-        const validadeInicial = new Date(
-          (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
-        ).getTime();
-        this.user.validadeInicial = validadeInicial;
-        this.user.validadeFinal = validadeInicial + Number(data) * 60000;
+        // const validadeInicial = new Date(
+        //   (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
+        // ).getTime();
+        // this.user.validadeInicial = validadeInicial;
+        // this.user.validadeFinal = validadeInicial + Number(data) * 60000;
         this.montarQrcode();
 
         if (this.habilitarPublicoExterno) {
@@ -1765,13 +1842,98 @@ export default defineComponent({
       }
       return filtro;
     },
-    //não existe nescessita pagamento - Verficar se é pra tirar
-    async onSubmit() {
-      if (this.necessitaPagamento) {
-        this.checkoutPagamento();
-        return;
+    validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial, validadeFinal, tempoMinimoAprovacao,funcionamentoIndividual){
+   
+      let paraAprovarPorTempoMinimo = false
+  
+
+      if (funcionamentoIndividual == true && this.necessitaAprovacao == true 
+        && tempoMinimoAprovacao > 0){      
+
+        let duracao = (validadeInicial - validadeFinal) / 60000       
+       
+        paraAprovarPorTempoMinimo = Math.abs(duracao)  > tempoMinimoAprovacao
+      
+      }
+      else if (funcionamentoIndividual == false && aprovarVisita 
+        && tempoMinimoAprovacao > 0) {
+
+        let duracao =  (validadeInicial - validadeFinal) / 60000
+        paraAprovarPorTempoMinimo = Math.abs(duracao) > tempoMinimoAprovacao
       }
 
+      if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao > 0 
+        && paraAprovarPorTempoMinimo){
+        this.user.paraAprovar = true;
+
+			  return true;
+      } 
+      if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao > 0 
+        && !paraAprovarPorTempoMinimo){
+        this.user.paraAprovar = false;
+ 
+			  return false;
+      } 
+      else if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao <= 0){
+        this.user.paraAprovar = true;
+ 
+			  return true;
+      }	   		
+     
+      else if (funcionamentoIndividual == false && aprovarVisita && tempoMinimoAprovacao > 0 && paraAprovarPorTempoMinimo) {
+        this.user.paraAprovar = true;
+  
+        return true;
+      }
+      else if (funcionamentoIndividual == false && aprovarVisita && tempoMinimoAprovacao > 0 && !paraAprovarPorTempoMinimo) {
+        this.user.paraAprovar = false;
+    
+        return false;
+      }
+      else if (funcionamentoIndividual == false && !aprovarVisita){
+        
+        this.user.paraAprovar = true;
+
+        return true;
+      }
+    },
+
+    //não existe nescessita pagamento - Verficar se é pra tirar
+    async validaCriacaoVisita(){
+     
+      /* Dados da Entidade */
+      const coworking =  this.gerenciamentoCreditos.coworking;
+      const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+      /* Dados do Imovel */
+      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+      const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+
+      const necessitaPagamento = this.necessitaPagamento;
+
+      const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
+      const necessitaAprovacao = this.necessitaAprovacao;
+      const aprovarVisita = this.aprovarVisita;
+      const validadeInicial = this.user.validadeInicial;
+      const validadeFinal = this.user.validadeFinal;
+
+      let validaUsoCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
+      let validaAprovacao = this.validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial,validadeFinal, tempoMinimoAprovacao,funcionamentoIndividual)
+      
+      if (!validaAprovacao&&!validaUsoCredito&&necessitaPagamento){
+
+        this.checkoutPagamento();
+      }
+      else{     
+        this.criacaoVisita();
+ 
+      }
+
+    },
+    async onSubmit() {
+      this.validaCriacaoVisita();
+    },
+    async criacaoVisita(){
+ 
       if (
         this.fotoFrente &&
         this.fotoFrente.length &&
@@ -1827,7 +1989,7 @@ export default defineComponent({
       let user = {
         ...this.user,
       };
-
+ 
       user.entidadeUsuario = this.getLogin.user.entidadeId
 
       if (this.necessitaAprovacao) {
@@ -1845,18 +2007,12 @@ export default defineComponent({
       if (this.eventoOutros) {
         user.eventoOutros = this.eventoOutros;
       }
-
-      this.user.paraAprovar =
-        this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
-
-      console.log("PIAZZETTA 🦝 ~ file: Index.vue:1849 ~ onSubmit ~ this.user:", user)
-        
+      
       let request = {
         url: "Visitas/validarVisita",
         method: "post",
         data: user,
       };
-
 
       if (!this.user.hasDocs) {
 
@@ -1916,7 +2072,7 @@ export default defineComponent({
             this.$store.dispatch("setarDados", { key: "setParams", value: {} });
             this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
             this.semImovel = true;
-            this.openURL("https://agenda.chavi.com.br", "_self");
+            this.openURL(`https://agenda.chavi.com.br/${this.routeCoworking}`, "_self");
             if (response.data && response.data.url)
               this.openURL(response.data.url, "_self");
           })
@@ -1944,7 +2100,7 @@ export default defineComponent({
               this.semImovel = true;
               if (response.data && response.data.url)
                 this.openURL(response.data.url, "_self");
-              else this.openURL("https://agenda.chavi.com.br", "_self");
+              else this.openURL("https://agenda.chavi.com.br/"+ this.routeCoworking, "_self");
             });
           });
       } else if (response && response.status) {
@@ -1990,9 +2146,11 @@ export default defineComponent({
       };
 
       const response = await this.executeMethod(request, false);
+     
       this.user.entidadeUsuario = this.entidadeUsuario;
-
-      let convite = await this.criarVisita()
+      let convite = {
+        dadosVisita : await this.criarVisita(),
+      }
       
       this.$store.dispatch("setarDados", {
         key: "setConvite",
@@ -2072,6 +2230,7 @@ export default defineComponent({
         const cliente = this.user.entidadeId;
         
         const imovel = this.user.imovelRef;
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:2214 ~ carregarHorarios ~ cliente:", cliente)
         if (cliente) {
           const response = await this.executeMethod({
             url: "Visitas/horariosOcupados",
@@ -2083,11 +2242,18 @@ export default defineComponent({
           });
 
           if (response && response.status == 200) {
-            console.log("PIAZZETTA 🦝 ~ file: Index.vue:2082 ~ carregarHorarios ~ response:", response)
             this.cliente = response.data.entidade;
 
             this.idImovel = response.data.idImovel;
             this.imovel = response.data.imovel;
+            if(this.imovel.opcoesDeCredito.descritivo && this.imovel.opcoesDeCredito.descritivo.length > 0){
+              this.imovel.opcoesDeCredito.descritivo = this.imovel.opcoesDeCredito.descritivo.filter(e => {
+                if(typeof(e) == "string"){
+                  let descricao = e.trim()
+                  return descricao.length > 0
+                }
+              })
+            }
             this.$store.dispatch("setarDados", {
               key: "setLogo",
               value: this.cliente.logo,
@@ -2196,8 +2362,6 @@ export default defineComponent({
                 : false;
             }
             this.events = response.data.horarios;/////
-            console.log("PIAZZETTA ~ file: Index.vue:2236 ~ carregarHorarios ~ response.data:", response.data)
-            console.log("PIAZZETTA ~ file: Index.vue:2236 ~ carregarHorarios ~ this.events:", this.events)
             
             this.formatData();
           } else {
@@ -2223,14 +2387,13 @@ export default defineComponent({
         let optionsOff = [];
         for (let horario of this.events) {
 
-          if (!horario.paraAprovar) {
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
               )
             );
 
-            let finalTemp = horario.timestampInicial + horario.intervalo
+            let finalTemp = parseInt(horario.timestampInicial) + parseInt(horario.intervalo)
 
             const final = parseTimestamp(
               moment(parseInt(finalTemp)).format(
@@ -2266,17 +2429,18 @@ export default defineComponent({
             }
 
             optionsOff.push({
-              title: horario.paraAprovar ? "Pendente" : titleBusy,
+              title: titleBusy,// horario.paraAprovar ? "Pendente" : titleBusy,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
-              bgcolor: horario.paraAprovar ? "blue-9" : "red-5",
+              bgcolor: horario.paraAprovar ? "yellow-9" : "red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
             });
-          }
+
         }
         this.events = optionsOff;
+
       }
     },
     async sendCode() {
@@ -2433,9 +2597,6 @@ export default defineComponent({
       if (this.eventoOutros) {
         user.eventoOutros = this.eventoOutros;
       }
-
-      this.user.paraAprovar =
-        this.user.validadeFinal - this.user.validadeInicial >= 60000 * 120;
 
       if (!this.user.hasDocs) {
 
@@ -2600,6 +2761,13 @@ export default defineComponent({
   z-index: 9999999;
   right: 20px;
   top: 20px;
+}
+
+.borderDivCalendar{
+  border-color : white;
+  border-style : solid;
+  border-width: 0.1rem;
+  border-radius: 10px;
 }
 
 .descritivo {

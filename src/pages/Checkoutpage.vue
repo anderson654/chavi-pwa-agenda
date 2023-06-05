@@ -1,37 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <q-img
-          src="agora_logo.png"
-          fit="contain"
-          width="100px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          class="q-my-sm"
-        />
-        <q-img
-          src="chavi_marca.png"
-          fit="contain"
-          width="150px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          style="
-            filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-              brightness(96%) contrast(81%);
-          "
-          class="q-my-sm"
-        />
-      </q-toolbar>
-    </q-header>
 
     <q-page-container style="padding-top: 10px">
       <q-page padding>
@@ -89,26 +57,42 @@
       </q-page>
     </q-page-container>
 
-    <q-footer v-model="footer" reveal elevated>
+    <footer>
       <div
-        class="full-width text-center justify-center"
-        style="height: 30px; background-color: white"
+      style="
+          height: 40px;
+          width: 100%;
+          color: white;
+          text-align: center; 
+          background-color: 
+          rgba(240, 240, 240, 0.9);"
       >
-        <div>
-          <span
+      <div class="bg-grey-3 footer flex flex-center">
+        <div class="footer-content">
+          <span style="color: #505050;">Desenvolvido por</span>
+          <q-img
+            src="chavi_marca.png"
+            fit="contain"
+            width="100px"
+            :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'"
+            no-spinner
+            class="q-my-sm"
+            style="
+              cursor: pointer;
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
             @click="openLink('https://chavi.com.br', '_blank')"
-            class="text-black text-h6"
-            style="cursor: pointer"
-          >
-            Visite nosso site
-          </span>
+          />
         </div>
       </div>
-    </q-footer>
+      </div>
+  </footer>
   </q-layout>
 </template>
 
 <script>
+import { Loading, Notify, } from "quasar";
 export default {
   data() {
     return {
@@ -122,21 +106,56 @@ export default {
   },
   async mounted() {
     this.mensagem = this.catalogoMensagens(this.$route.query.collection_status);
-    this.visita = this.$store.getters.getConvite;
-    this.nome = this.visita.name.charAt(0).toUpperCase() + this.visita.name.slice(1);
+    this.convite = this.$store.getters.getConvite;
+    let visita = this.$store.getters.getConvite.dadosVisita;
+    if (visita.name)
+    {
+      this.nome = visita.name.charAt(0).toUpperCase() + visita.name.slice(1);
+    }
+    else{
+      if (this.$store.getters.getLogin.user) {
+        this.nome = this.$store.getters.getLogin.user.name;
+      }
+    }
 
     if (this.$route.query.collection_status === "approved") {
 
-      let request = {
-        url: "Visitas/validarVisita",
-        method: "post",
-        data: {
-          ...this.visita,
-          pagamentoAutorizado: true,
-        },
-      };
-      const response = await this.executeMethod(request, false);
-      this.codigo = response.data.codigo;
+      if (!this.convite.id){
+        let request = {
+          url: "Visitas/validarVisita",
+          method: "post",
+          data: {
+            ...visita,
+            pagamentoAutorizado: true,
+          },
+        };
+        const response = await this.executeMethod(request, false);
+        this.codigo = response.data.codigo;
+      }
+      else{
+        const response = await this.executeMethod({
+                        url: "Convites/aprovar",
+                        method: 'post',
+                        data: {
+                        conviteId: this.convite.codigo,
+                        pagamentoRealizado: true,
+                        }})
+
+        if (response && response.status == 200) {
+           Notify.create({
+              message:
+                "A visita foi aprovada!",
+            });
+        }
+        else{
+          Notify.create({
+              message:
+                "Ocorreu um erro no processo!",
+            });
+        }
+   
+        this.codigo = response.data.codigo;
+      }
     }
   },
   methods: {

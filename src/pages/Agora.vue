@@ -1,45 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <q-btn
-          style="font-size: 0.7rem"
-          icon="home"
-          flat
-          dense
-          color="secondary"
-          class="home-icon"
-          @click="
-            selecionarBloco = true;
-            blocoSelecionado = null;
-          "
-        />
-
-        <div class="header-logo" @click="$router.push('/')">
-          <q-img
-            src="agora_logo.png"
-            fit="contain"
-            width="100px"
-            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
-            no-spinner
-            class="q-my-sm agora-logo"
-          />
-          <div class="bar"></div>
-          <q-img
-            src="chavi_marca.png"
-            fit="contain"
-            width="150px"
-            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
-            no-spinner
-            style="
-              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-                brightness(96%) contrast(81%);
-            "
-            class="q-my-sm"
-          />
-        </div>
-      </q-toolbar>
-    </q-header>
 
     <q-page-container>
       <q-page padding>
@@ -195,19 +155,37 @@
         </div>
       </q-page>
     </q-page-container>
-    <q-footer v-model="footer" reveal elevated>
-      <div class="full-width text-center justify-center" style="height: 30px">
-        <div>
-          <span
+    <footer>
+      <div
+      style="
+          height: 40px;
+          width: 100%;
+          color: white;
+          text-align: center; 
+          background-color: 
+          rgba(240, 240, 240, 0.9);"
+      >
+      <div class="bg-grey-3 footer flex flex-center">
+        <div class="footer-content">
+          <span style="color: #505050;">Desenvolvido por</span>
+          <q-img
+            src="chavi_marca.png"
+            fit="contain"
+            width="100px"
+            :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'"
+            no-spinner
+            class="q-my-sm"
+            style="
+              cursor: pointer;
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
             @click="openLink('https://chavi.com.br', '_blank')"
-            class="text-black text-h6"
-            style="cursor: pointer"
-          >
-            Visite nosso site
-          </span>
+          />
         </div>
       </div>
-    </q-footer>
+      </div>
+  </footer>
   </q-layout>
 </template>
 

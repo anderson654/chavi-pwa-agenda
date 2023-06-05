@@ -1,9 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-      </q-toolbar>
-    </q-header>
 
     <q-page-container>
       <q-page class="flex-center column">
@@ -85,7 +81,8 @@ export default {
       username: "",
       password: "",
       loading: false,
-
+      redirecionar: '',
+      redirecionar_parametro : "",
       loginEmail: false,
       user: {
         name: "",
@@ -106,6 +103,8 @@ export default {
     },
   },
   mounted() {
+    this.redirecionar = this.$route.query.redirect_to;
+    this.redirecionar_parametro = this.$route.query.redirect_param;
     if (this.$store.getters.getLogin.user) {
       this.$router.push("/hotmilk");
     } else {
@@ -239,7 +238,20 @@ export default {
       return regexp.test(valor) || regexp2.test(valor) || !this.utilizarEmail;
     },
     onSubmit() {
-      this.$router.push("/hotmilk");
+      if (this.redirecionar )
+      {
+        let caminho = this.redirecionar
+        if (caminho == "pagamento_agendamento" && this.redirecionar_parametro != ""){
+          let param = this.redirecionar_parametro
+          this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
+        } 
+        else{
+          this.$router.push("/");
+        }      
+      }
+      else{
+        this.$router.push("/");
+      }     
     },
     onReset() {
       this.user.name = "";
@@ -248,7 +260,20 @@ export default {
       this.user.email = "";
     },
     async nextStep() {
-      this.$router.push("/hotmilk");
+      if (this.redirecionar )
+      {
+        let caminho = this.redirecionar
+        if (caminho == "pagamento_agendamento" && this.redirecionar_parametro != ""){
+          let param = this.redirecionar_parametro
+          this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
+        } 
+        else{
+          this.$router.push("/");
+        }      
+      }
+      else{
+        this.$router.push("/");
+      }
     },
   },
 };

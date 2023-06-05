@@ -24,7 +24,7 @@
     <div class="containerBox">
       <div class="agora">
         <q-img
-          src="agora_logo.png"
+          src="agora.png"
           fit="contain"
           width="150px"
           height="100px"
@@ -56,7 +56,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('/hotmilk')"
+          @click="$router.push('/hotmilk/agenda')"
         />
       </div>
 

@@ -19,7 +19,7 @@ module.exports = configure(function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["i18n", "axios", "utilServices"],
+    boot: ["axios", "utilServices"],
 
     // https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
     css: ["app.sass"],
@@ -48,8 +48,8 @@ module.exports = configure(function (ctx) {
             // VUE_APP_API_URL: "https://api.chavi.com.br/api",
           }
         : {
-            //VUE_APP_API_URL: "https://api.chavi.com.br/api",
-            VUE_APP_API_URL: "https://beta2.chavi.com.br/api",
+            VUE_APP_API_URL: "https://api.chavi.com.br/api",
+            //VUE_APP_API_URL: "https://beta2.chavi.com.br/api",
             //VUE_APP_API_URL: 'https://betaserver.chavi.com.br/api',
           },
       vueRouterMode: "history", // available values: 'hash', 'history'
@@ -86,6 +86,7 @@ module.exports = configure(function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
+      lang: "pt-BR",
       config: {},
 
       // iconSet: 'material-icons', // Quasar icon set
