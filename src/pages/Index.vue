@@ -201,7 +201,7 @@
                         badgeStyles(event, timeStartPos, timeDurationHeight)
                       "
                     >
-                      <div class="title q-calendar__ellipsis">
+                      <div class="title">
                         <span class="text-center" v-html="event.title"></span>
                         <q-tooltip>{{ event.time }}</q-tooltip>
                       </div>
@@ -213,12 +213,12 @@
                   >
                     <div
                       v-if="holiday && !liberarFeriado"
-                      class="my-event full-width rounded-border bg-green-10"
-                      style="top: 0px; height: 100%; align-items: flex-start"
+                      class="my-event full-width rounded-border bg-grey-7"
+                      style="top: 0px; height: 100%; align-items: flex-start;"
                     >
                       <div
-                        class="title q-calendar__ellipsis text-black text-center"
-                        style="font-size: 1.2rem"
+                        class="title text-center"
+                        style="font-size: 1.2rem; color: lightgrey;"
                       >
                         Feriado <br />
                         {{ holiday.dia }}
@@ -884,8 +884,8 @@ export default defineComponent({
       return !this.isCoworking
         ? `Agende o melhor  dia<br> e hora para utilizar:<br> <strong> <p style='font-size: 1.8rem; margin-bottom: 16px;'> ${ref} . </strong> </p>`
         : `
-        <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px;" >Agende o melhor<br>dia e hora para utilizar:<br></p>
-          <p style="line-height: 0px;margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
+        <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px; margin-bottom: 5px" >Agende o melhor<br>dia e hora para utilizar:<br></p>
+          <p style="margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
     },
 
 //===============================================================================
@@ -2811,7 +2811,6 @@ export default defineComponent({
   max-width: 160px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   margin-bottom: 4px;
 }
 
@@ -2848,6 +2847,7 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   height: 100%;
+  word-break: break-all;
 }
 .fakelink {
   text-decoration: underline;

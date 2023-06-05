@@ -34,14 +34,16 @@ export default {
 </script>
 
 <style>
-@media (max-width: 580px) {
   .navigation-button{
+    max-width: 150px;
+    border-radius: 16px;
+  }
+@media (max-width: 600px) {
+  .navigation-button{
+    max-width: 100px;
     flex-direction: column;
     align-items: center;
   }
 }
-.navigation-button{
-  max-width: 150px;
-  border-radius: 16px;
-}
+
 </style>
