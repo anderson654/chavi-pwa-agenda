@@ -702,12 +702,13 @@
                       text-overflow: ellipsis;
                     "
                   >
-                  <div class="full-widith column wrap" style="box-shadow: none;">
+                  <div class="full-widith column wrap items-center" style="box-shadow: none;">
                     <q-btn
                       outline
                       label="voltar"
                       color="positive"
                       class="col-6 q-mr-xs q-mb-md"
+                      style="max-width: 250px;"
                       @click="cardVisita = false"
                     />
                     <q-btn
@@ -715,6 +716,7 @@
                       label="Excluir"
                       color="negative"
                       class="col-6 q-mr-xs q-mb-md"
+                      style="max-width: 250px;"
                       @click="deletar(visitaSelecionada.id)"
                     />
                   </div>
@@ -2524,6 +2526,7 @@ export default defineComponent({
             );
 
             const duracao = horario.intervalo / 60000;
+            console.log("PIAZZETTA 🦝 ~ file: Index.vue:2529 ~ formatData ~ horario:", horario)
 
             let titleBusy = "Ocupado";
 
@@ -2555,7 +2558,7 @@ export default defineComponent({
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
-              bgcolor: horario.paraAprovar ? "yellow-9" : horario.usuario == this.getLogin.user.nome? "blue-5":"red-5",
+              bgcolor: horario.paraAprovar ? "yellow-9" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
               visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : ""
