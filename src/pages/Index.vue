@@ -868,6 +868,8 @@ export default defineComponent({
       horaFinal: 24,
       horaInicial: 0,
       timeStepMin: 15,
+      agendamentoUnico : false,
+      tempoTotalMaximo : 0,
       necessitaAprovacao: false,
       validaNecessitaCredito : false,
       validaNecessitaAprovacao : false,
@@ -1639,6 +1641,61 @@ export default defineComponent({
       return opcoes;
 
     },
+
+    calcularTempoMaximoAgendamento(dataMarco, horaInicial, horaFinal,tempoTotalMaximo,horarios){
+     
+      const data = moment(dataMarco); // Obtém o momento atual
+
+      let horaMomentInicial = moment(horaInicial, 'HH:mm');
+      let horaMomentFinal = moment(horaFinal, 'HH:mm')
+
+      const momentInicial = horaMomentInicial.set({
+        date: data.date(),
+        month: data.month(),
+        year: data.year()
+      });
+
+      const momentFinal = horaMomentFinal.set({
+        date: data.date(),
+        month: data.month(),
+        year: data.year()
+      });
+
+      let agendamentosUsuario = horarios.filter((agendamento) => {	
+        console.log("🚀 ~ file: Index.vue:1554 ~ agendamentosUsuario ~ agendamento:", agendamento)
+ 
+        let timeStampInicial = parseInt(agendamento.timestampInicial);    
+        let intervalo =  agendamento.duration * 60000;
+        let timeStampFinal = timeStampInicial + intervalo;
+      	let hora= moment(timeStampInicial)
+        let horaFinal= moment(timeStampFinal)      	
+        let  validadepois = hora.isSameOrAfter(momentInicial);	
+        let validaAntes = horaFinal.isBefore(momentFinal);	
+      	return validadepois && validaAntes;
+      }) 
+   
+ 
+      let contador = 0;
+      for (let index = 0; index < agendamentosUsuario.length; index++) {
+
+        let timeStampInicial = parseInt(agendamentosUsuario[index].timestampInicial);    
+        let intervaloSelect =  agendamentosUsuario[index].duration * 60000;
+        let timeStampFinal = timeStampInicial + intervaloSelect;
+        let validaInicial = new Date(timeStampInicial);
+        let validaFinal = new Date(timeStampFinal);
+
+        let intervalo = validaInicial - validaFinal;
+        console.log("🚀 ~ file: Index.vue:1576 ~ calcularTempoMaximoAgendamento ~ intervalo:", intervalo)
+
+        contador += Math.abs(intervalo);
+
+      }
+
+      let contadorMinutos = contador / 60000;
+
+      return contadorMinutos;
+
+    },
       
     async escolherHorario(minutos, hora, scope) {
      let gerenciamentoHoras = {};
@@ -1697,25 +1754,92 @@ export default defineComponent({
         );
 
       this.user.validadeInicial = validadeInicial.getTime();;
-      
+      console.log("🚀 ~ file: Index.vue:1795 ~ escolherHorario ~ scope.timestamp.date:", scope.timestamp.date)
 
       /* Dados da Entidade */
       const coworking =  this.gerenciamentoCreditos .coworking;
       const consomeHoras = this.gerenciamentoCreditos .consomeHoras;
       const custoBase = this.gerenciamentoCreditos .custoBase;
       /* Dados do Imovel */
-      const funcionamentoIndividual = this.gerenciamentoCreditos .funcionamentoIndividual;
+      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
       const custaCreditos = this.gerenciamentoCreditos .custaCreditos;
-      const consumoCreditos = this.gerenciamentoCreditos .consumoCreditos;
+      const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
    
+      const horaInicial = this.horaInicial;
       const horaFinal = this.horaFinal;
       const timeStepMin =this.timeStepMin;
       const tempoMaximo = this.tempoMaximo; 
-      
+
       this.validaNecessitaCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
  
-      const options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
+      
+      let horariosOcupados = this.events;
+      let totalHorarioAgendamentos = this.tempoTotalMaximo;
+      let unico = this.agendamentoUnico;
 
+      if(unico && totalHorarioAgendamentos > 0){      
+        let maximoValidador = this.calcularTempoMaximoAgendamento(validadeInicial,horaInicial, horaFinal,totalHorarioAgendamentos,horariosOcupados);
+        
+        let maximo = 0 
+        if ( maximoValidador <= totalHorarioAgendamentos) {
+        
+          let restanteMaximo = Math.abs(maximoValidador - totalHorarioAgendamentos);
+          console.log("🚀 ~ file: Index.vue:1664 ~ escolherHorario ~ restanteMaximo:", restanteMaximo)
+          
+          if (tempoMaximo > restanteMaximo){
+            maximo = restanteMaximo;
+          }
+          else{
+            maximo = tempoMaximo;
+          
+          }
+          console.log("🚀 ~ file: Index.vue:1671 ~ escolherHorario ~ maximo:", maximo)
+
+
+          // if (restanteMaximo >= tempoMaximo)
+          // {
+          //   maximo = restanteMaximo;
+          // }
+          // else
+          // {
+          //   maximo = tempoMaximo;
+          // }
+          let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,maximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
+          console.log("Testadp")
+          this.acionarModal(scope,horario,gerenciamentoHoras,options);
+        }
+        else{        
+          Dialog.create({
+          title:
+            '<span class="text-primary" style="font-size:1.2rem">Limite Atingido!</span>',
+          message:
+            '<span style="font-size:1.0rem"> '+
+            "<br/> Você não pode realizar mais agendamentos para esta sala. </span>",
+          ok: "Entendido",
+          html: true,
+          });
+          // Notificar erro
+        }
+      }      
+      else
+      {
+        console.log("ttttttt")
+        let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
+        this.acionarModal(scope,horario,gerenciamentoHoras,options);
+      }
+    },
+    acionarModal(scope, horario, gerenciamentoHoras, options){
+
+      /* Dados da Entidade */
+      const coworking =  this.gerenciamentoCreditos.coworking;
+      const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+      const custoBase = this.gerenciamentoCreditos.custoBase;
+      /* Dados do Imovel */
+      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+      const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+      const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
+
+      let message;
       const date = scope.timestamp.date;
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
@@ -1743,7 +1867,7 @@ export default defineComponent({
         }
       }
   
-      let message;
+     
       if(this.validaNecessitaCredito){
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>`          
@@ -1843,6 +1967,7 @@ export default defineComponent({
         }
       });
     },
+        
     //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
     async onTimeClick({ event, scope }) {
       
@@ -2388,6 +2513,24 @@ export default defineComponent({
             }else{
               this.necessitaAprovacao = false
             }
+
+            console.log("🚀 ~ file: Index.vue:2274 ~ carregarHorarios ~ response:", response)
+            //Verifica se a sala tem agendamentoUnico
+            if (response.data.imovel.opcoesAgendamentoIndividual.agendamentoUnico){
+        
+              this.agendamentoUnico = true;
+              if (response.data.imovel.opcoesAgendamentoIndividual.tempoTotalMaximo > 0){
+                this.tempoTotalMaximo = response.data.imovel.opcoesAgendamentoIndividual.tempoTotalMaximo;
+              }else{
+                this.tempoTotalMaximo = 0
+              }
+            }else{
+              this.agendamentoUnico = false            
+              this.tempoTotalMaximo = 0
+           
+            }
+            console.log("🚀 ~ file: Index.vue:2286 ~ carregarHorarios ~ this.agendamentoUnico:", this.agendamentoUnico)
+            console.log("🚀 ~ file: Index.vue:2288 ~ carregarHorarios ~ this.tempoTotalMaximo:", this.tempoTotalMaximo)
 
               response.data.imovel.opcoesAgendamentoIndividual.necessitaPagamento
               ? (this.necessitaPagamento = true)
