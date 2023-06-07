@@ -202,7 +202,7 @@
                       "
                     >
                       <div class="title">
-                        <span class="text-center" v-html="event.title" @click="teste(event)"></span>
+                        <span class="text-center" v-html="event.title" @click="modalExcluirVisita(event)"></span>
                         <q-tooltip>{{ event.time }}</q-tooltip>
                       </div>
                     </div>
@@ -680,7 +680,8 @@
           >
             <div class="full-width justify-center">
               <div
-                class="full-width bg-primary"
+                class="full-width"
+                style="background-color: #505050;"
               >
                 <div
                   class="col-8 text-center justify-center items-center q-pt-md q-px-md"
@@ -1202,7 +1203,7 @@ export default defineComponent({
       this.carregarHorarios()
       this.cardVisita = false
     },
-    async teste(event){
+    async modalExcluirVisita(event){
       if(event.bgcolor == "blue-5"){
         if(event.visitaCodigo){
           let request = {
@@ -2695,12 +2696,14 @@ export default defineComponent({
           this.usoDeCreditos = true
         }
         this.user.name = this.getLogin.user.nome
+        this.carregarHorarios()
       } else {
         Notify.create({
           message: "Número de Telefone inválido ou Código SMS incorreto.",
           type: "warning",
         });
       }
+
     },
     async criarVisita() {
       this.user.numeroVisitantesExternos = parseInt(
