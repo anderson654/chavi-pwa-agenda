@@ -201,8 +201,8 @@
                         badgeStyles(event, timeStartPos, timeDurationHeight)
                       "
                     >
-                      <div class="title">
-                        <span class="text-center" v-html="event.title" @click="modalExcluirVisita(event)"></span>
+                      <div class="title" @click="modalExcluirVisita(event)">
+                        <span class="text-center" v-html="event.title" ></span>
                         <q-tooltip>{{ event.time }}</q-tooltip>
                       </div>
                     </div>
@@ -1662,8 +1662,9 @@ export default defineComponent({
       });
 
       let agendamentosUsuario = horarios.filter((agendamento) => {	
-        console.log("🚀 ~ file: Index.vue:1554 ~ agendamentosUsuario ~ agendamento:", agendamento)
- 
+
+        let usuarioValidado = agendamento.usuarioId == this.getLogin.user.id;
+
         let timeStampInicial = parseInt(agendamento.timestampInicial);    
         let intervalo =  agendamento.duration * 60000;
         let timeStampFinal = timeStampInicial + intervalo;
@@ -1671,8 +1672,9 @@ export default defineComponent({
         let horaFinal= moment(timeStampFinal)      	
         let  validadepois = hora.isSameOrAfter(momentInicial);	
         let validaAntes = horaFinal.isBefore(momentFinal);	
-      	return validadepois && validaAntes;
+      	return validadepois && validaAntes && usuarioValidado;
       }) 
+     
    
  
       let contador = 0;
@@ -1685,8 +1687,7 @@ export default defineComponent({
         let validaFinal = new Date(timeStampFinal);
 
         let intervalo = validaInicial - validaFinal;
-        console.log("🚀 ~ file: Index.vue:1576 ~ calcularTempoMaximoAgendamento ~ intervalo:", intervalo)
-
+ 
         contador += Math.abs(intervalo);
 
       }
@@ -1754,7 +1755,6 @@ export default defineComponent({
         );
 
       this.user.validadeInicial = validadeInicial.getTime();;
-      console.log("🚀 ~ file: Index.vue:1795 ~ escolherHorario ~ scope.timestamp.date:", scope.timestamp.date)
 
       /* Dados da Entidade */
       const coworking =  this.gerenciamentoCreditos .coworking;
@@ -1784,8 +1784,7 @@ export default defineComponent({
         if ( maximoValidador <= totalHorarioAgendamentos) {
         
           let restanteMaximo = Math.abs(maximoValidador - totalHorarioAgendamentos);
-          console.log("🚀 ~ file: Index.vue:1664 ~ escolherHorario ~ restanteMaximo:", restanteMaximo)
-          
+
           if (tempoMaximo > restanteMaximo){
             maximo = restanteMaximo;
           }
@@ -1793,20 +1792,25 @@ export default defineComponent({
             maximo = tempoMaximo;
           
           }
-          console.log("🚀 ~ file: Index.vue:1671 ~ escolherHorario ~ maximo:", maximo)
 
 
-          // if (restanteMaximo >= tempoMaximo)
-          // {
-          //   maximo = restanteMaximo;
-          // }
-          // else
-          // {
-          //   maximo = tempoMaximo;
-          // }
-          let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,maximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
-          console.log("Testadp")
-          this.acionarModal(scope,horario,gerenciamentoHoras,options);
+
+          if (maximo > 0){       
+            let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,maximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
+            this.acionarModal(scope,horario,gerenciamentoHoras,options);
+          }
+          else{        
+            Dialog.create({
+            title:
+              '<span class="text-primary" style="font-size:1.2rem">Limite Atingido!</span>',
+            message:
+              '<span style="font-size:1.0rem"> '+
+              "<br/> Você não pode realizar mais agendamentos para esta sala. </span>",
+            ok: "Entendido",
+            html: true,
+            });
+ 
+          }
         }
         else{        
           Dialog.create({
@@ -1823,7 +1827,7 @@ export default defineComponent({
       }      
       else
       {
-        console.log("ttttttt")
+
         let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
         this.acionarModal(scope,horario,gerenciamentoHoras,options);
       }
@@ -1940,11 +1944,7 @@ export default defineComponent({
           textColor: "text-white",
         };
         this.events.push(visita);
-        // const validadeInicial = new Date(
-        //   (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
-        // ).getTime();
-        // this.user.validadeInicial = validadeInicial;
-        // this.user.validadeFinal = validadeInicial + Number(data) * 60000;
+
         this.montarQrcode();
 
         if (this.habilitarPublicoExterno) {
@@ -2514,7 +2514,7 @@ export default defineComponent({
               this.necessitaAprovacao = false
             }
 
-            console.log("🚀 ~ file: Index.vue:2274 ~ carregarHorarios ~ response:", response)
+
             //Verifica se a sala tem agendamentoUnico
             if (response.data.imovel.opcoesAgendamentoIndividual.agendamentoUnico){
         
@@ -2529,8 +2529,6 @@ export default defineComponent({
               this.tempoTotalMaximo = 0
            
             }
-            console.log("🚀 ~ file: Index.vue:2286 ~ carregarHorarios ~ this.agendamentoUnico:", this.agendamentoUnico)
-            console.log("🚀 ~ file: Index.vue:2288 ~ carregarHorarios ~ this.tempoTotalMaximo:", this.tempoTotalMaximo)
 
               response.data.imovel.opcoesAgendamentoIndividual.necessitaPagamento
               ? (this.necessitaPagamento = true)
@@ -2669,8 +2667,7 @@ export default defineComponent({
             );
 
             const duracao = horario.intervalo / 60000;
-            console.log("PIAZZETTA 🦝 ~ file: Index.vue:2529 ~ formatData ~ horario:", horario)
-
+           
             let titleBusy = "Ocupado";
 
             if (horario.usuario){
@@ -2701,6 +2698,7 @@ export default defineComponent({
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
+              usuarioId : horario.usuarioId,
               bgcolor: horario.paraAprovar ? "yellow-9" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
