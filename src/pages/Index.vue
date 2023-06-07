@@ -675,10 +675,9 @@
     </div>
     <q-dialog v-model="cardVisita">
         <div
-            class="shadow-8 bg-grey-2"
-            style=" border-radius: 4vw"
+            class="shadow-8 bg-grey-2 justify-center"
+            style=" border-radius: 4vw; width: 50%;"
           >
-            <div class="full-width justify-center">
               <div
                 class="full-width"
                 style="background-color: #505050;"
@@ -693,10 +692,6 @@
                   </span>
                 </div>
               </div>
-              <div
-                class="full-width q-px-md q-mt-sm q-pm-xs flex justify-center"
-              >
-              </div>
               <div class="q-my-xs full-width q-px-md text-center">
                 <div class="column full-width justify-center">
                   <div
@@ -707,7 +702,7 @@
                       text-overflow: ellipsis;
                     "
                   >
-                  <q-btn-group class="full-widith" style="box-shadow: none;">
+                  <div class="full-widith column wrap" style="box-shadow: none;">
                     <q-btn
                       outline
                       label="voltar"
@@ -722,40 +717,36 @@
                       class="col-6 q-mr-xs q-mb-md"
                       @click="deletar(visitaSelecionada.id)"
                     />
-                  </q-btn-group>
+                  </div>
                     <br />
+                  </div>
+                  <div
+                    class="full-width text-center"
+                    style="font-size: 1rem"
+                    v-if="visitaSelecionada && visitaSelecionada.tipoVisita != 'Acesso Irrestrito'"
+                  >
+                    <span style="color: #505050"
+                      >O seu horário de acesso
+                      {{
+                        visitaSelecionada.validadeInicial > new Date().getTime()
+                          ? "será: "
+                          : visitaSelecionada.validadeFinal < new Date().getTime()
+                          ? "foi: "
+                          : "é: "
+                      }}
+                      <br />
+                      <strong>{{
+                        getHorario(visitaSelecionada.validadeInicial, "HH:mm")
+                      }}</strong>
+                      até
+                      <strong>{{
+                        getHorario(visitaSelecionada.validadeFinal, "HH:mm")
+                      }}</strong></span
+                    >
                   </div>
                 </div>
               </div>
-              <div
-                class="full-width text-center"
-                style="font-size: 1rem"
-                v-if="visitaSelecionada && visitaSelecionada.tipoVisita != 'Acesso Irrestrito'"
-              >
-                <span style="color: #505050"
-                  >O seu horário de acesso
-                  {{
-                    visitaSelecionada.validadeInicial > new Date().getTime()
-                      ? "será: "
-                      : visitaSelecionada.validadeFinal < new Date().getTime()
-                      ? "foi: "
-                      : "é: "
-                  }}
-                  <br />
-                  <strong>{{
-                    getHorario(visitaSelecionada.validadeInicial, "HH:mm")
-                  }}</strong>
-                  até
-                  <strong>{{
-                    getHorario(visitaSelecionada.validadeFinal, "HH:mm")
-                  }}</strong></span
-                >
-              </div>
-              <div class="full-width q-px-md q-mb-sm" style="font-size: 1rem">
-                <div class="row full-height justify-center itens-end">
-                </div>
-              </div>
-            </div>
+            
           </div>
     </q-dialog>
   </q-page>
