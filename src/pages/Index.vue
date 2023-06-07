@@ -202,7 +202,7 @@
                       "
                     >
                       <div class="title">
-                        <span class="text-center" v-html="event.title"></span>
+                        <span class="text-center" v-html="event.title" @click="teste(event)"></span>
                         <q-tooltip>{{ event.time }}</q-tooltip>
                       </div>
                     </div>
@@ -673,6 +673,90 @@
         </div>
       </q-form>
     </div>
+    <q-dialog v-model="cardVisita">
+        <div
+            class="shadow-8 bg-grey-2"
+            style=" border-radius: 4vw"
+          >
+            <div class="full-width justify-center">
+              <div
+                class="full-width bg-primary"
+              >
+                <div
+                  class="col-8 text-center justify-center items-center q-pt-md q-px-md"
+                >
+                  <span class="text-h6 text-white">
+                    {{
+                      visitaSelecionada.imovel.nome
+                    }}
+                  </span>
+                </div>
+              </div>
+              <div
+                class="full-width q-px-md q-mt-sm q-pm-xs flex justify-center"
+              >
+              </div>
+              <div class="q-my-xs full-width q-px-md text-center">
+                <div class="column full-width justify-center">
+                  <div
+                    class="full-width"
+                    style="
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                    "
+                  >
+                  <q-btn-group class="full-widith" style="box-shadow: none;">
+                    <q-btn
+                      outline
+                      label="voltar"
+                      color="positive"
+                      class="col-6 q-mr-xs q-mb-md"
+                      @click="cardVisita = false"
+                    />
+                    <q-btn
+                      outline
+                      label="Excluir"
+                      color="negative"
+                      class="col-6 q-mr-xs q-mb-md"
+                      @click="deletar(visitaSelecionada.id)"
+                    />
+                  </q-btn-group>
+                    <br />
+                  </div>
+                </div>
+              </div>
+              <div
+                class="full-width text-center"
+                style="font-size: 1rem"
+                v-if="visitaSelecionada && visitaSelecionada.tipoVisita != 'Acesso Irrestrito'"
+              >
+                <span style="color: #505050"
+                  >O seu horário de acesso
+                  {{
+                    visitaSelecionada.validadeInicial > new Date().getTime()
+                      ? "será: "
+                      : visitaSelecionada.validadeFinal < new Date().getTime()
+                      ? "foi: "
+                      : "é: "
+                  }}
+                  <br />
+                  <strong>{{
+                    getHorario(visitaSelecionada.validadeInicial, "HH:mm")
+                  }}</strong>
+                  até
+                  <strong>{{
+                    getHorario(visitaSelecionada.validadeFinal, "HH:mm")
+                  }}</strong></span
+                >
+              </div>
+              <div class="full-width q-px-md q-mb-sm" style="font-size: 1rem">
+                <div class="row full-height justify-center itens-end">
+                </div>
+              </div>
+            </div>
+          </div>
+    </q-dialog>
   </q-page>
   <footer>
       <div
@@ -729,6 +813,7 @@ import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
 import { Dialog } from "quasar";
 import StyleBloco from "src/components/styleBloco.vue";
 import { getLogin } from "src/store/module-example/getters";
+import ListaParticipanteVue from "src/components/ListaParticipante.vue";
 
 export default defineComponent({
   name: "PageIndex",
@@ -737,6 +822,7 @@ export default defineComponent({
     "navigation-bar": NavigatioBar,
     "q-calendar-month": QCalendarMonth,
     "style-bloco": StyleBloco,
+    "lista-participantes" : ListaParticipanteVue
   },
   data() {
     return {
@@ -809,7 +895,9 @@ export default defineComponent({
       eventoOutros: [],
       publicoExterno: false,
       usoDeCreditos: false,
-      custoBase : 0
+      custoBase : 0,
+      cardVisita: false,
+      visitaSelecionada: {},
     };
   },
   computed: {
@@ -1105,7 +1193,46 @@ export default defineComponent({
       }
     }
   },
-  methods: {   
+  methods: {  
+    async deletar(id){
+      let response = await this.executeMethod({
+          url: `Visitas/excluiVisitaDevolveHoras/${id}`,
+          method: "delete",
+        });
+      this.carregarHorarios()
+      this.cardVisita = false
+    },
+    async teste(event){
+      if(event.bgcolor == "blue-5"){
+        if(event.visitaCodigo){
+          let request = {
+            url:"visitas/obter/"+ event.visitaCodigo,
+            method:"get",
+          };
+  
+          const response = await this.executeMethod(request, false);
+          this.visitaSelecionada = response.data
+          this.cardVisita = true
+        }else{
+          return
+        }
+      }else{
+        return
+      }
+  },
+    getHorario(time, format) {
+      return moment(time).format(format);
+    },
+    getImage(visita) {
+      let path = `http://api.chavi.com.br/api/StorageContainers/fotoImovel/download/`;
+
+      if (visita && visita.foto) {
+        return path + visita.foto;
+      }else{
+        return "chavi_imovel.png";
+      }
+
+    },
     validarStatusProcesso(){
 
 
@@ -2234,7 +2361,6 @@ export default defineComponent({
         const cliente = this.user.entidadeId;
         
         const imovel = this.user.imovelRef;
-       
         if (cliente) {
           const response = await this.executeMethod({
             url: "Visitas/horariosOcupados",
@@ -2437,9 +2563,10 @@ export default defineComponent({
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
-              bgcolor: horario.paraAprovar ? "yellow-9" : "red-5",
+              bgcolor: horario.paraAprovar ? "yellow-9" : horario.usuario == this.getLogin.user.nome? "blue-5":"red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
+              visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : ""
             });
 
         }
