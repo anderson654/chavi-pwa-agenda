@@ -114,7 +114,7 @@
                   class="q-py-xs"
                 >
                   <li>
-                    <span class="descrt">
+                    <span>
                       {{ descritivo }}
                     </span>
                   </li>
@@ -3086,8 +3086,7 @@ export default defineComponent({
 }
 
 .descrt {
-  position: relative;
-  left: -10px;
+  margin-left: 10px;
 }
 .title-modal {
   color: #e86628;

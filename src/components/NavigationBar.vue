@@ -1,6 +1,6 @@
 <template>
   <div class="row justify-center">
-    <div class="q-pa-md q-gutter-sm row">
+    <div class="q-pa-md q-gutter-sm row" style="min-width: 450px; justify-content: center;">
       <q-btn
         no-caps
         class="purple-button navigation-button"        
