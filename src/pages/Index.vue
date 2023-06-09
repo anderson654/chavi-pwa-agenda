@@ -2354,8 +2354,9 @@ export default defineComponent({
             });
           });
       } else if (response && response.status) {
+      
         const message = response.data
-          ? response.data.message
+          ? response.data
           : response.message
           ? response.message
           : "";
@@ -2651,6 +2652,7 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
+        console.log("🚀 ~ file: Index.vue:2654 ~ formatData ~ horario:", horario)
 
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
