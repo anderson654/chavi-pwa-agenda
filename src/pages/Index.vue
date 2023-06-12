@@ -114,7 +114,7 @@
                   class="q-py-xs"
                 >
                   <li>
-                    <span class="descrt">
+                    <span>
                       {{ descritivo }}
                     </span>
                   </li>
@@ -201,8 +201,8 @@
                         badgeStyles(event, timeStartPos, timeDurationHeight)
                       "
                     >
-                      <div class="title q-calendar__ellipsis">
-                        <span class="text-center" v-html="event.title"></span>
+                      <div class="title" @click="modalExcluirVisita(event)">
+                        <span class="text-center" v-html="event.title" ></span>
                         <q-tooltip>{{ event.time }}</q-tooltip>
                       </div>
                     </div>
@@ -213,12 +213,12 @@
                   >
                     <div
                       v-if="holiday && !liberarFeriado"
-                      class="my-event full-width rounded-border bg-green-10"
-                      style="top: 0px; height: 100%; align-items: flex-start"
+                      class="my-event full-width rounded-border bg-grey-7"
+                      style="top: 0px; height: 100%; align-items: flex-start;"
                     >
                       <div
-                        class="title q-calendar__ellipsis text-black text-center"
-                        style="font-size: 1.2rem"
+                        class="title text-center"
+                        style="font-size: 1.2rem; color: lightgrey;"
                       >
                         Feriado <br />
                         {{ holiday.dia }}
@@ -673,6 +673,84 @@
         </div>
       </q-form>
     </div>
+    <q-dialog v-model="cardVisita">
+        <div
+            class="shadow-8 bg-grey-2 justify-center"
+            style=" border-radius: 4vw; width: 50%;"
+          >
+              <div
+                class="full-width"
+                style="background-color: #505050;"
+              >
+                <div
+                  class="col-8 text-center justify-center items-center q-pt-md q-px-md"
+                >
+                  <span class="text-h6 text-white">
+                    {{
+                      visitaSelecionada.imovel.nome
+                    }}
+                  </span>
+                </div>
+              </div>
+              <div class="q-my-xs full-width q-px-md text-center">
+                <div class="column full-width justify-center">
+                  <div
+                    class="full-width"
+                    style="
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                    "
+                  >
+                  <div class="full-widith column wrap items-center" style="box-shadow: none;">
+                    <q-btn
+                      outline
+                      label="voltar"
+                      color="positive"
+                      class="col-6 q-mr-xs q-mb-md"
+                      style="max-width: 250px;"
+                      @click="cardVisita = false"
+                    />
+                    <q-btn
+                      outline
+                      label="Excluir"
+                      color="negative"
+                      class="col-6 q-mr-xs q-mb-md"
+                      style="max-width: 250px;"
+                      @click="deletar(visitaSelecionada.id)"
+                    />
+                  </div>
+                    <br />
+                  </div>
+                  <div
+                    class="full-width text-center"
+                    style="font-size: 1rem"
+                    v-if="visitaSelecionada && visitaSelecionada.tipoVisita != 'Acesso Irrestrito'"
+                  >
+                    <span style="color: #505050"
+                      >O seu horário de acesso
+                      {{
+                        visitaSelecionada.validadeInicial > new Date().getTime()
+                          ? "será: "
+                          : visitaSelecionada.validadeFinal < new Date().getTime()
+                          ? "foi: "
+                          : "é: "
+                      }}
+                      <br />
+                      <strong>{{
+                        getHorario(visitaSelecionada.validadeInicial, "HH:mm")
+                      }}</strong>
+                      até
+                      <strong>{{
+                        getHorario(visitaSelecionada.validadeFinal, "HH:mm")
+                      }}</strong></span
+                    >
+                  </div>
+                </div>
+              </div>
+            
+          </div>
+    </q-dialog>
   </q-page>
   <footer>
       <div
@@ -729,6 +807,7 @@ import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
 import { Dialog } from "quasar";
 import StyleBloco from "src/components/styleBloco.vue";
 import { getLogin } from "src/store/module-example/getters";
+import ListaParticipanteVue from "src/components/ListaParticipante.vue";
 
 export default defineComponent({
   name: "PageIndex",
@@ -737,6 +816,7 @@ export default defineComponent({
     "navigation-bar": NavigatioBar,
     "q-calendar-month": QCalendarMonth,
     "style-bloco": StyleBloco,
+    "lista-participantes" : ListaParticipanteVue
   },
   data() {
     return {
@@ -788,6 +868,8 @@ export default defineComponent({
       horaFinal: 24,
       horaInicial: 0,
       timeStepMin: 15,
+      agendamentoUnico : false,
+      tempoTotalMaximo : 0,
       necessitaAprovacao: false,
       validaNecessitaCredito : false,
       validaNecessitaAprovacao : false,
@@ -809,7 +891,9 @@ export default defineComponent({
       eventoOutros: [],
       publicoExterno: false,
       usoDeCreditos: false,
-      custoBase : 0
+      custoBase : 0,
+      cardVisita: false,
+      visitaSelecionada: {},
     };
   },
   computed: {
@@ -884,8 +968,8 @@ export default defineComponent({
       return !this.isCoworking
         ? `Agende o melhor  dia<br> e hora para utilizar:<br> <strong> <p style='font-size: 1.8rem; margin-bottom: 16px;'> ${ref} . </strong> </p>`
         : `
-        <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px;" >Agende o melhor<br>dia e hora para utilizar:<br></p>
-          <p style="line-height: 0px;margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
+        <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px; margin-bottom: 5px" >Agende o melhor<br>dia e hora para utilizar:<br></p>
+          <p style="margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
     },
 
 //===============================================================================
@@ -1105,7 +1189,46 @@ export default defineComponent({
       }
     }
   },
-  methods: {   
+  methods: {  
+    async deletar(id){
+      let response = await this.executeMethod({
+          url: `Visitas/excluiVisitaDevolveHoras/${id}`,
+          method: "delete",
+        });
+      this.carregarHorarios()
+      this.cardVisita = false
+    },
+    async modalExcluirVisita(event){
+      if(event.bgcolor == "blue-5"){
+        if(event.visitaCodigo){
+          let request = {
+            url:"visitas/obter/"+ event.visitaCodigo,
+            method:"get",
+          };
+  
+          const response = await this.executeMethod(request, false);
+          this.visitaSelecionada = response.data
+          this.cardVisita = true
+        }else{
+          return
+        }
+      }else{
+        return
+      }
+  },
+    getHorario(time, format) {
+      return moment(time).format(format);
+    },
+    getImage(visita) {
+      let path = `http://api.chavi.com.br/api/StorageContainers/fotoImovel/download/`;
+
+      if (visita && visita.foto) {
+        return path + visita.foto;
+      }else{
+        return "chavi_imovel.png";
+      }
+
+    },
     validarStatusProcesso(){
 
 
@@ -1518,6 +1641,62 @@ export default defineComponent({
       return opcoes;
 
     },
+
+    calcularTempoMaximoAgendamento(dataMarco, horaInicial, horaFinal,tempoTotalMaximo,horarios){
+     
+      const data = moment(dataMarco); // Obtém o momento atual
+
+      let horaMomentInicial = moment(horaInicial, 'HH:mm');
+      let horaMomentFinal = moment(horaFinal, 'HH:mm')
+
+      const momentInicial = horaMomentInicial.set({
+        date: data.date(),
+        month: data.month(),
+        year: data.year()
+      });
+
+      const momentFinal = horaMomentFinal.set({
+        date: data.date(),
+        month: data.month(),
+        year: data.year()
+      });
+
+      let agendamentosUsuario = horarios.filter((agendamento) => {	
+
+        let usuarioValidado = agendamento.usuarioId == this.getLogin.user.id;
+
+        let timeStampInicial = parseInt(agendamento.timestampInicial);    
+        let intervalo =  agendamento.duration * 60000;
+        let timeStampFinal = timeStampInicial + intervalo;
+      	let hora= moment(timeStampInicial)
+        let horaFinal= moment(timeStampFinal)      	
+        let  validadepois = hora.isSameOrAfter(momentInicial);	
+        let validaAntes = horaFinal.isBefore(momentFinal);	
+      	return validadepois && validaAntes && usuarioValidado;
+      }) 
+     
+   
+ 
+      let contador = 0;
+      for (let index = 0; index < agendamentosUsuario.length; index++) {
+
+        let timeStampInicial = parseInt(agendamentosUsuario[index].timestampInicial);    
+        let intervaloSelect =  agendamentosUsuario[index].duration * 60000;
+        let timeStampFinal = timeStampInicial + intervaloSelect;
+        let validaInicial = new Date(timeStampInicial);
+        let validaFinal = new Date(timeStampFinal);
+
+        let intervalo = validaInicial - validaFinal;
+ 
+        contador += Math.abs(intervalo);
+
+      }
+
+      let contadorMinutos = contador / 60000;
+
+      return contadorMinutos;
+
+    },
       
     async escolherHorario(minutos, hora, scope) {
      let gerenciamentoHoras = {};
@@ -1576,25 +1755,95 @@ export default defineComponent({
         );
 
       this.user.validadeInicial = validadeInicial.getTime();;
-      
 
       /* Dados da Entidade */
       const coworking =  this.gerenciamentoCreditos .coworking;
       const consomeHoras = this.gerenciamentoCreditos .consomeHoras;
       const custoBase = this.gerenciamentoCreditos .custoBase;
       /* Dados do Imovel */
-      const funcionamentoIndividual = this.gerenciamentoCreditos .funcionamentoIndividual;
+      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
       const custaCreditos = this.gerenciamentoCreditos .custaCreditos;
-      const consumoCreditos = this.gerenciamentoCreditos .consumoCreditos;
+      const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
    
+      const horaInicial = this.horaInicial;
       const horaFinal = this.horaFinal;
       const timeStepMin =this.timeStepMin;
       const tempoMaximo = this.tempoMaximo; 
-      
+
       this.validaNecessitaCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
  
-      const options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
+      
+      let horariosOcupados = this.events;
+      let totalHorarioAgendamentos = this.tempoTotalMaximo;
+      let unico = this.agendamentoUnico;
 
+      if(unico && totalHorarioAgendamentos > 0){      
+        let maximoValidador = this.calcularTempoMaximoAgendamento(validadeInicial,horaInicial, horaFinal,totalHorarioAgendamentos,horariosOcupados);
+        
+        let maximo = 0 
+        if ( maximoValidador <= totalHorarioAgendamentos) {
+        
+          let restanteMaximo = Math.abs(maximoValidador - totalHorarioAgendamentos);
+
+          if (tempoMaximo > restanteMaximo){
+            maximo = restanteMaximo;
+          }
+          else{
+            maximo = tempoMaximo;
+          
+          }
+
+
+
+          if (maximo > 0){       
+            let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,maximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
+            this.acionarModal(scope,horario,gerenciamentoHoras,options);
+          }
+          else{        
+            Dialog.create({
+            title:
+              '<span class="text-primary" style="font-size:1.2rem">Limite Atingido!</span>',
+            message:
+              '<span style="font-size:1.0rem"> '+
+              "<br/> Você não pode realizar mais agendamentos para esta sala. </span>",
+            ok: "Entendido",
+            html: true,
+            });
+ 
+          }
+        }
+        else{        
+          Dialog.create({
+          title:
+            '<span class="text-primary" style="font-size:1.2rem">Limite Atingido!</span>',
+          message:
+            '<span style="font-size:1.0rem"> '+
+            "<br/> Você não pode realizar mais agendamentos para esta sala. </span>",
+          ok: "Entendido",
+          html: true,
+          });
+          // Notificar erro
+        }
+      }      
+      else
+      {
+
+        let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
+        this.acionarModal(scope,horario,gerenciamentoHoras,options);
+      }
+    },
+    acionarModal(scope, horario, gerenciamentoHoras, options){
+
+      /* Dados da Entidade */
+      const coworking =  this.gerenciamentoCreditos.coworking;
+      const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+      const custoBase = this.gerenciamentoCreditos.custoBase;
+      /* Dados do Imovel */
+      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+      const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+      const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
+
+      let message;
       const date = scope.timestamp.date;
       const dateTime = new Date(
         (date + " " + horario).replace(/\-/g, "/")
@@ -1622,7 +1871,7 @@ export default defineComponent({
         }
       }
   
-      let message;
+     
       if(this.validaNecessitaCredito){
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>`          
@@ -1695,11 +1944,7 @@ export default defineComponent({
           textColor: "text-white",
         };
         this.events.push(visita);
-        // const validadeInicial = new Date(
-        //   (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
-        // ).getTime();
-        // this.user.validadeInicial = validadeInicial;
-        // this.user.validadeFinal = validadeInicial + Number(data) * 60000;
+
         this.montarQrcode();
 
         if (this.habilitarPublicoExterno) {
@@ -1722,6 +1967,7 @@ export default defineComponent({
         }
       });
     },
+        
     //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
     async onTimeClick({ event, scope }) {
       
@@ -2108,8 +2354,9 @@ export default defineComponent({
             });
           });
       } else if (response && response.status) {
+      
         const message = response.data
-          ? response.data.message
+          ? response.data
           : response.message
           ? response.message
           : "";
@@ -2234,7 +2481,6 @@ export default defineComponent({
         const cliente = this.user.entidadeId;
         
         const imovel = this.user.imovelRef;
-       
         if (cliente) {
           const response = await this.executeMethod({
             url: "Visitas/horariosOcupados",
@@ -2267,6 +2513,22 @@ export default defineComponent({
               this.necessitaAprovacao = true
             }else{
               this.necessitaAprovacao = false
+            }
+
+
+            //Verifica se a sala tem agendamentoUnico
+            if (response.data.imovel.opcoesAgendamentoIndividual.agendamentoUnico){
+        
+              this.agendamentoUnico = true;
+              if (response.data.imovel.opcoesAgendamentoIndividual.tempoTotalMaximo > 0){
+                this.tempoTotalMaximo = response.data.imovel.opcoesAgendamentoIndividual.tempoTotalMaximo;
+              }else{
+                this.tempoTotalMaximo = 0
+              }
+            }else{
+              this.agendamentoUnico = false            
+              this.tempoTotalMaximo = 0
+           
             }
 
               response.data.imovel.opcoesAgendamentoIndividual.necessitaPagamento
@@ -2390,6 +2652,7 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
+        console.log("🚀 ~ file: Index.vue:2654 ~ formatData ~ horario:", horario)
 
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
@@ -2406,7 +2669,7 @@ export default defineComponent({
             );
 
             const duracao = horario.intervalo / 60000;
-
+           
             let titleBusy = "Ocupado";
 
             if (horario.usuario){
@@ -2437,9 +2700,11 @@ export default defineComponent({
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
-              bgcolor: horario.paraAprovar ? "yellow-9" : "red-5",
+              usuarioId : horario.usuarioId,
+              bgcolor: horario.paraAprovar ? "yellow-9" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
+              visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : ""
             });
 
         }
@@ -2568,12 +2833,14 @@ export default defineComponent({
           this.usoDeCreditos = true
         }
         this.user.name = this.getLogin.user.nome
+        this.carregarHorarios()
       } else {
         Notify.create({
           message: "Número de Telefone inválido ou Código SMS incorreto.",
           type: "warning",
         });
       }
+
     },
     async criarVisita() {
       this.user.numeroVisitantesExternos = parseInt(
@@ -2815,13 +3082,11 @@ export default defineComponent({
   max-width: 160px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   margin-bottom: 4px;
 }
 
 .descrt {
-  position: relative;
-  left: -10px;
+  margin-left: 10px;
 }
 .title-modal {
   color: #e86628;
@@ -2852,6 +3117,7 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   height: 100%;
+  word-break: break-all;
 }
 .fakelink {
   text-decoration: underline;

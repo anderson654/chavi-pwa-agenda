@@ -121,7 +121,7 @@
               class="full-width shadow-3 row q-my-md q-px-md gradient-hotmilk"
               style="
                 border-radius: 20px;
-                height: 180px;
+                min-height: 180px;
                 max-width: 500px;
                 cursor: pointer;
               "
@@ -148,8 +148,6 @@
                   style="
                     font-size: 1.2rem;
                     color: #505050;
-                    white-space: nowrap;
-                    min-width: 270px;
                   "
                   >{{ imovel.nome.toUpperCase().split("-")[0] }}
                 </span>
