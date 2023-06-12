@@ -261,7 +261,7 @@
                 'Por favor, insira seu telefone.',
               (val) =>
                 (val && val.length == 15) ||
-                'Por favor, insira seu telefone no formato (41) 91122-3344.',
+                'Por favor, insira seu telefone no formato (41) 91234-5678.',
             ]"
           />
           <!-- LOGIN EMAIL -->
@@ -284,6 +284,21 @@
             ]"
           />
           <!-- CÓDIGO DE VERIFICAÇÃO -->
+          <q-input
+            class="parte1 full-width"
+            type="text"
+            label-color="primary"
+            style="font-size: 1.2rem"
+            v-if="newUser"
+            v-model="user.name"
+            label="Parece que você é novo por aqui, qual o seu Nome?"
+            lazy-rules
+            :debounce="1000"
+            :rules="[
+              (val) =>
+                (val !== null && val !== '') || 'Por favor, insira seu nome',
+            ]"
+          />
           <q-input
             class="parte1 full-width"
             type="tel"
@@ -851,7 +866,7 @@ export default defineComponent({
         use: false,
         hasDocs: false,
       },
-      newUser: true,
+      newUser: false,
       isRegistredUser: false,
       /* Opções calendario */
       utilizarDocumentos: true,
@@ -2758,6 +2773,7 @@ export default defineComponent({
     async checkCode() {
       let response;
       const nome = this.user.name
+      const coworkingId = this.$store.getters.getImovelAgendamento.entidadeId
       if (this.newUser) {
         Loading.show({ delay: 400 });
         if (this.loginEmail)
@@ -2770,6 +2786,7 @@ export default defineComponent({
                   email: this.user.email,
                   nome: nome.trim(),
                   codigo: this.user.codigo,
+                  coworkingId: coworkingId,
                 },
               },
             },
@@ -2784,6 +2801,7 @@ export default defineComponent({
                 telefone: this.user.phone,
                 nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
+                coworkingId: coworkingId,
               },
             },
             false
