@@ -1,6 +1,6 @@
 <template>
   <div class="row justify-center">
-    <div class="q-pa-md q-gutter-sm row">
+    <div class="q-pa-md q-gutter-sm row" style="min-width: 450px; justify-content: center;">
       <q-btn
         no-caps
         class="purple-button navigation-button"        
@@ -34,14 +34,16 @@ export default {
 </script>
 
 <style>
-@media (max-width: 580px) {
   .navigation-button{
+    max-width: 150px;
+    border-radius: 16px;
+  }
+@media (max-width: 600px) {
+  .navigation-button{
+    max-width: 100px;
     flex-direction: column;
     align-items: center;
   }
 }
-.navigation-button{
-  max-width: 150px;
-  border-radius: 16px;
-}
+
 </style>

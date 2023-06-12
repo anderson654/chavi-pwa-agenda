@@ -1,45 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <q-btn
-          style="font-size: 0.7rem"
-          icon="home"
-          flat
-          dense
-          color="secondary"
-          class="home-icon"
-          @click="
-            selecionarBloco = true;
-            blocoSelecionado = null;
-          "
-        />
-
-        <div class="header-logo" @click="$router.push('/')">
-          <q-img
-            src="logo aplicação.png"
-            fit="contain"
-            width="100px"
-            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
-            no-spinner
-            class="q-my-sm mindhub-logo"
-          />
-          <div class="bar"></div>
-          <q-img
-            src="chavi_marca.png"
-            fit="contain"
-            width="150px"
-            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
-            no-spinner
-            style="
-              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-                brightness(96%) contrast(81%);
-            "
-            class="q-my-sm"
-          />
-        </div>
-      </q-toolbar>
-    </q-header>
 
     <q-page-container>
       <q-page padding>

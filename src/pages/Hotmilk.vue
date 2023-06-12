@@ -1,36 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <div class="header" @click="$router.push('/')">
-          <q-img
-            src="hotmilk.png"
-            fit="contain"
-            width="150px"
-            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
-            style="
-              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-                brightness(96%) contrast(81%);
-            "
-            no-spinner
-            class="q-my-sm"
-          />
-          <div class="bar"></div>
-          <q-img
-            src="chavi_marca.png"
-            fit="contain"
-            width="150px"
-            :style="$q.platform.is.desktop ? 'width: 150px' : 'width: 130px'"
-            no-spinner
-            class="q-my-sm"
-            style="
-              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-                brightness(96%) contrast(81%);
-            "
-          />
-        </div>
-      </q-toolbar>
-    </q-header>
 
     <q-page-container>
       <q-page padding>
@@ -152,7 +121,7 @@
               class="full-width shadow-3 row q-my-md q-px-md gradient-hotmilk"
               style="
                 border-radius: 20px;
-                height: 180px;
+                min-height: 180px;
                 max-width: 500px;
                 cursor: pointer;
               "
@@ -179,8 +148,6 @@
                   style="
                     font-size: 1.2rem;
                     color: #505050;
-                    white-space: nowrap;
-                    min-width: 270px;
                   "
                   >{{ imovel.nome.toUpperCase().split("-")[0] }}
                 </span>
@@ -219,10 +186,10 @@
         </div>
       </q-page>
     </q-page-container>
-
+    
     <footer>
       <div
-        style="
+      style="
           height: 40px;
           width: 100%;
           color: white;
@@ -230,13 +197,25 @@
           background-color: 
           rgba(240, 240, 240, 0.9);"
       >
-        <span
-          @click="openLink('https://chavi.com.br', '_blank')"
-          style="cursor: pointer; font-size: 1.2rem; color: #505050"
-        >
-          Visite
-          <span style="text-decoration: underline">nosso site</span>
-        </span>
+      <div class="bg-grey-3 footer flex flex-center">
+        <div class="footer-content">
+          <span style="color: #505050;">Desenvolvido por</span>
+          <q-img
+            src="chavi_marca.png"
+            fit="contain"
+            width="100px"
+            :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'"
+            no-spinner
+            class="q-my-sm"
+            style="
+              cursor: pointer;
+              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
+                brightness(96%) contrast(81%);
+            "
+            @click="openLink('https://chavi.com.br', '_blank')"
+          />
+        </div>
+      </div>
       </div>
     </footer>
   </q-layout>
@@ -300,9 +279,7 @@ export default {
     },
   },
   mounted() {
-    // if (!(this.login && this.login.user)) {
-    //   this.$router.push("/login");
-    // }
+    
   },
   methods: {
     openLink(url, target) {
@@ -412,9 +389,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.header:hover {
-  cursor: pointer;
 }
 .bar {
   height: 40px;

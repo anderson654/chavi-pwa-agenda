@@ -16,3 +16,6 @@ export function getEstadoInicial(state) {
 export function getImovelAgendamento(state){
   return state.imovelAgendamento;
 }
+export function getCoworkingNome(state){
+  return state.coworkingNome;
+}

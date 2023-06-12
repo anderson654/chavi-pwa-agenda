@@ -6,13 +6,14 @@ const routes = [
   },
 
   {
-    path: "/",
+    path: "/coworkings",
     component: () => import("pages/Landingpage.vue"),
   },
 
   {
-    path: "/hotmilk",
-    component: () => import("pages/Hotmilk.vue"),
+    path: "/hotmilk/agenda",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Hotmilk.vue") }]
   },
   {
     path: "/galvao",
@@ -24,6 +25,11 @@ const routes = [
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Checkoutpage.vue") }],
   },
+  {
+    path: "/feedbackAprovacao",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/CheckoutPreAprovacao.vue") }],
+  },
 
   {
     path: "/dormakaba",
@@ -32,15 +38,18 @@ const routes = [
 
   {
     path: "/agora",
-    component: () => import("pages/Agora.vue"),
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Agora.vue") }]
   },
   {
     path: "/mindhub",
-    component: () => import("pages/Mindhub.vue"),
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Mindhub.vue") }]
   },
   {
     path: "/login",
-    component: () => import("pages/Login.vue"),
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/Login.vue") }]
   },
   {
     path: "/baggio",
