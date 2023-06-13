@@ -2667,8 +2667,7 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-        console.log("🚀 ~ file: Index.vue:2654 ~ formatData ~ horario:", horario)
-
+     
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"

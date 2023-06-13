@@ -1,0 +1,83 @@
+
+:root.chavi
+{
+  --base-primary: #e86628;
+  --base-secondary : #b84628;
+  --base-accent : #9C27B0
+  --base-background : rgb(240, 240, 240);
+  --base-background-color : rgb(240, 240, 240);
+  --base-button : #ff7332;
+  --base-button-style : linear-gradient(267deg,#ffaf54 50%,#ffd49b);
+}
+
+:root.hotmilk 
+{
+  --base-primary: #760cda;
+  --base-secondary : #9C27B0;
+  --base-accent : #9C27B0;
+  --base-background : rgb(240, 240, 240);
+  --base-background-color : linear-gradient(
+    202deg,
+    rgba(240, 240, 240, 1) 50%,
+    rgba(150, 84, 255, 1) 100%
+  );
+  --base-button : #9654ff;
+  --base-button-style : linear-gradient(267deg,#9654ff 50%,#c29bff);
+} 
+
+body {
+  background: var( --base-background );
+  background: var( --base-background-color );
+  background-attachment:fixed;
+  background-position:left bottom;
+  background-repeat: no-repeat; 
+}
+
+
+
+
+/* .estilo1 {
+  background: blue;
+ }
+ 
+ .estilo2 {
+   background: rgb(255, 0, 98);
+ } */
+
+.gradient-hotmilk {
+  background: rgb(150, 84, 255);
+  background: linear-gradient(
+    37deg,
+    rgba(150, 84, 255, 1) 0%,
+    rgba(240, 240, 240, 1) 13%,
+    rgba(240, 240, 240, 1) 92%
+  );
+}
+
+.purple-button {
+  background:  var(--base-button);
+  background: var(--base-button-style);
+  color: white;
+  height: 35px;
+  width: 250px;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 520px) {
+  .purple-button {
+    width: 120px;
+    font-size: 1.2rem;
+  }
+}
+.red-button {
+  background: rgb(255, 78, 129);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 78, 129, 1) 0%,
+    rgba(255, 2, 75, 1) 100%
+  );
+  color: white;
+  height: 30px;
+  width: 300px !important;
+  font-size: 1.2rem;
+}

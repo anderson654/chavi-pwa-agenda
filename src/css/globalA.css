@@ -1,0 +1,53 @@
+body {
+  background: rgb(240, 240, 240);
+  background: linear-gradient(
+    202deg,
+    rgba(240, 240, 240, 1) 50%,
+    rgba(150, 84, 255, 1) 100%
+  );
+  background-attachment:fixed;
+  background-position:left bottom;
+  background-repeat: no-repeat; 
+}
+
+.gradient-hotmilk {
+  background: rgb(150, 84, 255);
+  background: linear-gradient(
+    37deg,
+    rgba(150, 84, 255, 1) 0%,
+    rgba(240, 240, 240, 1) 13%,
+    rgba(240, 240, 240, 1) 92%
+  );
+}
+
+.purple-button {
+  background: rgb(150, 84, 255);
+  background: linear-gradient(
+    267deg,
+    rgba(150, 84, 255, 1) 50%,
+    rgba(194, 155, 255, 1) 100%
+  );
+  color: white;
+  height: 35px;
+  width: 250px;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 520px) {
+  .purple-button {
+    width: 120px;
+    font-size: 1.2rem;
+  }
+}
+.red-button {
+  background: rgb(255, 78, 129);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 78, 129, 1) 0%,
+    rgba(255, 2, 75, 1) 100%
+  );
+  color: white;
+  height: 30px;
+  width: 300px !important;
+  font-size: 1.2rem;
+}
