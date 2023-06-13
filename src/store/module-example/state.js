@@ -6,5 +6,6 @@ export default function () {
     convite: {},
     imovelAgendamento: {},
     estadoInicial: false,
+    extra: 0
   };
 }

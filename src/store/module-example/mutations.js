@@ -1,6 +1,9 @@
 export function setParams(state, params) {
   state.params = params;
 }
+export function setExtra(state, extra) {
+  state.extra = extra;
+}
 export function setLogin(state, login) {
   state.login = login;
 }
