@@ -105,14 +105,13 @@ export default {
     };
   },
   async mounted() {
-    // let coworking = this.$route.query.entidade;
-    // if (coworking && coworking != ""){
-    //   this.atualizarCoworkingNome(coworking);
-    //   console.log("🚀 ~ file: Checkoutpage.vue:111 ~ mounted ~ coworking:", coworking)
-    // }   
+    let coworking = this.$route.query.entidade;
+    if (coworking && coworking != ""){
+      this.atualizarCoworkingNome(coworking);
+   }   
     this.mensagem = this.catalogoMensagens(this.$route.query.collection_status);
     this.convite = this.$store.getters.getConvite;
-    console.log("🚀 ~ file: Checkoutpage.vue:115 ~ mounted ~ this.convite:", this.convite)
+    
     let visita = this.$store.getters.getConvite.dadosVisita;
     if (visita.name)
     {
@@ -153,10 +152,10 @@ export default {
                 "A visita foi aprovada!",
             });
           
-            // this.$store.dispatch("setarDados", {
-            //   key: "setConvite",
-            //   value: {},
-            // });
+            this.$store.dispatch("setarDados", {
+              key: "setConvite",
+              value: {},
+            });
         }
         else{
           Notify.create({
