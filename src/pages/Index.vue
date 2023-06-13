@@ -698,9 +698,21 @@
           <q-dialog v-model="modalComprarCreditos.dialogAtivo">
             <q-card>
               <q-card-section>
-                <q-input v-model="modalComprarCreditos.creditos" label="Valor Monetário" type="number"></q-input>
+                <strong style="font-size: large; font-weight: 700;">Compra de créditos extras </strong>
               </q-card-section>
-              <q-card-actions align="right">
+              <q-card-section>
+                <span class='text-black' style='font-size: 1rem'>
+                  <p>Você não possui créditos suficientes<br/>Gostaria de comprar créditos?</p>
+
+                  <p style="margin-top: 10px; text-align: center">Créditos faltantes: <strong>
+                    {{ modalComprarCreditos.creditos }}
+                  </strong></p>
+                  <p style="margin-top: 10px; text-align: center">Custo total: <strong>
+                    {{ modalComprarCreditos.custo }} R$
+                  </strong></p>
+                </span>
+              </q-card-section>
+              <q-card-actions align="center">
                 <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
                 <q-btn label="Confirmar" color="positive" @click="gerarBoleto" :disable="!modalComprarCreditos.creditos"></q-btn>
               </q-card-actions>
@@ -861,7 +873,8 @@ export default defineComponent({
     return {
       modalComprarCreditos: {
         dialogAtivo: false,
-        creditos: 0
+        creditos: 0,
+        custo: 0
       },
       contador: 0,
       idImovel: "",
@@ -1232,6 +1245,20 @@ export default defineComponent({
     }
   },
   methods: {  
+    async adicionarCreditosExtras(){
+      let data = {
+        entidade: this.getLogin.user.entidadeId,
+        creditos: this.$store.getters.getExtra
+      }
+      let response = await this.executeMethod({
+          url: `Entidades/adicionarCreditosExtras`,
+          method: "post",
+          data: data
+        });
+      if(response && response.status == 200){
+        this.$store.dispatch("setarDados", { key: "setExtra", value: 0 });
+      }
+    },
     async deletar(id){
       let response = await this.executeMethod({
           url: `Visitas/excluiVisitaDevolveHoras/${id}`,
@@ -1299,22 +1326,10 @@ export default defineComponent({
       
         let message;
         if ((horasMensaisDisponiveis + horasExtras) < calculoCusto) {
-         
-          message = `<p>Você não possui créditos suficientes</p>
-                      <p>Gostaria de comprar créditos?</p>`;
-          Dialog.create({
-            title: "Aviso",
-            //link ainda não implemenado
-            message:message,
-            html: true,
-            ok: {
-              label: "ok",
-              color: "positive",
-            },
-          }).onOk(() => {
-            //modalComprarCreditos( calculoCusto - (horasMensaisDisponiveis + horasExtras))
-            this.abrirDialogo()
-          });
+         let creditosFaltantes = calculoCusto - (horasMensaisDisponiveis + horasExtras)
+          this.modalComprarCreditos.creditos = creditosFaltantes;
+          this.modalComprarCreditos.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
+          this.modalComprarCreditos.dialogAtivo = true;
           return false;
         }
         return true;
@@ -1322,19 +1337,47 @@ export default defineComponent({
       return true;
 
     },
-    abrirDialogo() {
-    this.modalComprarCreditos.dialogAtivo = true;
-  },
+    fecharDialogo(){
+      this.modalComprarCreditos.dialogAtivo = false;
+    },
   
-  fecharDialogo() {
-    this.modalComprarCreditos.dialogAtivo = false;
-  },
-  
-  gerarBoleto() {
-    // Aqui você pode chamar a função para gerar o boleto via API
-    // Use this.valorMonetario e this.explicacao para obter os valores inseridos pelo usuário
-    // Exemplo: this.$api.gerarBoleto(this.valorMonetario, this.explicacao)
-    this.fecharDialogo();
+    async gerarBoleto() {
+      const data = {
+        creditos: this.modalComprarCreditos.creditos,
+        preco:this.modalComprarCreditos.custo,
+        imovel: this.idImovel,
+        entidade: this.$store.getters.getImovelAgendamento.entidadeId
+      };
+
+      let request = {
+        url: "Entidades/comprarCreditos",
+        method: "post",
+        data: data,
+      };
+      const response = await this.executeMethod(request, false);
+      const publicKey = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.chaveAgendamento
+      if(response && response.status == 200){
+        this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
+      }
+
+      const mp = new MercadoPago(publicKey, {
+        locale: "pt-BR",
+      });
+      mp.checkout({
+        preference: {
+          id: response.data,
+        },
+        render: {
+          container: ".cho-container",
+          label: "Efetuar pagamento",
+        },
+        autoOpen: true,
+      });
+      return;
+
+
+
+    this.modalComprarCreditos.dialogAtivo = false
   },
 
     async telaInicial() {
