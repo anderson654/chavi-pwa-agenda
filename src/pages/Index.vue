@@ -2590,6 +2590,12 @@ export default defineComponent({
           message: "Carregando dados",
         });
         const cliente = this.user.entidadeId;
+        let requestH = {
+        url: "Historicos/comprasCreditos",
+        method: "post",
+        data: {data: {paraNaoEstar: "vazio"}},
+      };
+      const historico = await this.executeMethod(requestH, false);
         
         const imovel = this.user.imovelRef;
         if (cliente) {
