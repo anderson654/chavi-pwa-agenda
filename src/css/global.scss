@@ -3,7 +3,7 @@
 {
   --base-primary: #e86628;
   --base-secondary : #b84628;
-  --base-accent : #9C27B0
+  --base-accent : #c23b19;
   --base-background : rgb(240, 240, 240);
   --base-background-color : rgb(240, 240, 240);
   --base-button : #ff7332;
@@ -12,8 +12,8 @@
 
 :root.hotmilk 
 {
-  --base-primary: #760cda;
-  --base-secondary : #9C27B0;
+  --base-primary: #9654ff;
+  --base-secondary : #b337c9;
   --base-accent : #9C27B0;
   --base-background : rgb(240, 240, 240);
   --base-background-color : linear-gradient(
@@ -24,6 +24,67 @@
   --base-button : #9654ff;
   --base-button-style : linear-gradient(267deg,#9654ff 50%,#c29bff);
 } 
+
+:root.agora 
+{
+  --base-primary: #009688;
+  --base-secondary : #017065;
+  --base-accent : #015c53;
+  --base-background : rgb(240, 240, 240);
+  --base-background-color : linear-gradient(
+    202deg,
+    rgba(240, 240, 240, 1) 50%,
+    rgb(84, 221, 255) 100%
+  );
+  --base-button : #009688;
+  --base-button-style : linear-gradient(267deg,#009688 50%,#61f1e3);
+} 
+
+:root.mindhub 
+{
+  --base-primary: #9654ff;
+  --base-secondary : #b337c9;
+  --base-accent : #9C27B0;
+  --base-background : rgb(240, 240, 240);
+  --base-background-color : linear-gradient(
+    202deg,
+    rgba(240, 240, 240, 1) 50%,
+    rgba(150, 84, 255, 1) 100%
+  );
+  --base-button : #9654ff;
+  --base-button-style : linear-gradient(267deg,#9654ff 50%,#c29bff);
+}  
+
+:root.agora 
+{
+  --base-primary: #009688;
+  --base-secondary : #017065;
+  --base-accent : #015c53;
+  --base-background : rgb(240, 240, 240);
+  --base-background-color : linear-gradient(
+    202deg,
+    rgba(240, 240, 240, 1) 50%,
+    rgb(84, 221, 255) 100%
+  );
+  --base-button : #009688;
+  --base-button-style : linear-gradient(267deg,#009688 50%,#61f1e3);
+} 
+
+:root.baggio 
+{
+  --base-primary: #009688;
+  --base-secondary : #017065;
+  --base-accent : #015c53;
+  --base-background : rgb(240, 240, 240);
+  --base-background-color : linear-gradient(
+    202deg,
+    rgba(240, 240, 240, 1) 50%,
+    rgb(84, 221, 255) 100%
+  );
+  --base-button : #009688;
+  --base-button-style : linear-gradient(267deg,#009688 50%,#61f1e3);
+} 
+
 
 body {
   background: var( --base-background );
