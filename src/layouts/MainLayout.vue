@@ -55,24 +55,7 @@ export default defineComponent({
     },
   },
   mounted(){
-    // let a = document.styleSheets[0];
-    // console.log(a)
-    // document.body.classList.add('test');
-    // const elementosEstilo = document.getElementsByTagName('link');
-    // console.log("🚀 ~ file: MainLayout.vue:63 ~ mounted ~ elementosEstilo:", elementosEstilo)
-
-    // const linkElement = document.createElement('link');
-    // linkElement.rel = 'preload';
-    // linkElement.href = '../css/estilo1.css';
-    // linkElement.as = 'style';
-    // linkElement.onload = () => {
-    //   linkElement.onload = null;
-    //   linkElement.rel = 'stylesheet';
-    //   // Chame uma função ou realize ações adicionais após o pré-carregamento
-    //  // this.aplicarEstilo();
-    // };
-    // document.head.appendChild(linkElement);
-    
+        
     this.pegarCoworkingNome()
 
   },
@@ -104,14 +87,14 @@ export default defineComponent({
         let atual = false;
         for (let index = 0; index < listEstilos.length; index++) {
           let element = listEstilos[index];         
-          console.log("🚀 ~ file: MainLayout.vue:107 ~ alterarEstilo ~ element:", element)
+         
           if (element != 'chavi')     
           {
             if (element == elementEstilo){
               atual = true;
             }   
             else{
-              console.log(root.classList.item(index))
+            
               root.classList.remove(root.classList.item(index));     
             }         
         
@@ -124,11 +107,6 @@ export default defineComponent({
       else{
         root.classList.toggle(elementEstilo);
       }
-
-      console.log("🚀 ~ file: MainLayout.vue:110 ~ alterarEstilo ~  root.classList:",  root.classList)
-
-      
-    
 
     }
   },

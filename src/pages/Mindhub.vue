@@ -154,6 +154,15 @@ export default {
   created() {
     this.carregarImoveis();
   },
+  mounted() {
+    let coworkingSecao = this.$store.getters.getCoworkingNome;
+    if(coworkingSecao && coworkingSecao != "mindhub"){
+        this.$store.dispatch("setarDados", {
+        key: "setCoworkingNome",
+        value: "mindhub",
+      });          
+    }
+  },
   computed: {
     imoveisFiltred() {
       const imoveis = this.imoveis;

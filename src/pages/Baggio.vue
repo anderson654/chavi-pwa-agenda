@@ -208,6 +208,15 @@ export default {
   created() {
     this.carregarImoveis();
   },
+  mounted() {
+    let coworkingSecao = this.$store.getters.getCoworkingNome;
+    if(coworkingSecao && coworkingSecao != "baggio"){
+        this.$store.dispatch("setarDados", {
+        key: "setCoworkingNome",
+        value: "baggio",
+      });          
+    }
+  },
   computed: {
     imoveisFiltred() {
       const imoveis = this.imoveis;
