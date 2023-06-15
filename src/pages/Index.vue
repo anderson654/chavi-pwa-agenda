@@ -1324,12 +1324,27 @@ export default defineComponent({
       if((this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras))){
         const calculoCusto = this.calcularCusto(valor,consumoCreditos, custoBase);
       
-        let message;
         if ((horasMensaisDisponiveis + horasExtras) < calculoCusto) {
-         let creditosFaltantes = calculoCusto - (horasMensaisDisponiveis + horasExtras)
-          this.modalComprarCreditos.creditos = creditosFaltantes;
-          this.modalComprarCreditos.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
-          this.modalComprarCreditos.dialogAtivo = true;
+          if (!this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra) {
+          
+          let message = `<p>Você não possui créditos suficientes</p>
+                      <p>Entre em contato com o Estabelecimento para adiquirir créditos</p>`;
+          Dialog.create({
+            title: "Aviso",
+            //link ainda não implemenado
+            message:message,
+            html: true,
+            ok: {
+              label: "ok",
+              color: "positive",
+            },
+          }).onOk(() => {});
+          }else{
+            let creditosFaltantes = calculoCusto - (horasMensaisDisponiveis + horasExtras)
+             this.modalComprarCreditos.creditos = creditosFaltantes;
+             this.modalComprarCreditos.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
+             this.modalComprarCreditos.dialogAtivo = true;
+            }
           return false;
         }
         return true;
