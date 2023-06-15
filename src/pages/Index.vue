@@ -183,6 +183,11 @@
               v-model="selectedDate"
               @click-time="onTimeClick"
             >
+              <template #head-intervals="{ scope }">
+                <div style="display: flex; justify-content: flex-end; flex-direction: column; width: 100%; font-size: 10px; font-weight: 700; text-align: center;">
+                  <span>{{horarioInicial()}}</span>
+                </div>
+              </template>
               <template
                 #day-body="{
                   scope: { timestamp, timeStartPos, timeDurationHeight },
@@ -226,7 +231,7 @@
                     </div>
                   </template>
                 </template>
-              </template>
+              </template>              
             </q-calendar>
           </div>
         </div>
@@ -1134,8 +1139,7 @@ export default defineComponent({
   },
   mounted() {
     try { 
-      this.selectedDate = today();
-      
+      this.selectedDate = today();      
 
       if (this.login && this.login.user) {
         this.user = {
@@ -1441,7 +1445,15 @@ export default defineComponent({
       }
       return events;
     },
-
+    horarioInicial(){
+      if (this.horaInicial && this.horaInicial != ""){
+        let horaMomentInicial = moment(this.horaInicial, 'HH:mm');
+        return horaMomentInicial.format('HH:mm');
+      }
+      else{
+        return "";
+      }
+    },
     qualEvento(informacao, minutos, hora, scope) {
         let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1)
         Dialog.create({
