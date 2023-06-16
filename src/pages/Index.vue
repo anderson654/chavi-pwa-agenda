@@ -1241,6 +1241,10 @@ export default defineComponent({
     }
     if (this.semImovel){
       let nomeCoworking = this.$store.getters.getCoworkingNome
+      this.$store.dispatch("setarDados", {
+            key: "setLogin",
+            value: [],
+          });
       if(nomeCoworking){
         if(nomeCoworking == "hotmilk"){
           this.$router.push(`/${nomeCoworking}/agenda`)
