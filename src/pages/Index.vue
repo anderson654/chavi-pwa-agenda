@@ -1345,7 +1345,7 @@ export default defineComponent({
             },
           }).onOk(() => {});
           }else{
-            let creditosFaltantes = calculoCusto - (horasMensaisDisponiveis + horasExtras)
+            let creditosFaltantes = Math.ceil(calculoCusto - (horasMensaisDisponiveis + horasExtras))
              this.modalComprarCreditos.creditos = creditosFaltantes;
              this.modalComprarCreditos.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
              this.modalComprarCreditos.dialogAtivo = true;
