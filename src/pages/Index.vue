@@ -809,6 +809,22 @@
             
           </div>
     </q-dialog>
+    <q-dialog v-model="finalizacao">
+      <q-card>
+        <q-card-section>
+          <span class="text-primary" style="font-size:1.2rem">Finalizada</span>
+        </q-card-section>
+        <q-card-section>
+          <p style="font-size:1.0rem">  {{messageFinal[0]}}  </p>
+          <p style="font-size:1.0rem">  {{messageFinal[1]}}  </p>
+        </q-card-section>
+        <q-card-actions align="center">
+            <q-btn label="Salvar no calendáriorio" color="accent" @click="cancelMensagemFinal"></q-btn>
+            <q-btn label="Novo agendamento" color="primary" @click="$router.push(`/${routeCoworking}`)"></q-btn>
+            <q-btn label="Ver agendamento" class="button-secondary" @click="okMensagemFinal"></q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
   <footer>
       <div
@@ -959,6 +975,10 @@ export default defineComponent({
       custoBase : 0,
       cardVisita: false,
       visitaSelecionada: {},
+      finalizacao: false,
+      messageFinal:"",
+      returnUrl: "",
+      mensagemIcs:"",
     };
   },
   computed: {
@@ -1057,7 +1077,7 @@ export default defineComponent({
       let nome = this.cliente.nome
       nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
       if(nome == "hotmilk"){
-        return nome +"/agenda"
+        return "hotmilk/agenda"
       }else{
         return nome
       }
@@ -1139,8 +1159,6 @@ export default defineComponent({
     },
     intervalStart() {
       let intervalo = 60 / this.timeStepMin;
-      console.log("🚀 ~ file: Index.vue:1103 ~ intervalStart ~ intervalo:", intervalo)
-      console.log("🚀 ~ file: Index.vue:1105 ~ intervalStart ~ this.horaInicial * intervalo:", this.horaInicial * intervalo)
       return this.horaInicial * intervalo;
     },
     
@@ -2442,7 +2460,10 @@ export default defineComponent({
       Loading.hide();
 
       if (response && response.status == 200) {
-        const message = response.data.text;
+        this.messageFinal = response.data.text.split("<br/>")
+        if(response.data && response.data.url){
+          this.returnUrl = response.data.url
+        }
 
         if (
           response.data.responseWpp &&
@@ -2454,51 +2475,13 @@ export default defineComponent({
               "Algo inesperado aconteceu, não foi possível enviar mensagem via Whats App.",
           });
         }
-        const dialog = {
-          title:
-            '<span class="text-primary" style="font-size:1.2rem">Finalizada</span>',
-          message: '<span style="font-size:1.0rem"> ' + message + " </span>",
-          ok: "Entendido",
-          html: true,
-          persistent: true,
-        };
-        if (response.data.ics) dialog.cancel = "Salvar no calendário";
-        Dialog.create(dialog)
-          .onOk(() => {
-            this.$store.dispatch("setarDados", { key: "setParams", value: {} });
-            this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
-            this.semImovel = true;
-            this.openURL(`https://agenda.chavi.com.br/${this.routeCoworking}`, "_self");
-            if (response.data && response.data.url)
-              this.openURL(response.data.url, "_self");
-          })
-          .onCancel(async () => {
-            const ics = response.data.ics;
-            window.open(
-              `${process.env.VUE_APP_API_URL}/StorageContainers/ics/download/${ics}`,
-              "_system"
-              ,
-            );
-            Dialog.create({
-              title:
-                '<span class="text-primary" style="font-size:1.2rem">Download do agendamento sendo feito</span>',
-              message:
-                '<span style="font-size:1.0rem">Após o download, abra o arquivo para marcar o agendamento em sua agenda</span>',
-              ok: "Abrir visita",
-              persistent: true,
-              html: true,
-            }).onOk(() => {
-              this.$store.dispatch("setarDados", {
-                key: "setParams",
-                value: {},
-              });
-              this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
-              this.semImovel = true;
-              if (response.data && response.data.url)
-                this.openURL(response.data.url, "_self");
-              else this.openURL("https://agenda.chavi.com.br/"+ this.routeCoworking, "_self");
-            });
-          });
+        if (response.data.ics){
+          this.mensagemIcs = response.data.ics;
+          }
+        this.mensagemIcs = response.data.ics;
+        this.finalizacao = true
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:2485 ~ criacaoVisita ~ this.cliente.nome:", this.cliente.nome)
+
       } else if (response && response.status) {
       
         const message = response.data
@@ -2517,6 +2500,43 @@ export default defineComponent({
           html: true,
         });
       }
+    },
+
+    okMensagemFinal(){
+      this.$store.dispatch("setarDados", { key: "setParams", value: {} });
+      this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+      this.semImovel = true;
+      this.openURL(`https://agenda.chavi.com.br/${this.routeCoworking}`, "_self");
+      if (this.returnUrl){
+        this.openURL(this.returnUrl, "_self");
+      }
+    },
+
+    async cancelMensagemFinal(){
+            window.open(
+              `${process.env.VUE_APP_API_URL}/StorageContainers/ics/download/${this.mensagemIcs}`,
+              "_system"
+              ,
+            );
+            Dialog.create({
+              title:
+                '<span class="text-primary" style="font-size:1.2rem">Download do agendamento sendo feito</span>',
+              message:
+                '<span style="font-size:1.0rem">Após o download, abra o arquivo para marcar o agendamento em sua agenda</span>',
+              ok: "Abrir visita",
+              persistent: true,
+              html: true,
+            }).onOk(() => {
+              this.$store.dispatch("setarDados", {
+                key: "setParams",
+                value: {},
+              });
+              this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+              this.semImovel = true;
+              if (this.returnUrl)
+                this.openURL(this.returnUrl, "_self");
+              else this.openURL("https://agenda.chavi.com.br/"+ this.routeCoworking, "_self");
+            });
     },
 
     async checkoutPagamento() {
@@ -2804,7 +2824,6 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-        console.log("🚀 ~ file: Index.vue:2654 ~ formatData ~ horario:", horario)
 
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
