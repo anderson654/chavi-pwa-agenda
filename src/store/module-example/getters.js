@@ -1,6 +1,9 @@
 export function getParams(state) {
   return state.params;
 }
+export function getExtra(state) {
+  return state.extra;
+}
 export function getLogin(state) {
   return state.login;
 }

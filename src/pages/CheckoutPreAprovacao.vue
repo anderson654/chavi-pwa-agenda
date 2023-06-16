@@ -105,6 +105,12 @@ export default {
     };
   },
   async mounted() {
+    let coworking = this.$route.query.entidade;
+   
+    if (coworking && coworking != ""){
+     
+      this.atualizarPreviaCoworking(coworking);     
+    } 
     let idConvite = this.$route.query.convite_id;
     if (this.$store.getters.getLogin.user) {
       this.user = this.$store.getters.getLogin.user;
@@ -127,7 +133,15 @@ export default {
           });
       }
     } else {
-      this.$router.push("/login?redirect_to=pagamento_agendamento&redirect_param="+idConvite);
+      let rota = "/login?entidade="+coworking+"&redirect_to=pagamento_agendamento&redirect_param="+idConvite;
+      if (coworking && coworking != ""){
+            
+        this.$router.push(rota);   
+      } 
+      else{
+        this.$router.push("/login?redirect_to=pagamento_agendamento&redirect_param="+idConvite);
+      }
+    
     }
 
     //http://localhost:8080/feedbackAprovacao?convite_id=63e65653ffd6bb0365bb44c6  
@@ -136,6 +150,18 @@ export default {
   methods: {
     openLink(url, target) {
       window.open(url, target);
+    },
+    async atualizarPreviaCoworking(nomeCoworking){
+      if(this.$store.getters.getCoworkingNome){
+        return
+      }else{        
+        let nome = nomeCoworking
+        nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
+        this.$store.dispatch("setarDados", {
+          key: "setCoworkingNome",
+          value: nome,
+        });          
+      }
     },
     async atualizarCoworkingNome(){
       if(this.$store.getters.getCoworkingNome){

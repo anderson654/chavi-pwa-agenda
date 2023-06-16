@@ -83,6 +83,7 @@ export default {
       loading: false,
       redirecionar: '',
       redirecionar_parametro : "",
+      entidade : "",
       loginEmail: false,
       user: {
         name: "",
@@ -105,6 +106,8 @@ export default {
   mounted() {
     this.redirecionar = this.$route.query.redirect_to;
     this.redirecionar_parametro = this.$route.query.redirect_param;
+    this.entidade = this.$route.query.entidade;
+    
     if (this.$store.getters.getLogin.user) {
       this.$router.push("/hotmilk");
     } else {
@@ -243,7 +246,14 @@ export default {
         let caminho = this.redirecionar
         if (caminho == "pagamento_agendamento" && this.redirecionar_parametro != ""){
           let param = this.redirecionar_parametro
-          this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
+          let entidade = this.entidade;
+     
+          if (this.entidade != ""){
+            this.$router.push(`/feedbackAprovacao?entidade=${entidade}&convite_id=${param}`);
+          }
+          else{
+            this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
+          }
         } 
         else{
           this.$router.push("/");
@@ -265,7 +275,14 @@ export default {
         let caminho = this.redirecionar
         if (caminho == "pagamento_agendamento" && this.redirecionar_parametro != ""){
           let param = this.redirecionar_parametro
-          this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
+          let entidade = this.entidade;
+          
+          if (this.entidade != ""){
+            this.$router.push(`/feedbackAprovacao?entidade=${entidade}&convite_id=${param}`);
+          }
+          else{
+            this.$router.push(`/feedbackAprovacao?convite_id=${param}`);
+          }
         } 
         else{
           this.$router.push("/");

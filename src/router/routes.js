@@ -59,6 +59,10 @@ const routes = [
     path: "/:entidadeId/:imovelRef",
     component: () => import("layouts/Registro.vue"),
   },
+  {
+    path: "/redirect",
+    component: () => import("layouts/Redirect.vue"),
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

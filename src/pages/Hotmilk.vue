@@ -279,7 +279,13 @@ export default {
     },
   },
   mounted() {
-    
+    let coworkingSecao = this.$store.getters.getCoworkingNome;
+    if(coworkingSecao && coworkingSecao != "hotmilk"){
+        this.$store.dispatch("setarDados", {
+        key: "setCoworkingNome",
+        value: "hotmilk",
+      });          
+    }
   },
   methods: {
     openLink(url, target) {

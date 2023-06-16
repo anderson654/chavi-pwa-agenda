@@ -164,6 +164,7 @@
         <!-- CALENDÁRIO PARA AGENDAMENTO -->
         <div class="flex flex-center q-pa-md">
           <div style="width: 80%">
+            
             <q-calendar
               ref="calendar"
               weekday-align="left"
@@ -183,6 +184,12 @@
               v-model="selectedDate"
               @click-time="onTimeClick"
             >
+             <template #head-intervals="{ scope }">
+                <div style="display: flex; justify-content: flex-end; flex-direction: column; width: 100%; font-size: 10px; font-weight: 700; text-align: center;">
+                  <span>{{horarioMarco(horaInicial)}}</span>
+                </div>
+              </template>
+              
               <template
                 #day-body="{
                   scope: { timestamp, timeStartPos, timeDurationHeight },
@@ -226,8 +233,14 @@
                     </div>
                   </template>
                 </template>
-              </template>
+              </template>  
+                  
             </q-calendar>
+            <div class="q-calendar-day__interval--text q-calendar-day__interval--section">
+              <div style="width: 25px; margin-left: 15px;top: -6px; position: relative;">
+                {{horarioMarco(horaFinal)}}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -261,7 +274,7 @@
                 'Por favor, insira seu telefone.',
               (val) =>
                 (val && val.length == 15) ||
-                'Por favor, insira seu telefone no formato (41) 91122-3344.',
+                'Por favor, insira seu telefone no formato (41) 91234-5678.',
             ]"
           />
           <!-- LOGIN EMAIL -->
@@ -284,6 +297,21 @@
             ]"
           />
           <!-- CÓDIGO DE VERIFICAÇÃO -->
+          <q-input
+            class="parte1 full-width"
+            type="text"
+            label-color="primary"
+            style="font-size: 1.2rem"
+            v-if="newUser"
+            v-model="user.name"
+            label="Parece que você é novo por aqui, qual o seu Nome?"
+            lazy-rules
+            :debounce="1000"
+            :rules="[
+              (val) =>
+                (val !== null && val !== '') || 'Por favor, insira seu nome',
+            ]"
+          />
           <q-input
             class="parte1 full-width"
             type="tel"
@@ -672,6 +700,36 @@
           <div class="cho-container"></div>
         </div>
       </q-form>
+
+      <template>
+        <div>
+          <q-dialog v-model="modalComprarCreditos.dialogAtivo">
+            <q-card>
+              <q-card-section>
+                <strong style="font-size: large; font-weight: 700;">Compra de créditos extras </strong>
+              </q-card-section>
+              <q-card-section>
+                <span class='text-black' style='font-size: 1rem'>
+                  <p>Você não possui créditos suficientes<br/>Gostaria de comprar créditos?</p>
+
+                  <p style="margin-top: 10px; text-align: center">Créditos faltantes: <strong>
+                    {{ modalComprarCreditos.creditos }}
+                  </strong></p>
+                  <p style="margin-top: 10px; text-align: center">Custo total: <strong>
+                    {{ modalComprarCreditos.custo }} R$
+                  </strong></p>
+                </span>
+                <p style="text-align: center">voltar ao site após a compra</p>
+              </q-card-section>
+              <q-card-actions align="center">
+                <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
+                <q-btn label="Confirmar" color="positive" @click="gerarBoleto" :disable="!modalComprarCreditos.creditos"></q-btn>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+        </div>
+      </template>
+
     </div>
     <q-dialog v-model="cardVisita">
         <div
@@ -785,6 +843,8 @@
   </footer>
 </template>
 
+
+
 <script>
 import { defineComponent } from "vue";
 import { Loading, Notify, } from "quasar";
@@ -820,6 +880,11 @@ export default defineComponent({
   },
   data() {
     return {
+      modalComprarCreditos: {
+        dialogAtivo: false,
+        creditos: 0,
+        custo: 0
+      },
       contador: 0,
       idImovel: "",
       seMesmoDia: "",
@@ -851,7 +916,7 @@ export default defineComponent({
         use: false,
         hasDocs: false,
       },
-      newUser: true,
+      newUser: false,
       isRegistredUser: false,
       /* Opções calendario */
       utilizarDocumentos: true,
@@ -1074,8 +1139,11 @@ export default defineComponent({
     },
     intervalStart() {
       let intervalo = 60 / this.timeStepMin;
+      console.log("🚀 ~ file: Index.vue:1103 ~ intervalStart ~ intervalo:", intervalo)
+      console.log("🚀 ~ file: Index.vue:1105 ~ intervalStart ~ this.horaInicial * intervalo:", this.horaInicial * intervalo)
       return this.horaInicial * intervalo;
     },
+    
     intervalCount() {
       let horas = this.horaFinal - this.horaInicial;
       let intervalo = 60 / this.timeStepMin;
@@ -1119,8 +1187,7 @@ export default defineComponent({
   },
   mounted() {
     try { 
-      this.selectedDate = today();
-      
+      this.selectedDate = today();      
 
       if (this.login && this.login.user) {
         this.user = {
@@ -1190,6 +1257,24 @@ export default defineComponent({
     }
   },
   methods: {  
+    async adicionarCreditosExtras(){
+      let data = {
+        entidade: this.getLogin.user.entidadeId,
+        creditos: this.$store.getters.getExtra
+      }
+      if(data.creditos > 0){
+        let response = await this.executeMethod({
+            url: `Entidades/adicionarCreditosExtras`,
+            method: "post",
+            data: data
+          });
+        if(response && response.status == 200){
+          this.$store.dispatch("setarDados", { key: "setExtra", value: 0 });
+        }
+      }else{
+        return
+      }
+    },
     async deletar(id){
       let response = await this.executeMethod({
           url: `Visitas/excluiVisitaDevolveHoras/${id}`,
@@ -1255,10 +1340,11 @@ export default defineComponent({
       if((this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras))){
         const calculoCusto = this.calcularCusto(valor,consumoCreditos, custoBase);
       
-        let message;
         if ((horasMensaisDisponiveis + horasExtras) < calculoCusto) {
-         
-          message = "<p>Você não possui créditos suficientes</p>";
+          if (!this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra) {
+          
+          let message = `<p>Você não possui créditos suficientes</p>
+                      <p>Entre em contato com o Estabelecimento para adiquirir créditos</p>`;
           Dialog.create({
             title: "Aviso",
             //link ainda não implemenado
@@ -1269,6 +1355,12 @@ export default defineComponent({
               color: "positive",
             },
           }).onOk(() => {});
+          }else{
+            let creditosFaltantes = Math.ceil(calculoCusto - (horasMensaisDisponiveis + horasExtras))
+             this.modalComprarCreditos.creditos = creditosFaltantes;
+             this.modalComprarCreditos.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
+             this.modalComprarCreditos.dialogAtivo = true;
+            }
           return false;
         }
         return true;
@@ -1276,6 +1368,48 @@ export default defineComponent({
       return true;
 
     },
+    fecharDialogo(){
+      this.modalComprarCreditos.dialogAtivo = false;
+    },
+  
+    async gerarBoleto() {
+      const data = {
+        creditos: this.modalComprarCreditos.creditos,
+        preco:this.modalComprarCreditos.custo,
+        imovel: this.idImovel,
+        entidade: this.$store.getters.getImovelAgendamento.entidadeId
+      };
+
+      let request = {
+        url: "Entidades/comprarCreditos",
+        method: "post",
+        data: data,
+      };
+      const response = await this.executeMethod(request, false);
+      const publicKey = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.chaveAgendamento
+      if(response && response.status == 200){
+        this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
+      }
+
+      const mp = new MercadoPago(publicKey, {
+        locale: "pt-BR",
+      });
+      mp.checkout({
+        preference: {
+          id: response.data,
+        },
+        render: {
+          container: ".cho-container",
+          label: "Efetuar pagamento",
+        },
+        autoOpen: true,
+      });
+      return;
+
+
+
+    this.modalComprarCreditos.dialogAtivo = false
+  },
 
     async telaInicial() {
       await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
@@ -1426,7 +1560,15 @@ export default defineComponent({
       }
       return events;
     },
-
+    horarioMarco(horaCalendario){
+      if (horaCalendario && horaCalendario != ""){
+        let horaMoment = moment(horaCalendario, 'HH:mm');
+        return horaMoment.format('HH:mm');
+      }
+      else{
+        return "";
+      }
+    },
     qualEvento(informacao, minutos, hora, scope) {
         let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1)
         Dialog.create({
@@ -2479,6 +2621,12 @@ export default defineComponent({
           message: "Carregando dados",
         });
         const cliente = this.user.entidadeId;
+        let requestH = {
+        url: "Historicos/comprasCreditos",
+        method: "post",
+        data: {data: {coworkingId: this.$store.getters.getImovelAgendamento.entidadeId}},
+      };
+      const historico = await this.executeMethod(requestH, false);
         
         const imovel = this.user.imovelRef;
         if (cliente) {
@@ -2758,6 +2906,7 @@ export default defineComponent({
     async checkCode() {
       let response;
       const nome = this.user.name
+      const coworkingId = this.$store.getters.getImovelAgendamento.entidadeId
       if (this.newUser) {
         Loading.show({ delay: 400 });
         if (this.loginEmail)
@@ -2770,6 +2919,7 @@ export default defineComponent({
                   email: this.user.email,
                   nome: nome.trim(),
                   codigo: this.user.codigo,
+                  coworkingId: coworkingId,
                 },
               },
             },
@@ -2784,6 +2934,7 @@ export default defineComponent({
                 telefone: this.user.phone,
                 nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
+                coworkingId: coworkingId,
               },
             },
             false

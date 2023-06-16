@@ -105,8 +105,13 @@ export default {
     };
   },
   async mounted() {
+    let coworking = this.$route.query.entidade;
+    if (coworking && coworking != ""){
+      this.atualizarCoworkingNome(coworking);
+   }   
     this.mensagem = this.catalogoMensagens(this.$route.query.collection_status);
     this.convite = this.$store.getters.getConvite;
+    
     let visita = this.$store.getters.getConvite.dadosVisita;
     if (visita.name)
     {
@@ -146,6 +151,11 @@ export default {
               message:
                 "A visita foi aprovada!",
             });
+          
+            this.$store.dispatch("setarDados", {
+              key: "setConvite",
+              value: {},
+            });
         }
         else{
           Notify.create({
@@ -161,6 +171,18 @@ export default {
   methods: {
     openLink(url, target) {
       window.open(url, target);
+    },
+    async atualizarCoworkingNome(nomeCoworking){
+      if(this.$store.getters.getCoworkingNome){
+        return
+      }else{        
+        let nome = nomeCoworking
+        nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
+        this.$store.dispatch("setarDados", {
+          key: "setCoworkingNome",
+          value: nome,
+        });          
+      }
     },
 
     catalogoMensagens(param) {

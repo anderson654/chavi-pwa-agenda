@@ -215,6 +215,15 @@ export default {
   created() {
     this.carregarImoveis();
   },
+  mounted() {
+    let coworkingSecao = this.$store.getters.getCoworkingNome;
+    if(coworkingSecao && coworkingSecao != "agora"){
+        this.$store.dispatch("setarDados", {
+        key: "setCoworkingNome",
+        value: "agora",
+      });          
+    }
+  },
   computed: {
     imoveisFiltred() {
       const filtered = this.imoveis.filter((imovel) => {

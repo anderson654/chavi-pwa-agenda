@@ -1,5 +1,5 @@
 <template>
-  <router-view class="igual-font" />
+    <router-view class="igual-font" />
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -20,13 +20,15 @@ export default defineComponent({
     });
   },
   created() {
-    install();
+    install();  
     this.checkConnectionStatus();
   },
+
 });
 </script>
 <style scoped>
-@import "./css/global.css";
+
+@import "./css/global.scss";
 
 @font-face {
   font-family: poppins;
@@ -42,4 +44,6 @@ export default defineComponent({
 .poppins-font {
   font-family: "poppins";
 }
+
+
 </style>
