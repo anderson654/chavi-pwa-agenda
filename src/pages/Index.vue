@@ -237,7 +237,7 @@
                   
             </q-calendar>
             <div class="q-calendar-day__interval--text q-calendar-day__interval--section">
-              <div style="margin-left: 15px;top: -6px; position: relative;">
+              <div style="width: 25px; margin-left: 15px;top: -6px; position: relative;">
                 {{horarioMarco(horaFinal)}}
               </div>
             </div>
