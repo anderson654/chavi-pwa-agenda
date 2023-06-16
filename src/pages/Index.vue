@@ -711,6 +711,7 @@
                     {{ modalComprarCreditos.custo }} R$
                   </strong></p>
                 </span>
+                <p style="text-align: center">voltar ao site após a compra</p>
               </q-card-section>
               <q-card-actions align="center">
                 <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
@@ -1250,13 +1251,17 @@ export default defineComponent({
         entidade: this.getLogin.user.entidadeId,
         creditos: this.$store.getters.getExtra
       }
-      let response = await this.executeMethod({
-          url: `Entidades/adicionarCreditosExtras`,
-          method: "post",
-          data: data
-        });
-      if(response && response.status == 200){
-        this.$store.dispatch("setarDados", { key: "setExtra", value: 0 });
+      if(data.creditos > 0){
+        let response = await this.executeMethod({
+            url: `Entidades/adicionarCreditosExtras`,
+            method: "post",
+            data: data
+          });
+        if(response && response.status == 200){
+          this.$store.dispatch("setarDados", { key: "setExtra", value: 0 });
+        }
+      }else{
+        return
       }
     },
     async deletar(id){
@@ -2608,7 +2613,7 @@ export default defineComponent({
         let requestH = {
         url: "Historicos/comprasCreditos",
         method: "post",
-        data: {data: {paraNaoEstar: "vazio"}},
+        data: {data: {coworkingId: this.$store.getters.getImovelAgendamento.entidadeId}},
       };
       const historico = await this.executeMethod(requestH, false);
         
