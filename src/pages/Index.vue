@@ -312,6 +312,21 @@
                 (val !== null && val !== '') || 'Por favor, insira seu nome',
             ]"
           />
+          <div class="col-3 q-pl-xs">
+					<q-select  v-if="newUser" 
+          use-chips 
+          clearable 
+          emit-value 
+          color="primary" 
+          use-input 
+          v-model="user.empresa" 
+          :options="clenteOptions" 
+          map-options 
+          option-label="nome" 
+          option-value="id" 
+          @filter="carregarCliente" 
+          label="Escolha sua empresa" />
+				</div>
           <q-input
             class="parte1 full-width"
             type="tel"
@@ -985,6 +1000,7 @@ export default defineComponent({
       messageFinal:"",
       returnUrl: "",
       mensagemIcs:"",
+      clenteOptions: [],
     };
   },
   computed: {
@@ -3207,6 +3223,23 @@ export default defineComponent({
         },
       });
     },
+    async carregarCliente(value, update, abort) {
+			const request = {
+				url: 'Entidades',
+				method: 'get',
+				params: { filter: { where: { and: [{ nome: { like: value, option: 'i' } }, { tipo: { like: 'Locação', option: 'i' } }] }, fields: ['nome', 'id', 'tipo'], order: 'nome ASC' } },
+			}
+			if (!value) delete request.params.filter.where.and.splice(0, 1)
+			if (update) {
+				update(async () => {
+					const response = await this.executeMethod(request)
+					if (response.status == 200) this.clenteOptions = response.data
+				})
+			} else {
+				const response = await this.executeMethod(request)
+				if (response.status == 200) this.clenteOptions = response.data
+			}
+		}
   },
 });
 </script>
