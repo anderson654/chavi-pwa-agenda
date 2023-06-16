@@ -164,6 +164,7 @@
         <!-- CALENDÁRIO PARA AGENDAMENTO -->
         <div class="flex flex-center q-pa-md">
           <div style="width: 80%">
+            
             <q-calendar
               ref="calendar"
               weekday-align="left"
@@ -183,11 +184,12 @@
               v-model="selectedDate"
               @click-time="onTimeClick"
             >
-              <template #head-intervals="{ scope }">
+             <template #head-intervals="{ scope }">
                 <div style="display: flex; justify-content: flex-end; flex-direction: column; width: 100%; font-size: 10px; font-weight: 700; text-align: center;">
-                  <span>{{horarioInicial()}}</span>
+                  <span>{{horarioMarco(horaInicial)}}</span>
                 </div>
               </template>
+              
               <template
                 #day-body="{
                   scope: { timestamp, timeStartPos, timeDurationHeight },
@@ -231,8 +233,14 @@
                     </div>
                   </template>
                 </template>
-              </template>              
+              </template>  
+                  
             </q-calendar>
+            <div class="q-calendar-day__interval--text q-calendar-day__interval--section">
+              <div style="margin-left: 15px;top: -6px; position: relative;">
+                {{horarioMarco(horaFinal)}}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1131,8 +1139,11 @@ export default defineComponent({
     },
     intervalStart() {
       let intervalo = 60 / this.timeStepMin;
+      console.log("🚀 ~ file: Index.vue:1103 ~ intervalStart ~ intervalo:", intervalo)
+      console.log("🚀 ~ file: Index.vue:1105 ~ intervalStart ~ this.horaInicial * intervalo:", this.horaInicial * intervalo)
       return this.horaInicial * intervalo;
     },
+    
     intervalCount() {
       let horas = this.horaFinal - this.horaInicial;
       let intervalo = 60 / this.timeStepMin;
@@ -1549,10 +1560,10 @@ export default defineComponent({
       }
       return events;
     },
-    horarioInicial(){
-      if (this.horaInicial && this.horaInicial != ""){
-        let horaMomentInicial = moment(this.horaInicial, 'HH:mm');
-        return horaMomentInicial.format('HH:mm');
+    horarioMarco(horaCalendario){
+      if (horaCalendario && horaCalendario != ""){
+        let horaMoment = moment(horaCalendario, 'HH:mm');
+        return horaMoment.format('HH:mm');
       }
       else{
         return "";
