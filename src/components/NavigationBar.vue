@@ -1,9 +1,9 @@
 <template>
   <div class="row justify-center">
-    <div class="q-pa-md q-gutter-sm row" style="min-width: 450px; justify-content: center;">
+    <div class="q-pa-md q-gutter-sm row" style="justify-content: center">
       <q-btn
         no-caps
-        class="purple-button navigation-button"        
+        class="purple-button navigation-button"
         @click="$emit('prev')"
       >
         anterior
@@ -34,16 +34,22 @@ export default {
 </script>
 
 <style>
-  .navigation-button{
-    max-width: 150px;
-    border-radius: 16px;
-  }
+.navigation-button {
+  max-width: 150px;
+  border-radius: 16px;
+}
 @media (max-width: 600px) {
-  .navigation-button{
+  .navigation-button {
     max-width: 100px;
     flex-direction: column;
     align-items: center;
   }
 }
 
+@media (max-width: 400px) {
+  .navigation-button {
+    max-width: none;
+    width: 100%;
+  }
+}
 </style>
