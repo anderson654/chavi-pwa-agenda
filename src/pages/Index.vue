@@ -313,19 +313,15 @@
             ]"
           />
           <div class="col-3 q-pl-xs">
-					<q-select  v-if="newUser" 
-          use-chips 
-          clearable 
-          emit-value 
-          color="primary" 
-          use-input 
-          v-model="user.empresa" 
-          :options="clenteOptions" 
-          map-options 
+          <q-select v-if="newUser" 
+          filled 
+          emit-value
+          map-options
           option-label="nome" 
           option-value="id" 
-          @filter="carregarCliente" 
-          label="Escolha sua empresa" />
+          v-model="user.empresa" 
+          :options="clenteOptions" 
+          label="Selecione sua empresa"/>
 				</div>
           <q-input
             class="parte1 full-width"
@@ -945,7 +941,7 @@ export default defineComponent({
       gerenciamentoCreditos : {},
       user: {
         name: "",
-        empresa: "",
+        empresa: undefined,
         phone: "",
         cpf: "",
         email: "",
@@ -1000,7 +996,7 @@ export default defineComponent({
       messageFinal:"",
       returnUrl: "",
       mensagemIcs:"",
-      clenteOptions: [],
+      clenteOptions: [{nome: "outro", id: ""}],
     };
   },
   computed: {
@@ -2952,6 +2948,9 @@ export default defineComponent({
         if (response.status === 201) {
           this.user.codigo = response.data;
         }
+        if(this.newUser){
+          this.carregarClientes()
+        }
       } else {
         Notify.create({
           message: "Erro ao enviar Informações ao Servidor.",
@@ -2976,6 +2975,7 @@ export default defineComponent({
                   email: this.user.email,
                   nome: nome.trim(),
                   codigo: this.user.codigo,
+                  entidadeId: this.user.empresa,
                   coworkingId: coworkingId,
                 },
               },
@@ -2991,6 +2991,7 @@ export default defineComponent({
                 telefone: this.user.phone,
                 nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
+                entidadeId: this.user.empresa,
                 coworkingId: coworkingId,
               },
             },
@@ -3223,21 +3224,39 @@ export default defineComponent({
         },
       });
     },
-    async carregarCliente(value, update, abort) {
+    async carregarCliente() {
 			const request = {
-				url: 'Entidades',
+				url: 'Entidades/clientesCoworking/' + this.$store.getters.getImovelAgendamento.entidadeId,
 				method: 'get',
-				params: { filter: { where: { and: [{ nome: { like: value, option: 'i' } }, { tipo: { like: 'Locação', option: 'i' } }] }, fields: ['nome', 'id', 'tipo'], order: 'nome ASC' } },
 			}
-			if (!value) delete request.params.filter.where.and.splice(0, 1)
-			if (update) {
-				update(async () => {
-					const response = await this.executeMethod(request)
-					if (response.status == 200) this.clenteOptions = response.data
-				})
+			const response = await this.executeMethod(request)
+      
+					if (response.status == 200){
+            this.clenteOptions = [{nome: "outro", id: ""}]
+            let resp = JSON.parse(JSON.stringify(response.data))
+            for(let i = 0; i < resp.length; i++){
+              this.clenteOptions.push(resp[i])
+              }
+            }
+		},
+    async carregarClientes() {
+			//TODO: Implementar filtro *
+			const request = {
+				url: 'Entidades/clientesCoworking/' + this.$store.getters.getImovelAgendamento.entidadeId,
+				method: 'get',
+			}
+			const response = await this.executeMethod(request)
+			if (response && response.status == 200) {
+        let options = response.data ? response.data : []
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:3243 ~ carregarClientes ~ options:", options)
+        this.clenteOptions = [...options]
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:3245 ~ carregarClientes ~ this.clenteOptions:", this.clenteOptions)
+				this.clenteOptions.push({nome: "outro", id: ""})
 			} else {
-				const response = await this.executeMethod(request)
-				if (response.status == 200) this.clenteOptions = response.data
+				Notify.create({
+					type: 'warning',
+					message: 'Não foi possível carregar',
+				})
 			}
 		}
   },
