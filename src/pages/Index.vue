@@ -734,14 +734,14 @@
     <q-dialog v-model="cardVisita">
         <div
             class="shadow-8 bg-grey-2 justify-center"
-            style=" border-radius: 4vw; width: 50%;"
+            style=" border-radius: 4vw; width: 100%; max-width: 350px;"
           >
               <div
                 class="full-width"
-                style="background-color: #505050;"
+                style="background-color: #505050; "
               >
                 <div
-                  class="col-8 text-center justify-center items-center q-pt-md q-px-md"
+                  class="col-8 text-center justify-center items-center q-pt-md q-px-md "
                 >
                   <span class="text-h6 text-white">
                     {{
@@ -755,17 +755,23 @@
                   <div
                     class="full-width"
                     style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
                       white-space: nowrap;
                       overflow: hidden;
                       text-overflow: ellipsis;
                     "
                   >
-                  <div class="full-widith column wrap items-center" style="box-shadow: none;">
+                  <div 
+                    class="full-widith button-wrapper" 
+                    style="box-shadow: none; display:flex; gap: 10px;"
+                  >
                     <q-btn
                       outline
                       label="voltar"
                       color="positive"
-                      class="col-6 q-mr-xs q-mb-md"
+                      class="col-6 q-my-xs"
                       style="max-width: 250px;"
                       @click="cardVisita = false"
                     />
@@ -773,7 +779,7 @@
                       outline
                       label="Excluir"
                       color="negative"
-                      class="col-6 q-mr-xs q-mb-md"
+                      class="col-6 q-my-xs" 
                       style="max-width: 250px;"
                       @click="deletar(visitaSelecionada.id)"
                     />
@@ -1298,10 +1304,19 @@ export default defineComponent({
       }
     },
     async deletar(id){
-      let response = await this.executeMethod({
+      let horarioAtual = Date.now();
+      if ((this.visitaSelecionada.validadeInicial - 1800000) < horarioAtual){
+        Notify.create({
+          message: "O tempo máximo para exclução da visita é 30 minutos antes da reserva.",
+          type: "negative",
+        });
+        return
+      }else{
+        let response = await this.executeMethod({
           url: `Visitas/excluiVisitaDevolveHoras/${id}`,
           method: "delete",
         });
+      }
       this.carregarHorarios()
       this.cardVisita = false
     },
@@ -1315,6 +1330,7 @@ export default defineComponent({
   
           const response = await this.executeMethod(request, false);
           this.visitaSelecionada = response.data
+          // console.log(this.visitaSelecionada);
           this.cardVisita = true
         }else{
           return
