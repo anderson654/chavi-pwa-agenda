@@ -996,7 +996,7 @@ export default defineComponent({
       messageFinal:"",
       returnUrl: "",
       mensagemIcs:"",
-      clenteOptions: [{nome: "outro", id: ""}],
+      clenteOptions: [],
     };
   },
   computed: {
@@ -3224,21 +3224,6 @@ export default defineComponent({
         },
       });
     },
-    async carregarCliente() {
-			const request = {
-				url: 'Entidades/clientesCoworking/' + this.$store.getters.getImovelAgendamento.entidadeId,
-				method: 'get',
-			}
-			const response = await this.executeMethod(request)
-      
-					if (response.status == 200){
-            this.clenteOptions = [{nome: "outro", id: ""}]
-            let resp = JSON.parse(JSON.stringify(response.data))
-            for(let i = 0; i < resp.length; i++){
-              this.clenteOptions.push(resp[i])
-              }
-            }
-		},
     async carregarClientes() {
 			//TODO: Implementar filtro *
 			const request = {
@@ -3248,10 +3233,12 @@ export default defineComponent({
 			const response = await this.executeMethod(request)
 			if (response && response.status == 200) {
         let options = response.data ? response.data : []
-        console.log("PIAZZETTA 🦝 ~ file: Index.vue:3243 ~ carregarClientes ~ options:", options)
+        options = options.filter(e=>{
+          return e.id != "6064614dc7cddfdc2b65144d"
+        })
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:3239 ~ carregarClientes ~ options:", options)
         this.clenteOptions = [...options]
-        console.log("PIAZZETTA 🦝 ~ file: Index.vue:3245 ~ carregarClientes ~ this.clenteOptions:", this.clenteOptions)
-				this.clenteOptions.push({nome: "outro", id: ""})
+        this.clenteOptions.push({nome: "Outro", id:"6064614dc7cddfdc2b65144d"})
 			} else {
 				Notify.create({
 					type: 'warning',
