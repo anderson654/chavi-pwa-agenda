@@ -2800,8 +2800,7 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-        console.log("🚀 ~ file: Index.vue:2654 ~ formatData ~ horario:", horario)
-
+      
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
@@ -2842,6 +2841,8 @@ export default defineComponent({
 
               titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
             }
+               
+           
 
             optionsOff.push({
               title: horario.paraAprovar ? "PENDENTE" : titleBusy,
