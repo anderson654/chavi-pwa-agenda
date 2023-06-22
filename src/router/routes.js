@@ -4,6 +4,11 @@ const routes = [
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Index.vue") }],
   },
+  {
+    path: "/Rotativas",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("pages/PosicoesRotativas.vue") }],
+  },
 
   {
     path: "/coworkings",

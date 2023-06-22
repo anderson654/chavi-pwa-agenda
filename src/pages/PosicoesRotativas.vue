@@ -1,4 +1,15 @@
 <template>
+  <div>
+    <q-btn
+      style="font-size: 0.7rem"
+      icon="logout"
+      flat
+      dense
+      color="secondary"
+      class="home-icon"
+      @click="logout()"
+    />
+  </div>
   <q-page class="flex-center column">
     <!-- SEM IMÓVEL -->
     <div
@@ -83,6 +94,9 @@
 
       <!-- CALENDÁRIO -->
       <div class="full-width" v-if="!inForms">
+        <div class="container">
+          <div v-for="index in 5" :key="index" :style="getGradientStyle(index)"></div>
+        </div>
         <div class="row justify-center items-center">
           <div class="col-12 row justify-center items-center">
             <!-- BTN NAVEGAÇÃO -->
@@ -676,9 +690,8 @@
               >.
             </span>
           </div>
-          <div class="buttonsWrapper">
-            <q-btn-group push flat unelevated class="full-width row q-my-md q-ml-sm">
-              <q-btn
+          <q-btn-group push flat unelevated class="full-width row q-my-md">
+            <q-btn
               outline
               label="Voltar"
               color="secondary"
@@ -688,21 +701,17 @@
                   ? (parte -= 1)
                   : this.$router.back()
               "
-              />          
-            
-              <q-btn
-              v-if="validarStatusProcesso() !== 'Pagamento'"
+            />          
+
+            <q-btn
               class="col-6 q-ml-xs"
               :label="validarStatusProcesso()"
               type="submit"
               color="positive"            
-              />
-              <div 
-              id="wallet_container"
-              v-if="validarStatusProcesso() == 'Pagamento'"
-              ></div>
-            </q-btn-group>
-          </div>
+            />
+
+          </q-btn-group>
+          <div class="cho-container"></div>
         </div>
       </q-form>
 
@@ -990,7 +999,20 @@ export default defineComponent({
       messageFinal:"",
       returnUrl: "",
       mensagemIcs:"",
+      quantidadePosicoes: 0,
       clenteOptions: [],
+      colors: [
+        '#FF0000',
+        '#FF5500',
+        '#FFAA00',
+        '#FFFF00',
+        '#AAFF00',
+        '#55FF00',
+        '#00FF00',
+        '#00FF55',
+        '#00FFAA',
+        '#00FFFF'
+      ],
     };
   },
   computed: {
@@ -1216,7 +1238,7 @@ export default defineComponent({
 
   },
   mounted() {
-    try {
+    try { 
       this.selectedDate = today();      
 
       if (this.login && this.login.user) {
@@ -1290,7 +1312,15 @@ export default defineComponent({
       }
     }
   },
-  methods: {
+  methods: {  
+    getGradientStyle(index) {
+
+      const gradientStyle = {
+        background: this.colors[index]
+      };
+
+      return gradientStyle;
+    },
     async adicionarCreditosExtras(){
       let data = {
         entidade: this.getLogin.user.entidadeId,
@@ -1336,6 +1366,7 @@ export default defineComponent({
   
           const response = await this.executeMethod(request, false);
           this.visitaSelecionada = response.data
+          // console.log(this.visitaSelecionada);
           this.cardVisita = true
         }else{
           return
@@ -1434,14 +1465,18 @@ export default defineComponent({
         this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
       }
 
-      const mp = new MercadoPago(this.chaveAgendamento, {
+      const mp = new MercadoPago(publicKey, {
         locale: "pt-BR",
       });
-
-      mp.bricks().create("wallet", "wallet_container", {
-        initialization: {
-            preferenceId: response.data,
+      mp.checkout({
+        preference: {
+          id: response.data,
         },
+        render: {
+          container: ".cho-container",
+          label: "Efetuar pagamento",
+        },
+        autoOpen: true,
       });
       return;
 
@@ -1778,7 +1813,9 @@ export default defineComponent({
       else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
         return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
       }
-
+      else if (funcionamentoIndividual  && !necessitaAprovacao  &&  !aprovarVisita) {
+        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
+      }
       else if (!funcionamentoIndividual &&  !aprovarVisita) {
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
@@ -2300,8 +2337,9 @@ export default defineComponent({
  
 			  return false;
       } 
-      else if (funcionamentoIndividual == true && necessitaAprovacao){
-        this.user.paraAprovar = true; 
+      else if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao <= 0){
+        this.user.paraAprovar = true;
+ 
 			  return true;
       }	   		
      
@@ -2315,9 +2353,9 @@ export default defineComponent({
     
         return false;
       }
-      else if (funcionamentoIndividual == true && necessitaAprovacao == false ){
-        this.user.paraAprovar = false;
-        return false;
+      else if (funcionamentoIndividual == true && necessitaAprovacao == false && !aprovarVisita){
+        this.user.paraAprovar = true;
+        return true;
       }
       else if (funcionamentoIndividual == false && !aprovarVisita){
         this.user.paraAprovar = true;
@@ -2353,6 +2391,7 @@ export default defineComponent({
       }
       else{     
         this.criacaoVisita();
+ 
       }
 
     },
@@ -2493,6 +2532,7 @@ export default defineComponent({
           }
         this.mensagemIcs = response.data.ics;
         this.finalizacao = true
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:2485 ~ criacaoVisita ~ this.cliente.nome:", this.cliente.nome)
 
       } else if (response && response.status) {
       
@@ -2585,16 +2625,18 @@ export default defineComponent({
         key: "setConvite",
         value: convite,
       });
-
-      // inicio da integração do mercado pago
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
-
-      mp.bricks().create("wallet", "wallet_container", {
-        initialization: {
-            preferenceId: response.data,
+      mp.checkout({
+        preference: {
+          id: response.data,
         },
+        render: {
+          container: ".cho-container",
+          label: "Efetuar pagamento",
+        },
+        autoOpen: true,
       });
       return;
     },
@@ -2895,8 +2937,6 @@ export default defineComponent({
 
       }
     },
-    
-
     async sendCode() {
       let response;
       if (
@@ -3230,13 +3270,6 @@ export default defineComponent({
 			}
 		}
   },
-  watch: {
-    parte(newValue){
-      if (newValue == 4){
-        this.checkoutPagamento();
-      }
-    }
-  }
 });
 </script>
 
@@ -3266,9 +3299,7 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  width: 95%;
-  margin: 0 auto;
-  max-width: 400px;
+  width: 400px;
   max-height: 130px;
   background-color: white;
   border-radius: 8px;
@@ -3361,7 +3392,6 @@ export default defineComponent({
   .img-salas {
     width: 100vw;
   }
-
 }
 .img-salas {
     margin-top: 15px;
@@ -3370,35 +3400,6 @@ export default defineComponent({
     position: center;
     object-fit: contain;
   }
-
-.buttonsWrapper{
-  width: 100%;
-}
-
-.buttonsWrapper > div {
-  display: flex;
-  align-items: center;
-  max-height: 35px;
-}
-
-.buttonsWrapper > div > button{
-  position: relative;
-  top: -10px;
-}
-
-@media (max-width: 580px){
-  .buttonsWrapper > div{
-    flex-direction: column;
-    max-height: none;
-    align-items: center;
-  }
-  .buttonsWrapper > div > button{
-    margin: 5px auto;
-    top: 10px;
-    border-radius: 5px;
-  }
-}
-
 @font-face {
   font-family: 'igualfina';
   src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
@@ -3408,5 +3409,13 @@ export default defineComponent({
   font-family: 'igualnegrito';
   src: url('../../public/fonts/Igual/Igual-ExtraBold.otf') format('truetype');
   font-style: normal;
+}
+.container {
+  display: flex;
+}
+
+.container > div {
+  flex: 1;
+  height: 100px;
 }
 </style>
