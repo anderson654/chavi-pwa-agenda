@@ -676,8 +676,9 @@
               >.
             </span>
           </div>
-          <q-btn-group push flat unelevated class="full-width row q-my-md">
-            <q-btn
+          <div class="buttonsWrapper">
+            <q-btn-group push flat unelevated class="full-width row q-my-md q-ml-sm">
+              <q-btn
               outline
               label="Voltar"
               color="secondary"
@@ -687,17 +688,21 @@
                   ? (parte -= 1)
                   : this.$router.back()
               "
-            />          
-
-            <q-btn
+              />          
+            
+              <q-btn
+              v-if="validarStatusProcesso() !== 'Pagamento'"
               class="col-6 q-ml-xs"
               :label="validarStatusProcesso()"
               type="submit"
               color="positive"            
-            />
-
-          </q-btn-group>
-          <div class="cho-container"></div>
+              />
+              <div 
+              id="wallet_container"
+              v-if="validarStatusProcesso() == 'Pagamento'"
+              ></div>
+            </q-btn-group>
+          </div>
         </div>
       </q-form>
 
@@ -1210,7 +1215,7 @@ export default defineComponent({
 
   },
   mounted() {
-    try { 
+    try {
       this.selectedDate = today();      
 
       if (this.login && this.login.user) {
@@ -1284,7 +1289,7 @@ export default defineComponent({
       }
     }
   },
-  methods: {  
+  methods: {
     async adicionarCreditosExtras(){
       let data = {
         entidade: this.getLogin.user.entidadeId,
@@ -1429,18 +1434,14 @@ export default defineComponent({
         this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
       }
 
-      const mp = new MercadoPago(publicKey, {
+      const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
-      mp.checkout({
-        preference: {
-          id: response.data,
+
+      mp.bricks().create("wallet", "wallet_container", {
+        initialization: {
+            preferenceId: response.data,
         },
-        render: {
-          container: ".cho-container",
-          label: "Efetuar pagamento",
-        },
-        autoOpen: true,
       });
       return;
 
@@ -2355,7 +2356,6 @@ export default defineComponent({
       }
       else{     
         this.criacaoVisita();
- 
       }
 
     },
@@ -2589,18 +2589,16 @@ export default defineComponent({
         key: "setConvite",
         value: convite,
       });
+
+      // inicio da integração do mercado pago
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
       });
-      mp.checkout({
-        preference: {
-          id: response.data,
+
+      mp.bricks().create("wallet", "wallet_container", {
+        initialization: {
+            preferenceId: response.data,
         },
-        render: {
-          container: ".cho-container",
-          label: "Efetuar pagamento",
-        },
-        autoOpen: true,
       });
       return;
     },
@@ -3206,6 +3204,13 @@ export default defineComponent({
       });
     },
   },
+  watch: {
+    parte(newValue){
+      if (newValue == 4){
+        this.checkoutPagamento();
+      }
+    }
+  }
 });
 </script>
 
@@ -3328,6 +3333,7 @@ export default defineComponent({
   .img-salas {
     width: 100vw;
   }
+
 }
 .img-salas {
     margin-top: 15px;
@@ -3336,6 +3342,35 @@ export default defineComponent({
     position: center;
     object-fit: contain;
   }
+
+.buttonsWrapper{
+  width: 100%;
+}
+
+.buttonsWrapper > div {
+  display: flex;
+  align-items: center;
+  max-height: 35px;
+}
+
+.buttonsWrapper > div > button{
+  position: relative;
+  top: -10px;
+}
+
+@media (max-width: 580px){
+  .buttonsWrapper > div{
+    flex-direction: column;
+    max-height: none;
+    align-items: center;
+  }
+  .buttonsWrapper > div > button{
+    margin: 5px auto;
+    top: 10px;
+    border-radius: 5px;
+  }
+}
+
 @font-face {
   font-family: 'igualfina';
   src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
