@@ -3503,6 +3503,7 @@ export default defineComponent({
   .img-salas {
     width: 100vw;
   }
+
 }
 .img-salas {
     margin-top: 15px;
@@ -3511,6 +3512,35 @@ export default defineComponent({
     position: center;
     object-fit: contain;
   }
+
+.buttonsWrapper{
+  width: 100%;
+}
+
+.buttonsWrapper > div {
+  display: flex;
+  align-items: center;
+  max-height: 35px;
+}
+
+.buttonsWrapper > div > button{
+  position: relative;
+  top: -10px;
+}
+
+@media (max-width: 580px){
+  .buttonsWrapper > div{
+    flex-direction: column;
+    max-height: none;
+    align-items: center;
+  }
+  .buttonsWrapper > div > button{
+    margin: 5px auto;
+    top: 10px;
+    border-radius: 5px;
+  }
+}
+
 @font-face {
   font-family: 'igualfina';
   src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
