@@ -1789,9 +1789,7 @@ export default defineComponent({
       else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
         return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
       }
-      else if (funcionamentoIndividual  && !necessitaAprovacao  &&  !aprovarVisita) {
-        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
-      }
+
       else if (!funcionamentoIndividual &&  !aprovarVisita) {
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
@@ -2313,9 +2311,8 @@ export default defineComponent({
  
 			  return false;
       } 
-      else if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao <= 0){
-        this.user.paraAprovar = true;
- 
+      else if (funcionamentoIndividual == true && necessitaAprovacao){
+        this.user.paraAprovar = true; 
 			  return true;
       }	   		
      
@@ -2329,9 +2326,9 @@ export default defineComponent({
     
         return false;
       }
-      else if (funcionamentoIndividual == true && necessitaAprovacao == false && !aprovarVisita){
-        this.user.paraAprovar = true;
-        return true;
+      else if (funcionamentoIndividual == true && necessitaAprovacao == false ){
+        this.user.paraAprovar = false;
+        return false;
       }
       else if (funcionamentoIndividual == false && !aprovarVisita){
         this.user.paraAprovar = true;
@@ -2913,6 +2910,8 @@ export default defineComponent({
 
       }
     },
+    
+
     async sendCode() {
       let response;
       if (
