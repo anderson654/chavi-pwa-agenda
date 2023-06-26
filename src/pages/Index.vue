@@ -1335,7 +1335,6 @@ export default defineComponent({
   
           const response = await this.executeMethod(request, false);
           this.visitaSelecionada = response.data
-          // console.log(this.visitaSelecionada);
           this.cardVisita = true
         }else{
           return
@@ -2496,7 +2495,6 @@ export default defineComponent({
           }
         this.mensagemIcs = response.data.ics;
         this.finalizacao = true
-        console.log("PIAZZETTA 🦝 ~ file: Index.vue:2485 ~ criacaoVisita ~ this.cliente.nome:", this.cliente.nome)
 
       } else if (response && response.status) {
       
@@ -3240,7 +3238,9 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  width: 400px;
+  width: 95%;
+  margin: 0 auto;
+  max-width: 400px;
   max-height: 130px;
   background-color: white;
   border-radius: 8px;

@@ -3,10 +3,10 @@
     <div class="q-pa-md q-gutter-sm row" style="justify-content: center">
       <q-btn
         no-caps
-        class="purple-button navigation-button"
+        class="purple-button navigation-button arrow"
         @click="$emit('prev')"
       >
-        anterior
+        <i class="fa-solid fa-arrow-left"></i>
       </q-btn>
       <q-btn
         no-caps
@@ -18,11 +18,11 @@
 
       <q-btn
         no-caps
-        class="purple-button navigation-button"
+        class="purple-button navigation-button arrow"
         @click="$emit('next')"
       >
-        próximo
-      </q-btn>
+      <i class="fa-solid fa-arrow-right"></i>
+    </q-btn>
     </div>
   </div>
 </template>
@@ -38,6 +38,18 @@ export default {
   max-width: 150px;
   border-radius: 16px;
 }
+
+.navigation-button.arrow{
+  width: initial;
+}
+
+.navigation-button .fa-regular{
+  width: 30px;
+  height: 30px;
+  font-size: 25px;
+  color: white;
+}
+
 @media (max-width: 600px) {
   .navigation-button {
     max-width: 100px;
@@ -46,10 +58,4 @@ export default {
   }
 }
 
-@media (max-width: 400px) {
-  .navigation-button {
-    max-width: none;
-    width: 100%;
-  }
-}
 </style>
