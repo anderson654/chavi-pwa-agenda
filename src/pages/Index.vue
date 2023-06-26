@@ -312,6 +312,17 @@
                 (val !== null && val !== '') || 'Por favor, insira seu nome',
             ]"
           />
+          <div class="col-3 q-pl-xs">
+          <q-select v-if="newUser" 
+          filled 
+          emit-value
+          map-options
+          option-label="nome" 
+          option-value="id" 
+          v-model="user.empresa" 
+          :options="clenteOptions" 
+          label="Selecione sua empresa"/>
+				</div>
           <q-input
             class="parte1 full-width"
             type="tel"
@@ -935,7 +946,7 @@ export default defineComponent({
       gerenciamentoCreditos : {},
       user: {
         name: "",
-        empresa: "",
+        empresa: undefined,
         phone: "",
         cpf: "",
         email: "",
@@ -990,6 +1001,7 @@ export default defineComponent({
       messageFinal:"",
       returnUrl: "",
       mensagemIcs:"",
+      clenteOptions: [],
     };
   },
   computed: {
@@ -1777,9 +1789,7 @@ export default defineComponent({
       else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
         return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
       }
-      else if (funcionamentoIndividual  && !necessitaAprovacao  &&  !aprovarVisita) {
-        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
-      }
+
       else if (!funcionamentoIndividual &&  !aprovarVisita) {
         return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
       }
@@ -2301,9 +2311,8 @@ export default defineComponent({
  
 			  return false;
       } 
-      else if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao <= 0){
-        this.user.paraAprovar = true;
- 
+      else if (funcionamentoIndividual == true && necessitaAprovacao){
+        this.user.paraAprovar = true; 
 			  return true;
       }	   		
      
@@ -2317,9 +2326,9 @@ export default defineComponent({
     
         return false;
       }
-      else if (funcionamentoIndividual == true && necessitaAprovacao == false && !aprovarVisita){
-        this.user.paraAprovar = true;
-        return true;
+      else if (funcionamentoIndividual == true && necessitaAprovacao == false ){
+        this.user.paraAprovar = false;
+        return false;
       }
       else if (funcionamentoIndividual == false && !aprovarVisita){
         this.user.paraAprovar = true;
@@ -2836,7 +2845,7 @@ export default defineComponent({
         });
         let optionsOff = [];
         for (let horario of this.events) {
-
+      
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
@@ -2877,6 +2886,8 @@ export default defineComponent({
 
               titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
             }
+               
+           
 
             optionsOff.push({
               title: horario.paraAprovar ? "PENDENTE" : titleBusy,
@@ -2895,6 +2906,8 @@ export default defineComponent({
 
       }
     },
+    
+
     async sendCode() {
       let response;
       if (
@@ -2930,6 +2943,9 @@ export default defineComponent({
         if (response.status === 201) {
           this.user.codigo = response.data;
         }
+        if(this.newUser){
+          this.carregarClientes()
+        }
       } else {
         Notify.create({
           message: "Erro ao enviar Informações ao Servidor.",
@@ -2954,6 +2970,7 @@ export default defineComponent({
                   email: this.user.email,
                   nome: nome.trim(),
                   codigo: this.user.codigo,
+                  entidadeId: this.user.empresa,
                   coworkingId: coworkingId,
                 },
               },
@@ -2969,6 +2986,7 @@ export default defineComponent({
                 telefone: this.user.phone,
                 nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
+                entidadeId: this.user.empresa,
                 coworkingId: coworkingId,
               },
             },
@@ -3201,6 +3219,28 @@ export default defineComponent({
         },
       });
     },
+    async carregarClientes() {
+			//TODO: Implementar filtro *
+			const request = {
+				url: 'Entidades/clientesCoworking/' + this.$store.getters.getImovelAgendamento.entidadeId,
+				method: 'get',
+			}
+			const response = await this.executeMethod(request)
+			if (response && response.status == 200) {
+        let options = response.data ? response.data : []
+        options = options.filter(e=>{
+          return e.id != "6064614dc7cddfdc2b65144d"
+        })
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:3239 ~ carregarClientes ~ options:", options)
+        this.clenteOptions = [...options]
+        this.clenteOptions.push({nome: "Outro", id:"6064614dc7cddfdc2b65144d"})
+			} else {
+				Notify.create({
+					type: 'warning',
+					message: 'Não foi possível carregar',
+				})
+			}
+		}
   },
   watch: {
     parte(newValue){

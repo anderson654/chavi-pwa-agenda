@@ -19,7 +19,8 @@ export default {
       if(this.$route.query.collection_status === "approved"){
         let data = {
           entidade: this.getLogin.user.entidadeId,
-          creditos: this.$store.getters.getExtra
+          creditos: this.$store.getters.getExtra,
+          entidadeCoworking: this.$store.getters.getImovelAgendamento.entidadeId
         }
         if(data.creditos > 0){
           let response = await this.executeMethod({
