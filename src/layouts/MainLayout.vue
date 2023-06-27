@@ -1,8 +1,11 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar class="flex flex-center q-gutter-x-md full-width bg-grey-3">
-        <div class="header">
+    <q-header elevated class="bg-grey-3">
+      <q-toolbar class="header-toolbar flex flex-center flex-justify-between q-gutter-x-md full-width">
+        <div>
+          <p> </p>
+        </div>
+        <div class="header flex flex-center">
           <q-img
             :src="nomeCoworkingLocal"
             fit="contain"
@@ -12,8 +15,21 @@
             class="q-my-sm"
           />
         </div>
+        <div>
+          <q-btn
+            v-if="logado"
+            style="font-size: 1rem"
+            label="Logout"
+            flat
+            dense
+            color="secondary"
+            class="home-icon"
+            @click="logout()"
+          />
+        </div>
       </q-toolbar>
     </q-header>
+
 
     <q-page-container>
       <router-view />
@@ -24,6 +40,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { mapGetters } from 'vuex';
+import { Dialog } from "quasar";
 
 
 export default defineComponent({
@@ -38,6 +55,31 @@ export default defineComponent({
     nomeCoworkingLocal() {
       this.pegarCoworkingNome()
       return this.coworkingNome;
+    },
+    routeCoworking() {
+      let nome = this.coworkingNome
+      nome = nome.split(".")[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
+      if(nome == "hotmilk"){
+        return "hotmilk/agenda"
+      }else{
+        return nome
+      }
+    },
+    login: {
+      get() {
+        return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
+      },
+      set(value) {
+        const key = "setLogin";
+        this.$store.dispatch("setarDados", { key: key, value: value });
+      },
+    },
+    logado(){
+      if(this.login && this.login.user){
+        return true
+      }else{
+        return false
+      }
     },
     logo: {
       set(value) {
@@ -108,7 +150,47 @@ export default defineComponent({
         root.classList.toggle(elementEstilo);
       }
 
-    }
+    },
+    async logout(force) {
+      if (force) {
+        await this.$store.dispatch("setarDados", {
+          key: "setLogin",
+          value: [],
+        });
+
+        this.$store.dispatch("setarDados", {
+          key: "setEstadoInicial",
+          value: true,
+        });
+
+        return;
+      }
+      Dialog.create({
+        title: "Aviso",
+        message: `<p>Retornar para a tela inicial?</p> <p>Você irá deslogar</p>`,
+        html:true,
+        ok: {
+          label: "Sim",
+          color: "positive",
+        },
+        cancel: {
+          label: "Não",
+          color: "negative",
+        },
+      }).onOk(async () => {
+        await this.$store.dispatch("setarDados", {
+          key: "setLogin",
+          value: [],
+        });
+        this.telaInicial()
+      });
+    },
+    async telaInicial() {
+      await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
+      await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+      this.semImovel = true;
+      this.$router.push(`/${this.routeCoworking}`);
+    },
   },
   
 });
@@ -127,4 +209,12 @@ export default defineComponent({
   background-color: black;
   background-color: #505050;
 }
+.header-toolbar {
+  justify-content: space-between;
+}
+
+.right {
+  margin-left: auto;
+}
+
 </style>

@@ -1,15 +1,4 @@
 <template>
-  <div>
-    <q-btn
-      style="font-size: 0.7rem"
-      icon="logout"
-      flat
-      dense
-      color="secondary"
-      class="home-icon"
-      @click="logout()"
-    />
-  </div>
   <q-page class="flex-center column">
     <!-- SEM IMÓVEL -->
     <div
