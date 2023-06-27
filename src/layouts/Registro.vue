@@ -46,7 +46,6 @@ export default {
         value: nome,
       });
       Loading.hide();
-      console.log("PIAZZETTA 🦝 ~ file: Registro.vue:50 ~ carregarInfoLogo ~ this.$store.getters.getimovelAgendamento:", this.$store.getters.getImovelAgendamento)
       if(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.posicoesDeTrabalho){
         this.$router.push("/Rotativas");
 
