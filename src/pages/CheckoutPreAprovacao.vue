@@ -215,6 +215,7 @@ export default {
     },
     async checkoutPagamento() {
       const data = {
+        id: this.convite.id,
         sala: this.nomeImovel,//this.visita.imovelRef,
         tempoDeUso: this.diferencaEmMinutos(
           this.visita.validadeInicial,

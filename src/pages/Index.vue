@@ -2401,7 +2401,7 @@ export default defineComponent({
       
       if (!validaAprovacao&&!validaUsoCredito&&necessitaPagamento){
 
-        this.checkoutPagamento();
+        this.checkoutPagamentoConvite();
       }
       else{     
         this.criacaoVisita();
@@ -2603,52 +2603,101 @@ export default defineComponent({
             });
     },
 
-    async checkoutPagamento() {
-      const data = {
-        sala: this.user.imovelRef,
-        tempoDeUso: this.diferencaEmMinutos(
-          this.user.validadeInicial,
-          this.user.validadeFinal
-        ),
-        preco:
-          this.valorDaSala *
-          (this.diferencaEmMinutos(
-            this.user.validadeInicial,
-            this.user.validadeFinal
-          ) /
-            15),
-        imovel: this.idImovel
-      };
-
+    async gerarConvitePagamento(VisitaConvite){
       let request = {
-        url: "Entidades/checkoutPagamento",
+        url: "Convites/validarConvite",
         method: "post",
-        data: data,
+        data: VisitaConvite,
+        encaminharPagamento : true
       };
 
       const response = await this.executeMethod(request, false);
-     
-      this.user.entidadeUsuario = this.entidadeUsuario;
-      let convite = {
-        dadosVisita : await this.criarVisita(),
+      return response;
+    },
+    async checkoutPagamento() {
+
+      let visitaConvite =  await this.criarVisita();  
+      await this.gerarConvitePagamento(visitaConvite)
+      const response = await this.executeMethod(request, false);
+
+      if (response && response.status == 200) {
+        let idConvite = response.data.idConvite
+
+        const data = {
+          id : idConvite,
+          sala: this.user.imovelRef,
+          tempoDeUso: this.diferencaEmMinutos(
+            this.user.validadeInicial,
+            this.user.validadeFinal
+          ),
+          preco:
+            this.valorDaSala *
+            (this.diferencaEmMinutos(
+              this.user.validadeInicial,
+              this.user.validadeFinal
+            ) /
+              15),
+          imovel: this.idImovel
+        };
+
+        let request = {
+          url: "Entidades/checkoutPagamento",
+          method: "post",
+          data: data,
+        };
+
+        const responseCheckout = await this.executeMethod(request, false);
+
+        this.user.entidadeUsuario = this.entidadeUsuario;
+        const mp = new MercadoPago(this.chaveAgendamento, {
+          locale: "pt-BR",
+        });
+        mp.checkout({
+          preference: {
+            id: responseCheckout.data,
+          },
+          render: {
+            container: ".cho-container",
+            label: "Efetuar pagamento",
+          },
+          autoOpen: true,
+        });
+        return;
+
       }
-      
-      this.$store.dispatch("setarDados", {
-        key: "setConvite",
-        value: convite,
-      });
+      else{
+        return;
+      }
+      },
+    async checkoutPagamentoConvite() {
 
-      // inicio da integração do mercado pago
-      const mp = new MercadoPago(this.chaveAgendamento, {
-        locale: "pt-BR",
-      });
+      let visitaConvite =  await this.criarVisita();  
+      const response = await this.gerarConvitePagamento(visitaConvite)
+      // const response = await this.executeMethod(request, false);
 
-      mp.bricks().create("wallet", "wallet_container", {
-        initialization: {
-            preferenceId: response.data,
-        },
-      });
-      return;
+      if (response && response.status == 200) {
+        let idPreferencia = response.data.globalId;
+
+        this.user.entidadeUsuario = this.entidadeUsuario;
+        const mp = new MercadoPago(this.chaveAgendamento, {
+          locale: "pt-BR",
+        });
+        mp.checkout({
+          preference: {
+            id: idPreferencia,
+          },
+          render: {
+            container: ".cho-container",
+            label: "Efetuar pagamento",
+          },
+          autoOpen: true,
+        });
+        return;
+     
+      }
+      else{
+        return;
+      }
     },
     diferencaEmMinutos(inicial, final) {
       const dataInicio = moment(inicial);
