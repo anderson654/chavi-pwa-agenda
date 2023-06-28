@@ -6,17 +6,14 @@
       <q-page padding>
         <div class="container">
           <div class="box-text" style="padding-left: 8px; padding-right: 8px">
-            <span>Sua solicitação de Agendamento! aguarda a confirmacão do
-              <span class="text">pagamento</span>.
-            </span>
-            <span>Você receberá uma mensagem via WhatsApp!</span>
+            <span>Sua solicitação de Agendamento! Foi enviado com Sucesso! </span>           
           </div>
         </div>
 
         <div class="full-width text-center text-black text-h5 q-mt-lg"></div>
         <div class="full-width flex flex-center" style="margin-top: 30px">
           <div
-            class="text-center column q-gutter-lg shadow-1 full-width q-py-xs q-pb-xl"
+            class="text-center column q-gutter-lg full-width q-py-xs q-pb-xl"
             style="border-radius: 20px"
           >
             <div class="container">
@@ -24,7 +21,13 @@
                 <div
                   style="width: 300px; padding-left: 8px; padding-right: 8px"
                 >
-                  <p>Para o agendamento da sala.</p>
+                <span>Aguarde a confirmacão do
+                  <span class="text">pagamento</span>.
+                </span>
+
+                  <p>Você receberá uma mensagem </p>
+                  <p>via WhatsApp!</p>
+                  <p>Sobre o agendamento da sala.</p>
                   <p>{{ nomeImovel }}</p>
                   <p>
                     Atenciosamente,
@@ -38,12 +41,11 @@
             <div>
               <form action="https://chavi.com.br/app">
                 <q-btn
-                  :disable=!liberarPagamento
                   class="q-pa-sm text-bold"
                   color="primary"
                   text-color="white"
-                  label="Realize o Pagamento"
-                  @click=checkoutPagamento
+                  label="Voltar para o calendário"
+                  @click=aceitarMensagem
                 />
               </form>
             </div>
@@ -102,65 +104,7 @@ export default {
     let coworking = this.$route.query.entidade;
     if (coworking && coworking != ""){
       this.atualizarCoworkingNome(coworking);
-   }   
-    this.mensagem = this.catalogoMensagens(this.$route.query.collection_status);
-    this.convite = this.$store.getters.getConvite;
-    
-    let visita = this.$store.getters.getConvite.dadosVisita;
-    if (visita.name)
-    {
-      this.nome = visita.name.charAt(0).toUpperCase() + visita.name.slice(1);
-    }
-    else{
-      if (this.$store.getters.getLogin.user) {
-        this.nome = this.$store.getters.getLogin.user.name;
-      }
-    }
-
-    if (this.$route.query.collection_status === "approved") {
-
-      if (!this.convite.id){
-        let request = {
-          url: "Visitas/validarVisita",
-          method: "post",
-          data: {
-            ...visita,
-            pagamentoAutorizado: true,
-          },
-        };
-        const response = await this.executeMethod(request, false);
-        this.codigo = response.data.codigo;
-      }
-      else{
-        const response = await this.executeMethod({
-                        url: "Convites/aprovar",
-                        method: 'post',
-                        data: {
-                        conviteId: this.convite.codigo,
-                        pagamentoRealizado: true,
-                        }})
-
-        if (response && response.status == 200) {
-           Notify.create({
-              message:
-                "A visita foi aprovada!",
-            });
-          
-            this.$store.dispatch("setarDados", {
-              key: "setConvite",
-              value: {},
-            });
-        }
-        else{
-          Notify.create({
-              message:
-                "Ocorreu um erro no processo!",
-            });
-        }
-   
-        this.codigo = response.data.codigo;
-      }
-    }
+    }   
   },
   methods: {
     openLink(url, target) {
@@ -187,6 +131,10 @@ export default {
 
       return catalogo[param] || "";
     },
+
+    aceitarMensagem(){
+      this.$router.push("/home");  
+    }
   },
 };
 </script>

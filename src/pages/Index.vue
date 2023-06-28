@@ -619,9 +619,7 @@
 
               <div class="col-9 text-bold" v-html="getEnderecoHtml"></div>
             </div>
-            <div v-if="(!validaNecessitaCredito&&validaNecessitaAprovacao&&necessitaPagamento)
-             || (!validaNecessitaCredito&&!validaNecessitaAprovacao&&necessitaPagamento)  
-             || (validaNecessitaCredito&&validaNecessitaAprovacao&&necessitaPagamento) ">
+            <div v-if="validarValor()">
               <div class="row">
                 <div class="col-5">Preço 15 minutos:</div>
                 <div class="col-7 text-bold">
@@ -634,7 +632,25 @@
                   R$
                   {{ filtraValor() }}
                 </div>
+            </div>
+          </div>
+            <div v-if="validarExtra()">
+              <div class="row">
+                <div class="col-5">Créditos:</div>
+                <div class="col-7 text-bold">
+                 {{ creditosExtraAgendamento.creditos }} Faltantes
+                </div>
               </div>
+              <div class="row">
+                <div class="col-5">Preço:</div>
+                <div class="col-7 text-bold">
+                  R$
+                  {{ creditosExtraAgendamento.custo }}
+                </div>
+         
+  
+            </div>
+              
             </div>
             <div v-if="!user.hasDocs && utilizarDocumentos" class="row q-mt-md">
               <div class="col-5">Foto Frente:</div>
@@ -728,17 +744,17 @@
                   <p>Você não possui créditos suficientes<br/>Gostaria de comprar créditos?</p>
 
                   <p style="margin-top: 10px; text-align: center">Créditos faltantes: <strong>
-                    {{ modalComprarCreditos.creditos }}
+                    {{ creditosExtraAgendamento.creditos }}
                   </strong></p>
                   <p style="margin-top: 10px; text-align: center">Custo total: <strong>
-                    {{ modalComprarCreditos.custo }} R$
+                    {{ creditosExtraAgendamento.custo }} R$
                   </strong></p>
                 </span>
                 <p style="text-align: center">voltar ao site após a compra</p>
               </q-card-section>
               <q-card-actions align="center">
                 <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
-                <q-btn label="Confirmar" color="positive" @click="gerarBoleto" :disable="!modalComprarCreditos.creditos"></q-btn>
+                <q-btn label="Confirmar" color="positive" @click="confirmarDialogo" :disable="!creditosExtraAgendamento.creditos"></q-btn>
               </q-card-actions>
             </q-card>
           </q-dialog>
@@ -973,7 +989,9 @@ export default defineComponent({
       agendamentoUnico : false,
       tempoTotalMaximo : 0,
       necessitaAprovacao: false,
+      creditosExtraAgendamento : {},
       validaNecessitaCredito : false,
+      validaNecessitaExtra : false,
       validaNecessitaAprovacao : false,
       chaveAgendamento: "",
       liberarAgendamento: -1,
@@ -1396,7 +1414,7 @@ export default defineComponent({
   },
     getHorario(time, format) {
       return moment(time).format(format);
-    },
+    }, 
     getImage(visita) {
       let path = `http://api.chavi.com.br/api/StorageContainers/fotoImovel/download/`;
 
@@ -1407,8 +1425,41 @@ export default defineComponent({
       }
 
     },
+    validarValor(){
+      console.log("SSSSSS")
+      let valida = this.validarElementosValor() && !this.validarExtra();
+      console.log("🚀 ~ file: Index.vue:1387 ~ validarValor ~ valida:", valida)
+      return valida;
+    },
+    validarElementosValor(){
+      return (!this.validaNecessitaCredito&&this.validaNecessitaAprovacao&&this.necessitaPagamento)
+          || (!this.validaNecessitaCredito&&!this.validaNecessitaAprovacao&&this.necessitaPagamento)  
+          || (this.validaNecessitaCredito&&this.validaNecessitaAprovacao) 
+    },
+    validarExtra(){
+      let extra = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra;
+
+      if (extra && this.creditosExtraAgendamento && this.creditosExtraAgendamento != {})
+      {
+        if ( this.creditosExtraAgendamento.creditos > 0 &&  this.creditosExtraAgendamento.custo > 0){
+ 
+          return true;
+          
+        }
+         
+        else{
+      
+          return false;
+          
+        }
+          
+      }
+    },
     validarStatusProcesso(){
 
+      console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validarExtra():", this.validarExtra())
+      console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
+      console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validaNecessitaCredito:", this.validaNecessitaCredito)
 
       if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito) return "Pagamento";
 
@@ -1419,11 +1470,12 @@ export default defineComponent({
       else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && !this.necessitaPagamento) return "Solicitar";
       else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && this.necessitaPagamento) return "Solicitar";
 
-      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && !this.necessitaPagamento) return "Enviar";
+      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && !this.validarExtra()) return "Enviar";
       // if (validaNecessitaCredito || (validaNecessitaAprovacao && !necessitaPagamento)) return "Enviar";
-      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.necessitaPagamento) return "Enviar";
+      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) return "Créditos e Pagamento";
 
-    },      
+    }, 
+        
     validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras){
       return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras && (this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId));      
     },
@@ -1437,7 +1489,7 @@ export default defineComponent({
           if (!this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra) {
           
             let message = `<p>Você não possui créditos suficientes</p>
-                        <p>Entre em contato com o Estabelecimento para adiquirir créditos</p>`;
+                        <p>Entre em contato com o Estabelecimento para adquirir créditos</p>`;
             Dialog.create({
               title: "Aviso",
               //link ainda não implemenado
@@ -1447,17 +1499,18 @@ export default defineComponent({
                 label: "ok",
                 color: "positive",
               },
-            }).onOk(() => {});
+            }).onOk(() => {
+              
+            });
+            return false;
           }else{
-            let creditosFaltantes = Math.ceil(calculoCusto - (horasMensaisDisponiveis + horasExtras))
-            this.modalComprarCreditos.creditosConsumidos = calculoCusto;
-            this.modalComprarCreditos.horasMensaisDisponiveis = horasMensaisDisponiveis;
-            this.modalComprarCreditos.horasExtras = horasExtras;
-             this.modalComprarCreditos.creditos = creditosFaltantes;
-             this.modalComprarCreditos.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
+             let creditosFaltantes = Math.ceil(calculoCusto - (horasMensaisDisponiveis + horasExtras))
+             this.creditosExtraAgendamento.creditos = creditosFaltantes;
+             this.creditosExtraAgendamento.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
              this.modalComprarCreditos.dialogAtivo = true;
+             return true;
             }
-          return false;
+         
         }
         return true;
       }
@@ -1466,48 +1519,20 @@ export default defineComponent({
     },
     fecharDialogo(){
       this.modalComprarCreditos.dialogAtivo = false;
+      this.utilizarDocumentos && !this.user.hasDocs
+                  ? (this.parte -= 1)
+                  : this.$router.back()
     },
-
+    confirmarDialogo(){
+      this.modalComprarCreditos.dialogAtivo = false
+    },
     async gerarBoletoConvite() {
 
-      const data = {
-        creditosConsumidos : this.modalComprarCreditos.creditosConsumidos,
-        horasMensaisDisponiveis :  this.modalComprarCreditos.horasMensaisDisponiveis,
-        horasExtras : this.modalComprarCreditos.horasExtras,
-        creditos: this.modalComprarCreditos.creditos,
-        preco:this.modalComprarCreditos.custo,
-        imovel: this.idImovel,
-        entidade: this.$store.getters.getImovelAgendamento.entidadeId
-      };
-
-      console.log("🚀 ~ file: Index.vue:1436 ~ gerarBoleto ~ data:", data)
-
-      let request = {
-        url: "Entidades/comprarCreditos",
-        method: "post",
-        data: data,
-      };
-      const response = await this.executeMethod(request, false);
-      const publicKey = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.chaveAgendamento
-      if(response && response.status == 200){
-        this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
-      }
-
-      // const mp = new MercadoPago(this.chaveAgendamento, {
-      //   locale: "pt-BR",
-      // });
-
-      // mp.bricks().create("wallet", "wallet_container", {
-      //   initialization: {
-      //       preferenceId: response.data,
-      //   },
-      // });
-      return;
-
-
-
+      //gerarBoletoConvite
+      this.checkoutPagamentoConvite();
       this.modalComprarCreditos.dialogAtivo = false
-      },
+      
+    },
   
     async gerarBoleto() {
 
@@ -2241,6 +2266,7 @@ export default defineComponent({
                 !this.utilizarCPF
               )
                 this.parte = 4;
+
               else this.parte = 2;
             }
             Loading.hide();
@@ -2453,8 +2479,15 @@ export default defineComponent({
 
         this.checkoutPagamentoConvite();
       }
-      else{     
-        this.criacaoVisita();
+      else{  
+
+        if (validaUsoCredito&&!validaAprovacao&&this.validarExtra())
+        {
+          this.checkoutPagamentoConvite();
+        }
+        else{
+          this.criacaoVisita();
+        }
       }
 
     },
@@ -2664,61 +2697,61 @@ export default defineComponent({
       const response = await this.executeMethod(request, false);
       return response;
     },
-    async checkoutPagamento() {
+    // async checkoutPagamento() {
 
-      let visitaConvite =  await this.criarVisita();  
-      await this.gerarConvitePagamento(visitaConvite)
-      const response = await this.executeMethod(request, false);
+    //   let visitaConvite =  await this.criarVisita();  
+    //   await this.gerarConvitePagamento(visitaConvite)
+    //   const response = await this.executeMethod(request, false);
 
-      if (response && response.status == 200) {
-        let idConvite = response.data.idConvite
+    //   if (response && response.status == 200) {
+    //     let idConvite = response.data.idConvite
 
-        const data = {
-          id : idConvite,
-          sala: this.user.imovelRef,
-          tempoDeUso: this.diferencaEmMinutos(
-            this.user.validadeInicial,
-            this.user.validadeFinal
-          ),
-          preco:
-            this.valorDaSala *
-            (this.diferencaEmMinutos(
-              this.user.validadeInicial,
-              this.user.validadeFinal
-            ) /
-              15),
-          imovel: this.idImovel
-        };
+    //     const data = {
+    //       id : idConvite,
+    //       sala: this.user.imovelRef,
+    //       tempoDeUso: this.diferencaEmMinutos(
+    //         this.user.validadeInicial,
+    //         this.user.validadeFinal
+    //       ),
+    //       preco:
+    //         this.valorDaSala *
+    //         (this.diferencaEmMinutos(
+    //           this.user.validadeInicial,
+    //           this.user.validadeFinal
+    //         ) /
+    //           15),
+    //       imovel: this.idImovel
+    //     };
 
-        let request = {
-          url: "Entidades/checkoutPagamento",
-          method: "post",
-          data: data,
-        };
+    //     let request = {
+    //       url: "Entidades/checkoutPagamento",
+    //       method: "post",
+    //       data: data,
+    //     };
 
-        const responseCheckout = await this.executeMethod(request, false);
+    //     const responseCheckout = await this.executeMethod(request, false);
 
-        this.user.entidadeUsuario = this.entidadeUsuario;
-        const mp = new MercadoPago(this.chaveAgendamento, {
-          locale: "pt-BR",
-        });
-        mp.checkout({
-          preference: {
-            id: responseCheckout.data,
-          },
-          render: {
-            container: ".cho-container",
-            label: "Efetuar pagamento",
-          },
-          autoOpen: true,
-        });
-        return;
+    //     this.user.entidadeUsuario = this.entidadeUsuario;
+    //     const mp = new MercadoPago(this.chaveAgendamento, {
+    //       locale: "pt-BR",
+    //     });
+    //     mp.checkout({
+    //       preference: {
+    //         id: responseCheckout.data,
+    //       },
+    //       render: {
+    //         container: ".cho-container",
+    //         label: "Efetuar pagamento",
+    //       },
+    //       autoOpen: true,
+    //     });
+    //     return;
 
-      }
-      else{
-        return;
-      }
-      },
+    //   }
+    //   else{
+    //     return;
+    //   }
+    //   },
     async checkoutPagamentoConvite() {
 
       let visitaConvite =  await this.criarVisita();  

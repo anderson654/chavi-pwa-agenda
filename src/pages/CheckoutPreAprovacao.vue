@@ -214,22 +214,38 @@ export default {
     
     },
     async checkoutPagamento() {
-      const data = {
-        id: this.convite.id,
-        sala: this.nomeImovel,//this.visita.imovelRef,
-        tempoDeUso: this.diferencaEmMinutos(
-          this.visita.validadeInicial,
-          this.visita.validadeFinal
-        ),
-        preco:
-          this.valorDaSala *
-          (this.diferencaEmMinutos(
+
+      let data;
+      if (this.convite.convitePagamento){
+        data = {
+          id: this.convite.id,
+          sala: this.nomeImovel,//this.visita.imovelRef,
+          tempoDeUso: this.diferencaEmMinutos(
             this.visita.validadeInicial,
             this.visita.validadeFinal
-          ) /
-            15),
-        imovel: this.visita.imovelId
-      };
+          ),
+          preco: this.convite.convitePagamento.custoFaltante,          
+          imovel: this.visita.imovelId
+        };
+      }
+      else{
+        data = {
+          id: this.convite.id,
+          sala: this.nomeImovel,//this.visita.imovelRef,
+          tempoDeUso: this.diferencaEmMinutos(
+            this.visita.validadeInicial,
+            this.visita.validadeFinal
+          ),
+          preco:
+            this.valorDaSala *
+            (this.diferencaEmMinutos(
+              this.visita.validadeInicial,
+              this.visita.validadeFinal
+            ) /
+              15),
+          imovel: this.visita.imovelId
+        };
+      }      
 
       let request = {
         url: "Entidades/checkoutPagamento",
