@@ -717,16 +717,16 @@
               />          
             
               <q-btn
-              v-if="validarStatusProcesso() !== 'Pagamento'"
+              v-if="validarStatusProcesso()"
               class="col-6 q-ml-xs"
               :label="validarStatusProcesso()"
               type="submit"
               color="positive"            
               />
-              <div 
+              <!-- <div 
               id="wallet_container"
               v-if="validarStatusProcesso() == 'Pagamento'"
-              ></div>
+              ></div> -->
             </q-btn-group>
           </div>
         </div>
@@ -1460,8 +1460,13 @@ export default defineComponent({
       console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validarExtra():", this.validarExtra())
       console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
       console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validaNecessitaCredito:", this.validaNecessitaCredito)
+      console.log("🚀 ~ file: Index.vue:1428 ~ validarStatusProcesso ~ this.necessitaPagamento:", this.necessitaPagamento)
 
-      if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito) return "Pagamento";
+      if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito)
+      {
+        console.log("dsdddddddddddddd")
+        return "Pagamento";
+      } 
 
       else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && this.necessitaPagamento) return "Solicitar";
       else if (!this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Enviar";
@@ -1475,6 +1480,7 @@ export default defineComponent({
       else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) return "Créditos e Pagamento";
 
     }, 
+       
         
     validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras){
       return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras && (this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId));      
@@ -2453,6 +2459,39 @@ export default defineComponent({
       }
 
     },
+    async validaCriacaoVisitaPagamento(){
+     
+     /* Dados da Entidade */
+     const coworking =  this.gerenciamentoCreditos.coworking;
+     const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+     /* Dados do Imovel */
+     const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+     const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+
+     const necessitaPagamento = this.necessitaPagamento;
+
+     const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
+     const necessitaAprovacao = this.necessitaAprovacao;
+     const aprovarVisita = this.aprovarVisita;
+     const validadeInicial = this.user.validadeInicial;
+     const validadeFinal = this.user.validadeFinal;
+
+     let validaUsoCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
+     let validaAprovacao = this.validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial,validadeFinal, tempoMinimoAprovacao,funcionamentoIndividual)
+     
+     if (!validaAprovacao&&!validaUsoCredito&&necessitaPagamento){
+
+       this.checkoutPagamentoConvite();
+     }
+     else{  
+
+       if (validaUsoCredito&&!validaAprovacao&&this.validarExtra())
+       {
+         this.checkoutPagamentoConvite();
+       }
+     }
+
+   },
 
     //não existe nescessita pagamento - Verficar se é pra tirar
     async validaCriacaoVisita(){
@@ -2762,6 +2801,15 @@ export default defineComponent({
         let idPreferencia = response.data.globalId;
 
         this.user.entidadeUsuario = this.entidadeUsuario;
+          //  const mp = new MercadoPago(this.chaveAgendamento, {
+          //  locale: "pt-BR",
+          // });
+
+          // mp.bricks().create("wallet", "wallet_container", {
+          //   initialization: {
+          //       preferenceId: response.data,
+          //   },
+          // });
         const mp = new MercadoPago(this.chaveAgendamento, {
           locale: "pt-BR",
         });
@@ -2775,7 +2823,7 @@ export default defineComponent({
           },
           autoOpen: true,
         });
-        return;
+         return;
      
       }
       else{
@@ -3513,7 +3561,7 @@ export default defineComponent({
   watch: {
     parte(newValue){
       if (newValue == 4){
-        this.checkoutPagamento();
+        // this.validaCriacaoVisitaPagamento();
       }
     }
   }
