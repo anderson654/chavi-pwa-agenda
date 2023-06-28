@@ -343,6 +343,7 @@ export default {
       }
     },
     agendamento(imovel) {
+      console.log("🚀 ~ file: Hotmilk.vue:346 ~ agendamento ~ imovel:", imovel)
       this.$store.dispatch("setarDados", {
         key: "setImovelAgendamento",
         value: imovel,

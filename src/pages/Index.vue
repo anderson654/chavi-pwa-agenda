@@ -1436,20 +1436,23 @@ export default defineComponent({
         if ((horasMensaisDisponiveis + horasExtras) < calculoCusto) {
           if (!this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra) {
           
-          let message = `<p>Você não possui créditos suficientes</p>
-                      <p>Entre em contato com o Estabelecimento para adiquirir créditos</p>`;
-          Dialog.create({
-            title: "Aviso",
-            //link ainda não implemenado
-            message:message,
-            html: true,
-            ok: {
-              label: "ok",
-              color: "positive",
-            },
-          }).onOk(() => {});
+            let message = `<p>Você não possui créditos suficientes</p>
+                        <p>Entre em contato com o Estabelecimento para adiquirir créditos</p>`;
+            Dialog.create({
+              title: "Aviso",
+              //link ainda não implemenado
+              message:message,
+              html: true,
+              ok: {
+                label: "ok",
+                color: "positive",
+              },
+            }).onOk(() => {});
           }else{
             let creditosFaltantes = Math.ceil(calculoCusto - (horasMensaisDisponiveis + horasExtras))
+            this.modalComprarCreditos.creditosConsumidos = calculoCusto;
+            this.modalComprarCreditos.horasMensaisDisponiveis = horasMensaisDisponiveis;
+            this.modalComprarCreditos.horasExtras = horasExtras;
              this.modalComprarCreditos.creditos = creditosFaltantes;
              this.modalComprarCreditos.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
              this.modalComprarCreditos.dialogAtivo = true;
@@ -1464,14 +1467,20 @@ export default defineComponent({
     fecharDialogo(){
       this.modalComprarCreditos.dialogAtivo = false;
     },
-  
-    async gerarBoleto() {
+
+    async gerarBoletoConvite() {
+
       const data = {
+        creditosConsumidos : this.modalComprarCreditos.creditosConsumidos,
+        horasMensaisDisponiveis :  this.modalComprarCreditos.horasMensaisDisponiveis,
+        horasExtras : this.modalComprarCreditos.horasExtras,
         creditos: this.modalComprarCreditos.creditos,
         preco:this.modalComprarCreditos.custo,
         imovel: this.idImovel,
         entidade: this.$store.getters.getImovelAgendamento.entidadeId
       };
+
+      console.log("🚀 ~ file: Index.vue:1436 ~ gerarBoleto ~ data:", data)
 
       let request = {
         url: "Entidades/comprarCreditos",
@@ -1484,15 +1493,56 @@ export default defineComponent({
         this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
       }
 
-      const mp = new MercadoPago(this.chaveAgendamento, {
-        locale: "pt-BR",
-      });
+      // const mp = new MercadoPago(this.chaveAgendamento, {
+      //   locale: "pt-BR",
+      // });
 
-      mp.bricks().create("wallet", "wallet_container", {
-        initialization: {
-            preferenceId: response.data,
-        },
-      });
+      // mp.bricks().create("wallet", "wallet_container", {
+      //   initialization: {
+      //       preferenceId: response.data,
+      //   },
+      // });
+      return;
+
+
+
+      this.modalComprarCreditos.dialogAtivo = false
+      },
+  
+    async gerarBoleto() {
+
+      const data = {
+        creditosConsumidos : this.modalComprarCreditos.creditosConsumidos,
+        horasMensaisDisponiveis :  this.modalComprarCreditos.horasMensaisDisponiveis,
+        horasExtras : this.modalComprarCreditos.horasExtras,
+        creditos: this.modalComprarCreditos.creditos,
+        preco:this.modalComprarCreditos.custo,
+        imovel: this.idImovel,
+        entidade: this.$store.getters.getImovelAgendamento.entidadeId
+      };
+   
+      console.log("🚀 ~ file: Index.vue:1436 ~ gerarBoleto ~ data:", data)
+
+      let request = {
+        url: "Entidades/comprarCreditos",
+        method: "post",
+        data: data,
+      };
+      const response = await this.executeMethod(request, false);
+      const publicKey = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.chaveAgendamento
+      if(response && response.status == 200){
+        this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
+      }
+
+      // const mp = new MercadoPago(this.chaveAgendamento, {
+      //   locale: "pt-BR",
+      // });
+
+      // mp.bricks().create("wallet", "wallet_container", {
+      //   initialization: {
+      //       preferenceId: response.data,
+      //   },
+      // });
       return;
 
 
