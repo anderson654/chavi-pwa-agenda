@@ -46,12 +46,7 @@ export default {
         value: nome,
       });
       Loading.hide();
-      if(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.posicoesDeTrabalho){
-        this.$router.push("/Rotativas");
-
-      }else{
-        this.$router.push("/home");
-      }
+      this.$router.push("/home");
 
     }
   }
