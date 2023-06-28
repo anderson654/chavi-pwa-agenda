@@ -83,6 +83,16 @@
 
       <!-- CALENDÁRIO -->
       <div class="full-width" v-if="!inForms">
+        <div v-if="funcionamentoRotativo" class="container">
+          <div class="container-title">
+            <span>1</span>
+            <p>Quantidade de Posições</p>
+            <span>{{ quantidadePosicoes }}</span>
+          </div>
+          <div class="wrapper-bar">
+            <div v-for="index in quantidadeDeElementos" :key="index" :style="getGradientStyle(index)" ></div>
+          </div>
+        </div>
         <div class="row justify-center items-center">
           <div class="col-12 row justify-center items-center">
             <!-- BTN NAVEGAÇÃO -->
@@ -991,11 +1001,41 @@ export default defineComponent({
       returnUrl: "",
       mensagemIcs:"",
       clenteOptions: [],
+      colors: [
+        '#EDD9A3',
+        '#F1C18E',
+        '#F79C79',
+        '#F98477',
+        '#F2637F',
+        '#EA4F88',
+        '#CA3C97',
+        '#B1339E',
+        '#872CA2',
+        '#5A2995'
+      ],
     };
   },
   computed: {
-    
-  
+    quantidadeDeElementos(){
+      if(this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho > 10){
+        return 10
+      }else {
+        return Number(this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
+      }
+    },  
+    funcionamentoRotativo(){
+      if(this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.posicoesDeTrabalho){
+        return this.imovel.opcoesAgendamentoIndividual.posicoesDeTrabalho && this.imovel.opcoesAgendamentoIndividual.funcionamentoIndividual;
+      }
+    },
+    quantidadePosicoes(){
+      if (this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho){
+        // console.log("teste adrian imovel", this.imovel)
+        return  Number(this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho)
+      } else {
+        return 0;
+      }
+    },
     parseData() {
       if (this.user.validadeInicial && this.user.validadeFinal) {
         const inicial = moment(new Date(this.user.validadeInicial));
@@ -1291,6 +1331,16 @@ export default defineComponent({
     }
   },
   methods: {
+    getGradientStyle(index) {
+      let gradientStyle = {background: this.colors[index-1]};
+      if (index == 1){
+        gradientStyle.borderRadius = "5px 0 0 5px";
+      }else if (this.quantidadeDeElementos == index){
+        gradientStyle.borderRadius = "0 5px 5px 0 ";
+      }
+
+      return gradientStyle;
+    },
     async adicionarCreditosExtras(){
       let data = {
         entidade: this.getLogin.user.entidadeId,
@@ -1589,6 +1639,8 @@ export default defineComponent({
         s.height = timeDurationHeight(event.duration) + "px";
       }
       s["align-items"] = "flex-start";
+      s["background-color"] = `${event.styledBg} !important`;
+      if(this.imovel.opcoesAgendamentoIndividual.posicoesDeTrabalho) s["pointer-events"] = "none";
       return s;
     },
 
@@ -2811,7 +2863,11 @@ export default defineComponent({
             }
             this.events = response.data.horarios;/////
             
-            this.formatData();
+            if(this.funcionamentoRotativo){
+              this.formatDataRotativo();
+            }else{
+              this.formatData();
+            }
           } else {
             Notify.create({
               message:
@@ -2828,13 +2884,15 @@ export default defineComponent({
       }
     },
     formatData() {
+      let optionsOff = [];
+      
       if (this.events && this.events.length > 0) {
         this.events.sort((a, b) => {
           return a.timestampInicial < b.timestampInicial ? -1 : 1;
         });
-        let optionsOff = [];
+        
         for (let horario of this.events) {
-      
+
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
                 "YYYY-MM-DD HH:mm"
@@ -2887,15 +2945,105 @@ export default defineComponent({
               bgcolor: horario.paraAprovar ? "yellow-9" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
-              visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : ""
+              visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : "",
+              styledBg: ""
             });
 
         }
         this.events = optionsOff;
-
       }
     },
-    
+    formatDataRotativo(){
+      let elementosParaRenderizar = []; // esse array divide cada visita conforme o intervaloMin para renderização
+      let quantidadeDeDivisoesQueEstaVisitaOcupa = 0;
+      let intervaloMinimoEmMilessegundos = this.imovel.opcoesAgendamentoIndividual.intervaloMin * 60 * 1000;
+      let optionsOff = [];
+
+      if (this.events && this.events.length > 0) {
+        this.events.sort((a, b) => {
+          return a.timestampInicial < b.timestampInicial ? -1 : 1;
+        });
+
+        for (let horario of this.events) {
+          // esses dois if corrigems horarios quebrados para prosseguir com o sistema
+          if (horario.timestampInicial % intervaloMinimoEmMilessegundos != 0){
+            horario.timestampInicial -= horario.timestampInicial % intervaloMinimoEmMilessegundos
+          }
+          if (horario.intervalo % intervaloMinimoEmMilessegundos != 0){
+            horario.intervalo += (horario.intervalo % intervaloMinimoEmMilessegundos)- intervaloMinimoEmMilessegundos; 
+          }
+
+          quantidadeDeDivisoesQueEstaVisitaOcupa = horario.intervalo / intervaloMinimoEmMilessegundos;          
+          if(elementosParaRenderizar.length == 0){
+            for (let i=0; quantidadeDeDivisoesQueEstaVisitaOcupa > i; i++){
+              elementosParaRenderizar.push({
+                InicioDaDivisao: horario.timestampInicial + (intervaloMinimoEmMilessegundos * i),
+                usuarioIds: [horario.usuarioId],
+                quantidade: 1
+              })
+            }
+          }else {
+            for (let i=0; quantidadeDeDivisoesQueEstaVisitaOcupa > i; i++){
+              let inicioDessaDivisao = horario.timestampInicial + intervaloMinimoEmMilessegundos * i;
+              let adicionou = false;
+
+              for (let index = 0; elementosParaRenderizar.length > index; index++){
+                if(elementosParaRenderizar[index].InicioDaDivisao == inicioDessaDivisao){
+                  elementosParaRenderizar[index].quantidade++;
+                  elementosParaRenderizar[index].usuarioIds.push(horario.usuarioId);
+                  adicionou = true;
+                }
+              }
+              if(adicionou){continue}
+              else{
+                  elementosParaRenderizar.push({
+                  InicioDaDivisao: inicioDessaDivisao,
+                  usuarioIds: [horario.usuarioId],
+                  quantidade: 1
+                })
+              }
+            }
+          }
+        }
+
+        for (let index=0; elementosParaRenderizar.length > index; index++){
+          // clonagem do formData original
+          const inicio = parseTimestamp(
+            moment(parseInt(elementosParaRenderizar[index].InicioDaDivisao)).format(
+              "YYYY-MM-DD HH:mm"
+            )
+          );
+
+          const duracao = intervaloMinimoEmMilessegundos / 60000;
+          let titleBusy = "Ocupado";
+
+          titleBusy = `
+            <div class="column justify-center text-center align-center" style="white-space: pre-wrap;">
+                <div class="full-width text-center row">`;
+
+          titleBusy += `<div class="full-width text-center" style="color: #000;">${elementosParaRenderizar[index].quantidade} / ${this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho} </div> </div>`
+          
+          // const temIdDoUsuario = elementosParaRenderizar[index].usuarioIds.filter(id => id == this.getLogin.userId);
+          // let usuarioId = temIdDoUsuario.length > 0 ? temIdDoUsuario[0]: " "; 
+
+          let indexColor = Math.floor((elementosParaRenderizar[index].quantidade * 10) / this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
+
+          optionsOff.push({
+            title: titleBusy,
+            date: inicio.date,
+            time: inicio.time,
+            duration: duracao,
+            usuarioId : " ",
+            bgcolor: "blue-5",
+            textColor: "text-white",
+            timestampInicial: elementosParaRenderizar[index].InicioDaDivisao,
+            visitaCodigo: "",
+            styledBg: this.colors[indexColor]
+          });
+        }
+        this.events = optionsOff;
+      }
+    },
 
     async sendCode() {
       let response;
@@ -3241,12 +3389,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-@media (max-width: 450px) {
-  .home-icon {
-    transform: scale(0.8);
-  }
-}
-
 .home-icon {
   position: fixed;
   transform: scale(1.6);
@@ -3267,8 +3409,8 @@ export default defineComponent({
   flex-wrap: wrap;
   align-content: flex-start;
   width: 95%;
-  margin: 0 auto;
   max-width: 400px;
+  margin: 0 auto;
   max-height: 130px;
   background-color: white;
   border-radius: 8px;
@@ -3361,7 +3503,6 @@ export default defineComponent({
   .img-salas {
     width: 100vw;
   }
-
 }
 .img-salas {
     margin-top: 15px;
@@ -3370,35 +3511,6 @@ export default defineComponent({
     position: center;
     object-fit: contain;
   }
-
-.buttonsWrapper{
-  width: 100%;
-}
-
-.buttonsWrapper > div {
-  display: flex;
-  align-items: center;
-  max-height: 35px;
-}
-
-.buttonsWrapper > div > button{
-  position: relative;
-  top: -10px;
-}
-
-@media (max-width: 580px){
-  .buttonsWrapper > div{
-    flex-direction: column;
-    max-height: none;
-    align-items: center;
-  }
-  .buttonsWrapper > div > button{
-    margin: 5px auto;
-    top: 10px;
-    border-radius: 5px;
-  }
-}
-
 @font-face {
   font-family: 'igualfina';
   src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
@@ -3409,4 +3521,40 @@ export default defineComponent({
   src: url('../../public/fonts/Igual/Igual-ExtraBold.otf') format('truetype');
   font-style: normal;
 }
+.container {
+  width: 70vw;
+  display: flex;
+  flex-direction: column;
+  margin: 20px auto;
+}
+
+.container-title{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.container-title p,.container-title span {
+  margin: 0;
+  color: #505050;
+  font-size: 1.2rem;
+}
+.wrapper-bar{
+  display: flex;
+
+}
+.container .wrapper-bar> div {
+  flex: 1;
+  height: 25px;
+}
+
+@media (max-width: 450px) {
+  .home-icon {
+    transform: scale(0.8);
+  }
+  .container {
+    width: 95%;
+  }
+}
+
 </style>
