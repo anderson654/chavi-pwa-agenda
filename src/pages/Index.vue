@@ -895,6 +895,7 @@
                       color="positive"
                       class="col-6 q-my-xs" 
                       style="max-width: 250px;"
+                      @click="checkoutPagamento(visitaSelecionada)"
                     />
                   </div>
                     <br />
@@ -1479,7 +1480,7 @@ export default defineComponent({
         }else{
           return
         }
-      }else if(event.bgcolor == "yellow-9" && event.esperaPagamento){
+      }else if(event.bgcolor == "yellow-9"  && event.esperaPagamento){
         if(event.codigo){
           let request = {
             url:"convites/obtemPorCodigo/"+ event.codigo,
@@ -2867,6 +2868,66 @@ export default defineComponent({
     //     return;
     //   }
     //   },
+
+    async checkoutPagamento(convite) {
+    console.log("🚀 ~ file: Index.vue:2873 ~ checkoutPagamento ~ convite:", convite)
+
+      let data;
+      if (convite.convitePagamento){
+        data = {
+          id: convite.id,
+          sala: "",
+          tempoDeUso: this.diferencaEmMinutos(
+            convite.dadosVisita.validadeInicial,
+            convite.dadosVisita.validadeFinal
+          ),
+          preco: convite.convitePagamento.custoFaltante,          
+          imovel:convite.dadosVisita.imovelId
+        };
+      }
+      else{
+        data = {
+          id: convite.id,
+          sala: "",//this.visita.imovelRef,
+          tempoDeUso: this.diferencaEmMinutos(
+            convite.dadosVisita.validadeInicial,
+            convite.dadosVisita.validadeFinal
+          ),
+          preco:
+            this.valorDaSala *
+            (this.diferencaEmMinutos(
+              convite.dadosVisita.validadeInicial,
+              convite.dadosVisita.validadeFinal
+            ) /
+              15),
+          imovel: convite.dadosVisita.imovelId
+        };
+      }      
+
+      let request = {
+        url: "Entidades/checkoutPagamento",
+        method: "post",
+        data: data,
+      };
+
+      const response = await this.executeMethod(request, false);
+
+      const mp = new MercadoPago(this.chaveAgendamento, {
+        locale: "pt-BR",
+      });
+      mp.checkout({
+        preference: {
+          id: response.data,
+        },
+        render: {
+          container: ".cho-container",
+          label: "Efetuar pagamento",
+        },
+        autoOpen: true,
+      });
+
+      return;
+    },
     async checkoutPagamentoConvite() {
 
       let visitaConvite =  await this.criarVisita();  
@@ -3194,12 +3255,12 @@ export default defineComponent({
            
 
             optionsOff.push({
-              title: horario.paraAprovar ? "PENDENTE" : titleBusy,
+              title: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id && horario.esperaPagamento == true ? "PENDENTE<br>PAGAMENTO" : "PENDENTE" : titleBusy,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
               usuarioId : horario.usuarioId,
-              bgcolor: horario.paraAprovar ? "yellow-9" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
+              bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id ? "yellow-9" : "yellow-5" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
               visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : "",

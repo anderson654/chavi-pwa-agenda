@@ -254,12 +254,6 @@ export default {
       };
 
       const response = await this.executeMethod(request, false);
-
-     
-      this.$store.dispatch("setarDados", {
-        key: "setConvite",
-        value: this.convite,
-      });
       
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
