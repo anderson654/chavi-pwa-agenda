@@ -765,7 +765,7 @@
     <q-dialog v-model="cardVisita">
         <div
             class="shadow-8 bg-grey-2 justify-center"
-            style=" border-radius: 4vw; width: 100%; max-width: 350px;"
+            style=" border-radius: 2vw; width: 100%; max-width: 350px;"
           >
               <div
                 class="full-width"
@@ -846,6 +846,75 @@
             
           </div>
     </q-dialog>
+    <!-- teste adrian -->
+    <q-dialog v-model="cardPagamento">
+        <div
+            class="shadow-8 bg-grey-2 justify-center"
+            style=" border-radius: 2vw; width: 100%; max-width: 350px;"
+          >
+              <div
+                class="full-width"
+                style="background-color: #505050; "
+              >
+                <div
+                  class="col-8 text-center justify-center items-center q-pt-md q-px-md "
+                >
+                  <span class="text-h6 text-white">
+                    Pagamento pendente                    
+                  </span>
+                </div>
+              </div>
+              <div class="q-my-xs full-width q-px-md text-center">
+                <div class="column full-width justify-center">
+                  <div
+                    class="full-width"
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                    "
+                  >
+                  <div 
+                    class="full-widith button-wrapper" 
+                    style="box-shadow: none; display:flex; gap: 10px;"
+                  >
+                    <q-btn
+                      outline
+                      label="voltar"
+                      color="negative"
+                      class="col-6 q-my-xs"
+                      style="max-width: 250px;"
+                      @click="cardPagamento = false"
+                    />
+                    <q-btn
+                      outline
+                      label="Pagar"
+                      color="positive"
+                      class="col-6 q-my-xs" 
+                      style="max-width: 250px;"
+                    />
+                  </div>
+                    <br />
+                  </div>
+                  <div
+                    class="full-width text-center"
+                    style="font-size: 1rem"
+                  >
+                    <span style="color: #505050"
+                      >Finalize o pagamento da sua reserva para agendar a vista.
+                      <br />
+                    </span>
+                  </div>
+                  
+                </div>
+              </div>
+            
+          </div>
+    </q-dialog>
+
     <q-dialog v-model="finalizacao">
       <q-card>
         <q-card-section>
@@ -1013,6 +1082,7 @@ export default defineComponent({
       usoDeCreditos: false,
       custoBase : 0,
       cardVisita: false,
+      cardPagamento: false,
       visitaSelecionada: {},
       finalizacao: false,
       messageFinal:"",
@@ -1404,7 +1474,22 @@ export default defineComponent({
   
           const response = await this.executeMethod(request, false);
           this.visitaSelecionada = response.data
+          console.log("🚀 ~ file: Index.vue:1492 ~ modalExcluirVisita ~ this.visitaSelecionada:", this.visitaSelecionada)
           this.cardVisita = true
+        }else{
+          return
+        }
+      }else if(event.bgcolor == "yellow-9" && event.esperaPagamento){
+        if(event.codigo){
+          let request = {
+            url:"convites/obtemPorCodigo/"+ event.codigo,
+            method:"get",
+          };
+  
+          const response = await this.executeMethod(request, false);
+          this.visitaSelecionada = response.data
+          console.log("🚀 ~ file: Index.vue:1505 ~ modalExcluirVisita ~ visitaSelecionada:", this.visitaSelecionada)
+          this.cardPagamento = true
         }else{
           return
         }
@@ -1426,9 +1511,7 @@ export default defineComponent({
 
     },
     validarValor(){
-      console.log("SSSSSS")
       let valida = this.validarElementosValor() && !this.validarExtra();
-      console.log("🚀 ~ file: Index.vue:1387 ~ validarValor ~ valida:", valida)
       return valida;
     },
     validarElementosValor(){
@@ -1457,14 +1540,8 @@ export default defineComponent({
     },
     validarStatusProcesso(){
 
-      console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validarExtra():", this.validarExtra())
-      console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
-      console.log("🚀 ~ file: Index.vue:1419 ~ validarStatusProcesso ~ this.validaNecessitaCredito:", this.validaNecessitaCredito)
-      console.log("🚀 ~ file: Index.vue:1428 ~ validarStatusProcesso ~ this.necessitaPagamento:", this.necessitaPagamento)
-
       if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito)
       {
-        console.log("dsdddddddddddddd")
         return "Pagamento";
       } 
 
@@ -1552,7 +1629,6 @@ export default defineComponent({
         entidade: this.$store.getters.getImovelAgendamento.entidadeId
       };
    
-      console.log("🚀 ~ file: Index.vue:1436 ~ gerarBoleto ~ data:", data)
 
       let request = {
         url: "Entidades/comprarCreditos",
@@ -1721,7 +1797,7 @@ export default defineComponent({
       }
       s["align-items"] = "flex-start";
       s["background-color"] = `${event.styledBg} !important`;
-      if(this.imovel.opcoesAgendamentoIndividual.posicoesDeTrabalho) s["pointer-events"] = "none";
+      if(this.funcionamentoRotativo ) s["pointer-events"] = "none";
       return s;
     },
 
@@ -3072,6 +3148,7 @@ export default defineComponent({
         });
         
         for (let horario of this.events) {
+        console.log("🚀 ~ file: Index.vue:3136 ~ formatData ~ horario:", horario)
 
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
@@ -3126,7 +3203,9 @@ export default defineComponent({
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
               visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : "",
-              styledBg: ""
+              styledBg: "",
+              esperaPagamento: horario.esperaPagamento? horario.esperaPagamento : false,
+              codigo: horario.codigo ? horario.codigo : " ",
             });
 
         }
@@ -3391,7 +3470,7 @@ export default defineComponent({
       }
 
       if (!this.user.hasDocs) {
-
+        
         this.user.fotoFrente = await this.compressImage(this.fotoFrente);
         this.user.fotoAtras = await this.compressImage(this.fotoVerso);
         this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
