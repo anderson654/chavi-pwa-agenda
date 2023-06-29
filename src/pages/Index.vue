@@ -1555,7 +1555,7 @@ export default defineComponent({
 
       else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && !this.validarExtra()) return "Enviar";
       // if (validaNecessitaCredito || (validaNecessitaAprovacao && !necessitaPagamento)) return "Enviar";
-      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) return "Créditos e Pagamento";
+      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) return "Pagamento";
 
     }, 
        
