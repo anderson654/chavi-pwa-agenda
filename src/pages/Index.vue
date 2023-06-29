@@ -1546,15 +1546,13 @@ export default defineComponent({
         return "Pagamento";
       } 
 
-      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && this.necessitaPagamento) return "Solicitar";
       else if (!this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Enviar";
 
-      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Solicitar";    
-      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && !this.necessitaPagamento) return "Solicitar";
       else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && this.necessitaPagamento) return "Solicitar";
-
+      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Solicitar";  
+      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && this.validarExtra()) return "Solicitar";
+      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && !this.validarExtra()) return "Solicitar";
       else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && !this.validarExtra()) return "Enviar";
-      // if (validaNecessitaCredito || (validaNecessitaAprovacao && !necessitaPagamento)) return "Enviar";
       else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) return "Pagamento";
 
     }, 
