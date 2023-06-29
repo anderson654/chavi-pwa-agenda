@@ -1119,7 +1119,6 @@ export default defineComponent({
     },
     quantidadePosicoes(){
       if (this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho){
-        // console.log("teste adrian imovel", this.imovel)
         return  Number(this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho)
       } else {
         return 0;
@@ -1475,7 +1474,6 @@ export default defineComponent({
   
           const response = await this.executeMethod(request, false);
           this.visitaSelecionada = response.data
-          console.log("🚀 ~ file: Index.vue:1492 ~ modalExcluirVisita ~ this.visitaSelecionada:", this.visitaSelecionada)
           this.cardVisita = true
         }else{
           return
@@ -1489,7 +1487,6 @@ export default defineComponent({
   
           const response = await this.executeMethod(request, false);
           this.visitaSelecionada = response.data
-          console.log("🚀 ~ file: Index.vue:1505 ~ modalExcluirVisita ~ visitaSelecionada:", this.visitaSelecionada)
           this.cardPagamento = true
         }else{
           return
@@ -1796,7 +1793,7 @@ export default defineComponent({
       }
       s["align-items"] = "flex-start";
       s["background-color"] = `${event.styledBg} !important`;
-      if(this.funcionamentoRotativo ) s["pointer-events"] = "none";
+      if(this.funcionamentoRotativo && ( event.quantidade !== this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho)) s["pointer-events"] = "none";
       return s;
     },
 
@@ -2144,12 +2141,12 @@ export default defineComponent({
       this.user.validadeInicial = validadeInicial.getTime();;
 
       /* Dados da Entidade */
-      const coworking =  this.gerenciamentoCreditos .coworking;
-      const consomeHoras = this.gerenciamentoCreditos .consomeHoras;
-      const custoBase = this.gerenciamentoCreditos .custoBase;
+      const coworking =  this.gerenciamentoCreditos.coworking;
+      const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+      const custoBase = this.gerenciamentoCreditos.custoBase;
       /* Dados do Imovel */
       const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
-      const custaCreditos = this.gerenciamentoCreditos .custaCreditos;
+      const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
       const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
    
       const horaInicial = this.horaInicial;
@@ -2214,7 +2211,6 @@ export default defineComponent({
       }      
       else
       {
-
         let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
         this.acionarModal(scope,horario,gerenciamentoHoras,options);
       }
@@ -2242,14 +2238,35 @@ export default defineComponent({
       for (const opt of options) {
         const inteiro = Number(opt.value) % Number(this.timeStepMin) == 0
         const ms = Number(opt.value) * multiplicaMs;
+        let eventFilter;
 
-        const eventFilter = this.events.find((item) => {
-          return item.timestampInicial > dateTime;
-        });
+        if(this.funcionamentoRotativo){
+          eventFilter = this.events.filter((item) => {
+            return item.quantidade == this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho;
+          });
+        }else{
+          eventFilter = this.events.find((item) => {
+            return item.timestampInicial > dateTime;
+          });
+        }
 
-        if (eventFilter) {
+        if(this.funcionamentoRotativo){ 
           const dateTimeFinal = dateTime + ms;
+          
+          let haveBreakpoint = eventFilter.find((item) => {
+            return (item.timestampInicial) == dateTimeFinal - this.imovel.opcoesAgendamentoIndividual.intervaloMin * 60 * 1000;
+          })
 
+          if (haveBreakpoint){
+            break
+          }else{
+            if (inteiro) {
+              itens.push(opt);
+            }
+          }
+        }else if (eventFilter) {
+          const dateTimeFinal = dateTime + ms;
+          
           if ((eventFilter.timestampInicial >= dateTimeFinal) && inteiro) {
             itens.push(opt);
           }
@@ -2307,7 +2324,7 @@ export default defineComponent({
         html: true,
         persistent: true,
       }).onOk((data) => {
-
+        
         const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
         const necessitaAprovacao = this.necessitaAprovacao;
         const aprovarVisita = this.aprovarVisita;
@@ -3207,7 +3224,6 @@ export default defineComponent({
         });
         
         for (let horario of this.events) {
-        console.log("🚀 ~ file: Index.vue:3136 ~ formatData ~ horario:", horario)
 
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
@@ -3283,6 +3299,8 @@ export default defineComponent({
         });
 
         for (let horario of this.events) {
+          horario.timestampInicial = Number(horario.timestampInicial);
+
           // esses dois if corrigems horarios quebrados para prosseguir com o sistema
           if (horario.timestampInicial % intervaloMinimoEmMilessegundos != 0){
             horario.timestampInicial -= horario.timestampInicial % intervaloMinimoEmMilessegundos
@@ -3344,19 +3362,20 @@ export default defineComponent({
           // const temIdDoUsuario = elementosParaRenderizar[index].usuarioIds.filter(id => id == this.getLogin.userId);
           // let usuarioId = temIdDoUsuario.length > 0 ? temIdDoUsuario[0]: " "; 
 
-          let indexColor = Math.floor((elementosParaRenderizar[index].quantidade * 10) / this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
+          let indexColor = Math.floor((elementosParaRenderizar[index].quantidade * this.quantidadeDeElementos) / this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
 
           optionsOff.push({
             title: titleBusy,
             date: inicio.date,
             time: inicio.time,
             duration: duracao,
-            usuarioId : " ",
-            bgcolor: "blue-5",
+            usuarioId : "",
+            bgcolor: "",
             textColor: "text-white",
             timestampInicial: elementosParaRenderizar[index].InicioDaDivisao,
             visitaCodigo: "",
-            styledBg: this.colors[indexColor]
+            styledBg: this.colors[indexColor],
+            quantidade: elementosParaRenderizar[index].quantidade,
           });
         }
         this.events = optionsOff;
