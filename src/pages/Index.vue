@@ -1480,7 +1480,7 @@ export default defineComponent({
         }else{
           return
         }
-      }else if(event.bgcolor == "yellow-9"  && event.esperaPagamento){
+      }else if(event.bgcolor == "blue-8"  && event.esperaPagamento){
         if(event.codigo){
           let request = {
             url:"convites/obtemPorCodigo/"+ event.codigo,
@@ -3260,7 +3260,7 @@ export default defineComponent({
               time: inicio.time,
               duration: duracao,
               usuarioId : horario.usuarioId,
-              bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id ? "yellow-9" : "yellow-5" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
+              bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id ? "blue-8" : "yellow-8" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
               visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : "",
