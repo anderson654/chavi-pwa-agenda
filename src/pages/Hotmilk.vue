@@ -19,7 +19,7 @@
               v-for="(bloco, index) in blocos"
               :key="index"
               class="q-my-sm column flex content-center box-images"
-              style="width: 48%;"
+              style="width: 48%; "
             >
               <q-img
                 :src="bloco.foto"
@@ -35,7 +35,7 @@
                 push
                 rounded
                 class="q-mb-md purple-button"
-                style=" border-radius: 40px; max-width: 80%; font-weight: bolder;"
+                style=" border-radius: 40px; max-width: 80%; font-weight: bolder; min-width: fit-content;"
                 :label="'Bloco ' + bloco.num"
                 @click="
                   selecionarBloco = false;
@@ -51,7 +51,7 @@
           <div class="flex buttons-mobile justify-center q-mt-lg q-mb-lg">
             <div class="q-mb-md">
               <q-btn
-                style=" background-color: #0070a0; z-index: 5"
+                style=" background-color: #0070a0; z-index: 5;"
                 class="red-button igual-black-negrito"
                 dense
                 rounded
@@ -343,6 +343,7 @@ export default {
       }
     },
     agendamento(imovel) {
+      console.log("🚀 ~ file: Hotmilk.vue:346 ~ agendamento ~ imovel:", imovel)
       this.$store.dispatch("setarDados", {
         key: "setImovelAgendamento",
         value: imovel,
@@ -358,6 +359,11 @@ export default {
   font-family: 'igualfina';
   color: #505050;
 }
+
+.purple-button {
+  white-space: nowrap;
+}
+
 @media (max-width: 620px) {
   .bloco-escolha {
     flex-direction: column;

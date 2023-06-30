@@ -1,6 +1,6 @@
 {
   "name": "chavi-pwa-agenda",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "Agenda de Visitas Chavi",
   "productName": "Chavi Agenda",
   "author": "suporte@chavi.com.br",
@@ -17,18 +17,20 @@
     "core-js": "^3.6.5",
     "easy-js-camera": "^2.1.0",
     "easy-vue-camera": "^1.0.5",
-    "mercadopago": "^1.5.14",
-    "moment": "^2.29.1",
+    "mercadopago": "^1.5.16",
+    "moment": "^2.29.4",
     "qrcode": "^1.4.4",
     "quasar": "^2.0.0",
     "resize-observer": "^1.0.2",
+    "vue": "^3.3.4",
     "vue-i18n": "^9.0.0",
     "vue-moment": "^4.1.0",
+    "vue-router": "^4.2.2",
     "vuex": "^4.0.1",
     "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
-    "@quasar/app": "^3.0.0",
+    "@quasar/app": "^3.3.3",
     "@quasar/quasar-app-extension-qcalendar": "^4.0.0-beta.6",
     "workbox-webpack-plugin": "^6.3.0"
   },

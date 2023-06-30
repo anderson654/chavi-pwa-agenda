@@ -4,7 +4,6 @@ const routes = [
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Index.vue") }],
   },
-
   {
     path: "/coworkings",
     component: () => import("pages/Landingpage.vue"),
@@ -23,7 +22,7 @@ const routes = [
   {
     path: "/feedback",
     component: () => import("layouts/MainLayout.vue"),
-    children: [{ path: "", component: () => import("pages/Checkoutpage.vue") }],
+    children: [{ path: "", component: () => import("pages/CheckoutFeedback.vue") }],
   },
   {
     path: "/feedbackAprovacao",

@@ -47,6 +47,7 @@ export default {
       });
       Loading.hide();
       this.$router.push("/home");
+
     }
   }
 };

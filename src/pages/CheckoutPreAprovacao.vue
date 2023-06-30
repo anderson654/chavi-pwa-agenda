@@ -186,7 +186,20 @@ export default {
           }
       }
     },
-
+    async getPropriedadesEntidade(idEntidade){    
+  
+      let response = await this.executeMethod({
+        url: 'Entidades/' + idEntidade,
+        method: 'get',
+      })
+        
+      if (response && response.status == 200) {
+        return response.data;
+      }
+      else{
+        return null
+      }
+    },
     async getImovel(idImovel){    
   
       let response = await this.executeMethod({
@@ -196,9 +209,40 @@ export default {
          
       if (response && response.status == 200) {
         this.nomeImovel = response.data.nome;
-        this.chaveAgendamento = response.data.opcoesAgendamentoIndividual.chaveAgendamento;
+
+        let entidadeImovel = await this.getPropriedadesEntidade(response.data.entidadeId);
+      
+        if (entidadeImovel && entidadeImovel != null)
+        {
+          if ( response.data.opcoesAgendamentoIndividual.custaCreditos && entidadeImovel.opcoesCalendario.cobrarCreditoExtra && entidadeImovel.opcoesCalendario.chaveAgendamento != "")
+              {
+                entidadeImovel.opcoesCalendario.chaveAgendamento
+                ? (this.chaveAgendamento =
+                  entidadeImovel.opcoesCalendario.chaveAgendamento)
+                : (this.chaveAgendamento = "");
+              }
+              else{
+                response.data.opcoesAgendamentoIndividual.chaveAgendamento
+                ? (this.chaveAgendamento =
+                    response.data.opcoesAgendamentoIndividual.chaveAgendamento)
+                : (this.chaveAgendamento = "");
+              }
+        }
+
+       // this.chaveAgendamento = response.data.opcoesAgendamentoIndividual.chaveAgendamento;
         this.valorDaSala = response.data.opcoesAgendamentoIndividual.valorDaSala;
-        this.liberarPagamento = true;
+
+        if (this.chaveAgendamento != "")
+        {
+          this.liberarPagamento = true;
+        }
+        else{
+          Notify.create({
+            message:
+              "Ocorreu um erro ao obter as configuraçõe de pagamento!",
+        });
+        }
+        
         this.entidadeId = response.data.entidadeId;
         this.atualizarCoworkingNome()
         //await this.checkoutPagamento()        
@@ -214,21 +258,38 @@ export default {
     
     },
     async checkoutPagamento() {
-      const data = {
-        sala: this.nomeImovel,//this.visita.imovelRef,
-        tempoDeUso: this.diferencaEmMinutos(
-          this.visita.validadeInicial,
-          this.visita.validadeFinal
-        ),
-        preco:
-          this.valorDaSala *
-          (this.diferencaEmMinutos(
+
+      let data;
+      if (this.convite.convitePagamento && this.convite.convitePagamento != {}){
+        data = {
+          id: this.convite.id,
+          sala: this.nomeImovel,//this.visita.imovelRef,
+          tempoDeUso: this.diferencaEmMinutos(
             this.visita.validadeInicial,
             this.visita.validadeFinal
-          ) /
-            15),
-        imovel: this.visita.imovelId
-      };
+          ),
+          preco: this.convite.convitePagamento.custoFaltante,          
+          imovel: this.visita.imovelId
+        };
+      }
+      else{
+        data = {
+          id: this.convite.id,
+          sala: this.nomeImovel,//this.visita.imovelRef,
+          tempoDeUso: this.diferencaEmMinutos(
+            this.visita.validadeInicial,
+            this.visita.validadeFinal
+          ),
+          preco:
+            this.valorDaSala *
+            (this.diferencaEmMinutos(
+              this.visita.validadeInicial,
+              this.visita.validadeFinal
+            ) /
+              15),
+          imovel: this.visita.imovelId
+        };
+      }      
 
       let request = {
         url: "Entidades/checkoutPagamento",
@@ -237,12 +298,6 @@ export default {
       };
 
       const response = await this.executeMethod(request, false);
-
-     
-      this.$store.dispatch("setarDados", {
-        key: "setConvite",
-        value: this.convite,
-      });
       
       const mp = new MercadoPago(this.chaveAgendamento, {
         locale: "pt-BR",
