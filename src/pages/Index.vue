@@ -1925,9 +1925,9 @@ export default defineComponent({
     adicionaCreditoExtenso(opcaoPasso,funcionamentoIndividual,custaCreditos,consumoCreditos,coworking,consomeHoras,custoBase){
 
       if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){
-    
+
         let calculoCusto = this.calcularCusto(opcaoPasso.value,consumoCreditos, custoBase);
-   
+
         opcaoPasso.label += `(${calculoCusto.toFixed(2)} créditos)`;
       }
 
@@ -2015,8 +2015,9 @@ export default defineComponent({
       let horaIntervalo = horaMomentInicial.clone();
       horaIntervalo.add(contadorTempoIntervalo, 'minutes');
 
-      while ((contadorTempoIntervalo <= tempoMaximo)&&((horaMomentFinal.isAfter(horaIntervalo))||horaMomentFinal.isSame(horaIntervalo))){
 
+      while ((contadorTempoIntervalo <= tempoMaximo)&&((horaMomentFinal.isAfter(horaIntervalo))||horaMomentFinal.isSame(horaIntervalo))){
+        
             let opcao = this.escreveItemHorario(contadorTempoIntervalo);            
             opcao = this.adicionaCreditoExtenso(opcao,funcionamentoIndividual,custaCreditos,consumoCreditos,coworking,consomeHoras,custoBase);
             opcoes.push(opcao);
@@ -2266,7 +2267,7 @@ export default defineComponent({
             // if(this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId){
               if((!isNaN( gerenciamentoHoras.horasMensaisDisponiveis))&&(!isNaN( gerenciamentoHoras.horasExtras))){
                 let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras ;
-                
+ 
                 message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
                         ${creditoUsuario.toFixed(2)}
                         </strong></p>
@@ -3104,11 +3105,21 @@ export default defineComponent({
                   response.data.entidade.preferenciaVisita.emailAvisoAgendamento
               }
             }
-
-            response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento
-              ? (this.chaveAgendamento =
-                  response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento)
-              : (this.chaveAgendamento = "");
+         
+              if ( response.data.entidade.preferenciaVisita.cobrarCreditoExtra &&  response.data.entidade.preferenciaVisita.chaveAgendamento != "")
+            
+              {
+                response.data.entidade.preferenciaVisita.chaveAgendamento
+                ? (this.chaveAgendamento =
+                  response.data.entidade.preferenciaVisita.chaveAgendamento)
+                : (this.chaveAgendamento = "");
+              }
+              else{
+                response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento
+                ? (this.chaveAgendamento =
+                    response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento)
+                : (this.chaveAgendamento = "");
+              }
 
             response.data.imovel.opcoesAgendamentoIndividual.valorDaSala
               ? (this.valorDaSala =
