@@ -214,7 +214,7 @@ export default {
       
         if (entidadeImovel && entidadeImovel != null)
         {
-          if (entidadeImovel.opcoesCalendario.cobrarCreditoExtra && entidadeImovel.opcoesCalendario.chaveAgendamento != "")
+          if ( response.data.opcoesAgendamentoIndividual.custaCreditos && entidadeImovel.opcoesCalendario.cobrarCreditoExtra && entidadeImovel.opcoesCalendario.chaveAgendamento != "")
               {
                 entidadeImovel.opcoesCalendario.chaveAgendamento
                 ? (this.chaveAgendamento =

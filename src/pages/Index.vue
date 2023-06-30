@@ -3123,7 +3123,7 @@ export default defineComponent({
               }
             }
          
-              if ( response.data.entidade.preferenciaVisita.cobrarCreditoExtra &&  response.data.entidade.preferenciaVisita.chaveAgendamento != "")
+              if ( response.data.imovel.opcoesAgendamentoIndividual.custaCreditos && response.data.entidade.preferenciaVisita.cobrarCreditoExtra &&  response.data.entidade.preferenciaVisita.chaveAgendamento != "")
             
               {
                 response.data.entidade.preferenciaVisita.chaveAgendamento
