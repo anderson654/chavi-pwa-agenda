@@ -95,7 +95,7 @@
       </div>
       <div class="chavi">
         <q-img
-          src="habitat.png"
+          src="habitatsenai.png"
           fit="contain"
           height="100px"
           width="150px"
