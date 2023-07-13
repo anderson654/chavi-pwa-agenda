@@ -106,7 +106,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('/habitat')"
+          @click="$router.push('/habitatsenai')"
         />
       </div>
     </div>
