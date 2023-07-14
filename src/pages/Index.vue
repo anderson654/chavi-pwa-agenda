@@ -1449,7 +1449,8 @@ export default defineComponent({
     },
     async deletar(id){
       let horarioAtual = Date.now();
-      if ((this.visitaSelecionada.validadeInicial - 1800000) < horarioAtual){
+      if ((this.visitaSelecionada.validadeInicial - 1800000) < horarioAtual && this.visitaSelecionada.imovel.opcoesAgendamentoIndividual.custaCreditos){
+        console.log("🚀 ~ file: Index.vue:1453 ~ deletar ~ this.visitaSelecionada:", this.visitaSelecionada)
         Notify.create({
           message: "O tempo máximo para exclução da visita é 30 minutos antes da reserva.",
           type: "negative",
@@ -3726,13 +3727,6 @@ export default defineComponent({
 			}
 		}
   },
-  watch: {
-    parte(newValue){
-      if (newValue == 4){
-        // this.validaCriacaoVisitaPagamento();
-      }
-    }
-  }
 });
 </script>
 
