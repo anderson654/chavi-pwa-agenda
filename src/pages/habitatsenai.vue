@@ -117,7 +117,7 @@ export default {
     if(coworkingSecao && coworkingSecao != "mindhub"){
         this.$store.dispatch("setarDados", {
         key: "setCoworkingNome",
-        value: "habitat",
+        value: "habitatsenai",
       });          
     }
   },

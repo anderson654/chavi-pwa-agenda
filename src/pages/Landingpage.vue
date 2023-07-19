@@ -95,7 +95,7 @@
       </div>
       <div class="chavi">
         <q-img
-          src="habitat.png"
+          src="habitatsenai.png"
           fit="contain"
           height="100px"
           width="150px"
@@ -106,7 +106,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('/habitat')"
+          @click="$router.push('/habitatsenai')"
         />
       </div>
     </div>
