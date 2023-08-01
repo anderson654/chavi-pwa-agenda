@@ -6,6 +6,8 @@ export default function () {
     convite: {},
     imovelAgendamento: {},
     estadoInicial: false,
-    extra: 0
+    extra: 0,
+    andarSelecionado: undefined,
+    blocoSelecionado: undefined
   };
 }

@@ -169,10 +169,37 @@ export default ({ app, router, store }) => {
             });
         });
       },
-      agendamento(imovel) {
+      escolherBloco(bloco){
+        if(bloco == undefined){
+          this.selecionarBloco = true;  
+        }else{
+          this.selecionarBloco = false;
+        }
+        this.selecionarAndar = true;
+        this.blocoSelecionado = bloco;
+      },
+      escolherAndar(andar){
+  
+        if(andar == undefined){
+          this.selecionarAndar = true;
+        }else{
+          this.selecionarAndar = false;
+        }
+  
+        this.andarSelecionado = andar;
+      },
+      agendamento(imovel, andar, bloco) {
         this.$store.dispatch("setarDados", {
           key: "setImovelAgendamento",
           value: imovel,
+        });
+        this.$store.dispatch("setarDados", {
+          key: "setAndarSelecionado",
+          value: andar,
+        });
+        this.$store.dispatch("setarDados", {
+          key: "setBlocoSelecionado",
+          value: bloco,
         });
         return;
       },
