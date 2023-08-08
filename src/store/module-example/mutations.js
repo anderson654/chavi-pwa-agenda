@@ -22,3 +22,10 @@ export function setImovelAgendamento(state, imovelAgendamento){
 export function setCoworkingNome(state, coworkingNome){
   state.coworkingNome = coworkingNome;
 }
+
+export function setAndarSelecionado(state, andarSelecionado){
+  state.andarSelecionado = andarSelecionado;
+}
+export function setBlocoSelecionado(state, blocoSelecionado){
+  state.blocoSelecionado = blocoSelecionado;
+}

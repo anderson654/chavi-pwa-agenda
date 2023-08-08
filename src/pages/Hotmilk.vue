@@ -38,9 +38,7 @@
                 style=" border-radius: 40px; max-width: 80%; font-weight: bolder; min-width: fit-content;"
                 :label="'Bloco ' + bloco.num"
                 @click="
-                  selecionarBloco = false;
-                  selecionarAndar = true;
-                  blocoSelecionado = bloco;
+                  escolherBloco(bloco)
                 "
               />
             </div>
@@ -59,9 +57,7 @@
                 text-color="white"
                 label="Selecionar outro bloco"
                 @click="
-                  selecionarBloco = true;
-                  selecionarAndar = true;
-                  blocoSelecionado = undefined;
+                  escolherBloco(undefined)
                 "
               />
             </div>
@@ -75,8 +71,7 @@
                 text-color="white"
                 label="Selecionar outro andar"
                 @click="
-                  selecionarAndar = true;
-                  andarSelecionado = undefined;
+                  escolherAndar(undefined)
                 "
               />
             </div>
@@ -104,8 +99,7 @@
                   :label="`${andar === 'Térreo' ? andar : andar + '° Andar '}`"
                   style="width: 100%; max-width: 200px "
                   @click="
-                    andarSelecionado = andar;
-                    selecionarAndar = false;
+                    escolherAndar(andar)
                   "
                 />
               </div>
@@ -286,8 +280,40 @@ export default {
         value: "hotmilk",
       });          
     }
+    this.andarSelecionado = this.$store.getters.getAndarSelecionado
+    this.blocoSelecionado = this.$store.getters.getBlocoSelecionado
+    if(this.blocoSelecionado == undefined){
+      this.andarSelecionado = undefined;
+      this.selecionarBloco = true;
+      this.selecionarAndar = true;
+    }else if(this.andarSelecionado == undefined){
+      this.selecionarBloco = false;
+      this.selecionarAndar = true;
+    }else{
+      this.selecionarBloco = false;
+      this.selecionarAndar = false;
+    }
   },
   methods: {
+    escolherBloco(bloco){
+      if(bloco == undefined){
+        this.selecionarBloco = true;  
+      }else{
+        this.selecionarBloco = false;
+      }
+      this.selecionarAndar = true;
+      this.blocoSelecionado = bloco;
+    },
+    escolherAndar(andar){
+
+      if(andar == undefined){
+        this.selecionarAndar = true;
+      }else{
+        this.selecionarAndar = false;
+      }
+
+      this.andarSelecionado = andar;
+    },
     openLink(url, target) {
       window.open(url, target);
     },
@@ -343,10 +369,17 @@ export default {
       }
     },
     agendamento(imovel) {
-      console.log("🚀 ~ file: Hotmilk.vue:346 ~ agendamento ~ imovel:", imovel)
       this.$store.dispatch("setarDados", {
         key: "setImovelAgendamento",
         value: imovel,
+      });
+      this.$store.dispatch("setarDados", {
+        key: "setAndarSelecionado",
+        value: this.andarSelecionado,
+      });
+      this.$store.dispatch("setarDados", {
+        key: "setBlocoSelecionado",
+        value: this.blocoSelecionado,
       });
       return;
     },

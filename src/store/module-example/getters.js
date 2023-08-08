@@ -22,3 +22,10 @@ export function getImovelAgendamento(state){
 export function getCoworkingNome(state){
   return state.coworkingNome;
 }
+
+export function getAndarSelecionado(state){
+  return state.andarSelecionado;
+}
+export function getBlocoSelecionado(state){
+  return state.blocoSelecionado;
+}

@@ -130,7 +130,7 @@ export default defineComponent({
         for (let index = 0; index < listEstilos.length; index++) {
           let element = listEstilos[index];         
          
-          if (element != 'chavi')     
+          if (element != 'chavi')
           {
             if (element == elementEstilo){
               atual = true;

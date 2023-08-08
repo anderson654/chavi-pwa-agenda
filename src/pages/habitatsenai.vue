@@ -19,8 +19,7 @@
                 text-color="white"
                 label="Selecionar outro andar"
                 @click="
-                  selecionarAndar = true;
-                  andarSelecionado = undefined;
+                  escolherAndar(undefined)
                 "
               />
             </div>
@@ -41,7 +40,7 @@
               v-for="(imovel, index) in imoveisFiltred"
               :key="index"
               @click="
-                agendamento(imovel);
+                agendamento(imovel, this.andarSelecionado, this.blocoSelecionado);
                 $router.push(imovel.link);
                 "
             >
@@ -118,7 +117,20 @@ export default {
         this.$store.dispatch("setarDados", {
         key: "setCoworkingNome",
         value: "habitatsenai",
-      });          
+      });   
+      this.andarSelecionado = this.$store.getters.getAndarSelecionado
+    this.blocoSelecionado = this.$store.getters.getBlocoSelecionado
+    if(this.blocoSelecionado == undefined){
+      this.andarSelecionado = undefined;
+      this.selecionarBloco = true;
+      this.selecionarAndar = true;
+    }else if(this.andarSelecionado == undefined){
+      this.selecionarBloco = false;
+      this.selecionarAndar = true;
+    }else{
+      this.selecionarBloco = false;
+      this.selecionarAndar = false;
+    }        
     }
   },
   computed: {
@@ -129,6 +141,25 @@ export default {
     },
   },
   methods: {
+    escolherBloco(bloco){
+      if(bloco == undefined){
+        this.selecionarBloco = true;  
+      }else{
+        this.selecionarBloco = false;
+      }
+      this.selecionarAndar = true;
+      this.blocoSelecionado = bloco;
+    },
+    escolherAndar(andar){
+
+      if(andar == undefined){
+        this.selecionarAndar = true;
+      }else{
+        this.selecionarAndar = false;
+      }
+
+      this.andarSelecionado = andar;
+    },
     openLink(url, target) {
       window.open(url, target);
     },
