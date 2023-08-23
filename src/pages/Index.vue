@@ -1079,7 +1079,7 @@ export default defineComponent({
         },
       },
       maximoPessoas: "",
-      eventoOutros: [],
+      eventoOutros: {},
       publicoExterno: false,
       usoDeCreditos: false,
       custoBase : 0,
@@ -1838,7 +1838,7 @@ export default defineComponent({
           this.eventoOutros = { label: informacao, value: texto };
           this.escolherHorario(minutos, hora, scope);
       });
-      if (this.eventoOutros.length > 0) this.eventoOutros = [];
+      // if (this.eventoOutros.length > 0) this.eventoOutros = [];
     },
     quantasPessoas() {
       Dialog.create({
@@ -2458,7 +2458,7 @@ export default defineComponent({
                 this.qualEvento(data, minutos, hora, scope);
 
               } else {
-                this.eventoOutros.push(data);
+                this.eventoOutros.label = data;
                 this.escolherHorario(minutos, hora, scope);
               }
               resolve();
@@ -2703,7 +2703,8 @@ export default defineComponent({
       }
 
       if (this.eventoOutros) {
-        user.eventoOutros = this.eventoOutros;
+        user.eventoOutros = JSON.stringify(this.eventoOutros);
+        user.publicoExterno = this.publicoExterno
       }
       
       let request = {
@@ -3562,7 +3563,8 @@ export default defineComponent({
       }
 
       if (this.eventoOutros) {
-        user.eventoOutros = this.eventoOutros;
+        user.eventoOutros = JSON.stringify(this.eventoOutros);
+        user.publicoExterno = this.publicoExterno
       }
 
       if (!this.user.hasDocs) {
