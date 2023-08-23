@@ -3265,7 +3265,7 @@ export default defineComponent({
                 <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
                     <div class="full-width text-center">`;
 
-              titleBusy += `${horario.usuarioEntidade.trim()}<br/>`;
+              titleBusy += `${horario.usuarioEntidade.trim()} - <br/>`;
 
               if (horario.usuario.indexOf("-") == -1){
                 titleBusy += horario.usuario.trim();
