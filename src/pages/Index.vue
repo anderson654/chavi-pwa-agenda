@@ -1003,6 +1003,7 @@ export default defineComponent({
   },
   data() {
     return {
+      dayHeight: 75,
       modalComprarCreditos: {
         dialogAtivo: false,
         creditos: 0,
@@ -3238,6 +3239,7 @@ export default defineComponent({
         });
         
         for (let horario of this.events) {
+        console.log("PIAZZETTA 🦝 ~ file: Index.vue:3241 ~ formatData ~ horario:", horario)
 
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
@@ -3261,6 +3263,8 @@ export default defineComponent({
               titleBusy = `
                 <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
                     <div class="full-width text-center">`;
+
+              titleBusy += `${horario.usuarioEntidade.trim()}<br/>`;
 
               if (horario.usuario.indexOf("-") == -1){
                 titleBusy += horario.usuario.trim();
