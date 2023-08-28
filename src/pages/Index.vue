@@ -1453,7 +1453,6 @@ export default defineComponent({
     async deletar(id){
       let horarioAtual = Date.now();
       if ((this.visitaSelecionada.validadeInicial - 1800000) < horarioAtual && this.visitaSelecionada.imovel.opcoesAgendamentoIndividual.custaCreditos){
-        console.log("🚀 ~ file: Index.vue:1453 ~ deletar ~ this.visitaSelecionada:", this.visitaSelecionada)
         Notify.create({
           message: "O tempo máximo para exclução da visita é 30 minutos antes da reserva.",
           type: "negative",
@@ -1640,16 +1639,6 @@ export default defineComponent({
       if(response && response.status == 200){
         this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
       }
-
-      // const mp = new MercadoPago(this.chaveAgendamento, {
-      //   locale: "pt-BR",
-      // });
-
-      // mp.bricks().create("wallet", "wallet_container", {
-      //   initialization: {
-      //       preferenceId: response.data,
-      //   },
-      // });
       return;
 
 
@@ -1838,7 +1827,6 @@ export default defineComponent({
           this.eventoOutros = { label: informacao, value: texto };
           this.escolherHorario(minutos, hora, scope);
       });
-      // if (this.eventoOutros.length > 0) this.eventoOutros = [];
     },
     quantasPessoas() {
       Dialog.create({
@@ -2285,7 +2273,6 @@ export default defineComponent({
         message = `<span class='text-black' style='font-size: 1rem'>
             <center>Selecione a duração da sua utilização</center>`          
 
-            // if(this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId){
               if((!isNaN( gerenciamentoHoras.horasMensaisDisponiveis))&&(!isNaN( gerenciamentoHoras.horasExtras))){
                 let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras ;
  
@@ -2299,7 +2286,6 @@ export default defineComponent({
                    <strong> 0 </strong></p>
                   </span>`;
               }
-           //}
        
            message +=  "</span> <center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
            message += `</span>`
@@ -2834,64 +2820,8 @@ export default defineComponent({
       const response = await this.executeMethod(request, false);
       return response;
     },
-    // async checkoutPagamento() {
-
-    //   let visitaConvite =  await this.criarVisita();  
-    //   await this.gerarConvitePagamento(visitaConvite)
-    //   const response = await this.executeMethod(request, false);
-
-    //   if (response && response.status == 200) {
-    //     let idConvite = response.data.idConvite
-
-    //     const data = {
-    //       id : idConvite,
-    //       sala: this.user.imovelRef,
-    //       tempoDeUso: this.diferencaEmMinutos(
-    //         this.user.validadeInicial,
-    //         this.user.validadeFinal
-    //       ),
-    //       preco:
-    //         this.valorDaSala *
-    //         (this.diferencaEmMinutos(
-    //           this.user.validadeInicial,
-    //           this.user.validadeFinal
-    //         ) /
-    //           15),
-    //       imovel: this.idImovel
-    //     };
-
-    //     let request = {
-    //       url: "Entidades/checkoutPagamento",
-    //       method: "post",
-    //       data: data,
-    //     };
-
-    //     const responseCheckout = await this.executeMethod(request, false);
-
-    //     this.user.entidadeUsuario = this.entidadeUsuario;
-    //     const mp = new MercadoPago(this.chaveAgendamento, {
-    //       locale: "pt-BR",
-    //     });
-    //     mp.checkout({
-    //       preference: {
-    //         id: responseCheckout.data,
-    //       },
-    //       render: {
-    //         container: ".cho-container",
-    //         label: "Efetuar pagamento",
-    //       },
-    //       autoOpen: true,
-    //     });
-    //     return;
-
-    //   }
-    //   else{
-    //     return;
-    //   }
-    //   },
 
     async checkoutPagamento(convite) {
-    console.log("🚀 ~ file: Index.vue:2873 ~ checkoutPagamento ~ convite:", convite)
 
       let data;
       if (convite.convitePagamento){
@@ -2953,21 +2883,11 @@ export default defineComponent({
 
       let visitaConvite =  await this.criarVisita();  
       const response = await this.gerarConvitePagamento(visitaConvite)
-      // const response = await this.executeMethod(request, false);
 
       if (response && response.status == 200) {
         let idPreferencia = response.data.globalId;
 
         this.user.entidadeUsuario = this.entidadeUsuario;
-          //  const mp = new MercadoPago(this.chaveAgendamento, {
-          //  locale: "pt-BR",
-          // });
-
-          // mp.bricks().create("wallet", "wallet_container", {
-          //   initialization: {
-          //       preferenceId: response.data,
-          //   },
-          // });
         const mp = new MercadoPago(this.chaveAgendamento, {
           locale: "pt-BR",
         });
@@ -3209,7 +3129,7 @@ export default defineComponent({
                 ? this.cliente.preferenciaVisita.habilitarPublicoExterno
                 : false;
             }
-            this.events = response.data.horarios;/////
+            this.events = response.data.horarios;
             
             if(this.funcionamentoRotativo){
               this.formatDataRotativo();
@@ -3240,7 +3160,6 @@ export default defineComponent({
         });
         
         for (let horario of this.events) {
-        console.log("PIAZZETTA 🦝 ~ file: Index.vue:3241 ~ formatData ~ horario:", horario)
 
             const inicio = parseTimestamp(
               moment(parseInt(horario.timestampInicial)).format(
@@ -3378,8 +3297,6 @@ export default defineComponent({
 
           titleBusy += `<div class="full-width text-center" style="color: #000;">${elementosParaRenderizar[index].quantidade} / ${this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho} </div> </div>`
           
-          // const temIdDoUsuario = elementosParaRenderizar[index].usuarioIds.filter(id => id == this.getLogin.userId);
-          // let usuarioId = temIdDoUsuario.length > 0 ? temIdDoUsuario[0]: " "; 
 
           let indexColor = Math.floor((elementosParaRenderizar[index].quantidade * this.quantidadeDeElementos) / this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
 

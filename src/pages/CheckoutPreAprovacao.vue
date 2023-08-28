@@ -233,7 +233,6 @@ export default {
               }
         }
 
-       // this.chaveAgendamento = response.data.opcoesAgendamentoIndividual.chaveAgendamento;
         this.valorDaSala = response.data.opcoesAgendamentoIndividual.valorDaSala;
 
         if (this.chaveAgendamento != "")
