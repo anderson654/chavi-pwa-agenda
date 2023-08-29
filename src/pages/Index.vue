@@ -3180,11 +3180,13 @@ export default defineComponent({
             let titleBusy = "Ocupado";
 
             if (horario.usuario){
-              titleBusy = `
+                          titleBusy = `
                 <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
                     <div class="full-width text-center">`;
 
-              titleBusy += `${horario.usuarioEntidade.trim()} - <br/>`;
+              if (horario.usuarioEntidade){        
+                titleBusy += `${horario.usuarioEntidade.trim()} - <br/>`;
+              }
 
               if (horario.usuario.indexOf("-") == -1){
                 titleBusy += horario.usuario.trim();
