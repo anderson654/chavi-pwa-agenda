@@ -3678,9 +3678,9 @@ export default defineComponent({
   flex-wrap: wrap;
   align-content: flex-start;
   width: 95%;
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
-  max-height: 130px;
+  max-height: 330px;
   background-color: white;
   border-radius: 8px;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
@@ -3707,33 +3707,13 @@ export default defineComponent({
   justify-content: center;
 }
 
-.new-div {
-  display: flex;
-  justify-content: center;
-}
+
 .descritivo > div > li {
   padding-left: 10px;
-  max-width: 160px;
+  max-width: 350px;
   white-space: nowrap;
   overflow: hidden;
   margin-bottom: 4px;
-}
-
-.descrt {
-  margin-left: 10px;
-}
-.title-modal {
-  color: #e86628;
-}
-
-.btn-modal {
-  color: #21ba45;
-  border: 1px solid #21ba45;
-  border-radius: 4px;
-}
-
-.content-modal {
-  font-weight: bold;
 }
 
 .my-event {
@@ -3802,11 +3782,19 @@ export default defineComponent({
     flex-direction: column;
     max-height: none;
     align-items: center;
+
   }
   .buttonsWrapper > div > button{
     margin: 5px auto;
     top: 10px;
     border-radius: 5px;
+  }
+  .descritivo {
+    max-width: 100vw;
+  }
+
+  .descritivo > div > li {
+    max-width: 80vw;
   }
 }
 
