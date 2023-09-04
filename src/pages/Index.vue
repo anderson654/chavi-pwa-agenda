@@ -319,15 +319,6 @@
             ]"
           />
           <div class="col-3 q-pl-xs">
-          <q-select v-if="newUser" 
-          filled 
-          emit-value
-          map-options
-          option-label="nome" 
-          option-value="id" 
-          v-model="user.empresa" 
-          :options="clenteOptions" 
-          label="Selecione sua empresa"/>
 				</div>
           <q-input
             class="parte1 full-width"
@@ -3402,7 +3393,7 @@ export default defineComponent({
                 telefone: this.user.phone,
                 nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
-                entidadeId: this.user.empresa,
+                entidadeId: '6064614dc7cddfdc2b65144d',
                 coworkingId: coworkingId,
               },
             },
