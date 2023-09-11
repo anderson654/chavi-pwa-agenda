@@ -170,7 +170,6 @@
               :view="$q.platform.is.desktop ? 'week' : 'day'"
               locale="pt-br"
               style="width: 100%"
-              cell-height="100px"
               :weekdays="getWeekDisplay"
               :hoverable="true"
               :interval-minutes="timeStepMin"
@@ -209,7 +208,15 @@
                     >
                       <div class="title" @click="modalExcluirVisita(event)">
                         <span class="text-center" v-html="event.title" ></span>
-                        <q-tooltip>{{ event.time }}</q-tooltip>
+                        <q-tooltip v-if="event.tooltip" anchor="center middle" self="center middle" transition-show="fade">
+                          Empresa: {{ event.tooltip.empresa }} <br/>
+                          Usuário: {{ event.tooltip.usuario }} <br/>
+                          Início: {{ event.tooltip.inicio }} <br/>
+                          Fim: {{ event.tooltip.fim }} <br/>
+                        </q-tooltip> 
+                        <q-tooltip v-else anchor="center middle" self="center middle" transition-show="fade">
+                          início: {{ event.time }} <br/>
+                        </q-tooltip>
                       </div>
                     </div>
                   </template>
@@ -312,15 +319,6 @@
             ]"
           />
           <div class="col-3 q-pl-xs">
-          <q-select v-if="newUser" 
-          filled 
-          emit-value
-          map-options
-          option-label="nome" 
-          option-value="id" 
-          v-model="user.empresa" 
-          :options="clenteOptions" 
-          label="Selecione sua empresa"/>
 				</div>
           <q-input
             class="parte1 full-width"
@@ -846,7 +844,6 @@
             
           </div>
     </q-dialog>
-    <!-- teste adrian -->
     <q-dialog v-model="cardPagamento">
         <div
             class="shadow-8 bg-grey-2 justify-center"
@@ -1476,8 +1473,10 @@ export default defineComponent({
           };
   
           const response = await this.executeMethod(request, false);
-          this.visitaSelecionada = response.data
-          this.cardVisita = true
+          if(response.status == 200){
+            this.visitaSelecionada = response.data
+            this.cardVisita = true
+          }
         }else{
           return
         }
@@ -1489,8 +1488,10 @@ export default defineComponent({
           };
   
           const response = await this.executeMethod(request, false);
-          this.visitaSelecionada = response.data
-          this.cardPagamento = true
+          if(response.status == 200){
+            this.visitaSelecionada = response.data
+            this.cardVisita = true
+          }
         }else{
           return
         }
@@ -3158,6 +3159,7 @@ export default defineComponent({
         this.events.sort((a, b) => {
           return a.timestampInicial < b.timestampInicial ? -1 : 1;
         });
+        //verifica horário
         
         for (let horario of this.events) {
 
@@ -3181,27 +3183,19 @@ export default defineComponent({
 
             if (horario.usuario){
                           titleBusy = `
-                <div class="column justify-center text-center align-center" style="white-space: pre-wrap">
-                    <div class="full-width text-center">`;
+                <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
+                    <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
 
-              if (horario.usuarioEntidade){        
-                titleBusy += `${horario.usuarioEntidade.trim()} - <br/>`;
+                      console.log("PIAZZETTA 🦝 ~ file: Index.vue:3199 ~ formatData ~ this.timeStepMin:", this.timeStepMin * 60000)
+                      console.log("PIAZZETTA 🦝 ~ file: Index.vue:3200 ~ formatData ~ horario.intervalo:", horario.intervalo)
+              if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000){   
+                let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
+                titleBusy += `${entidadeNomeCortado} <br/>`;
               }
 
-              if (horario.usuario.indexOf("-") == -1){
-                titleBusy += horario.usuario.trim();
-              }
-              else{
-                titleBusy += `${horario.usuario.split("-")[0].trim()}<br/>`
-
-                if(horario.usuario.split("-")[1]){
-                  titleBusy += horario.usuario.split("-")[1].trim();
-                }
-                else
-                {
-                  titleBusy += "";
-                }
-              }
+              let usuarioNomeCortado = horario.usuario.split("-")[0]
+              usuarioNomeCortado = usuarioNomeCortado.split(" ")[0]
+              titleBusy += `${usuarioNomeCortado} <br/>`
 
               titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
             }
@@ -3213,8 +3207,9 @@ export default defineComponent({
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
+              tooltip:{inicio: inicio.time, fim: final.time, empresa: horario.usuarioEntidade.trim(), usuario: horario.usuario.split("-")[0].trim() },
               usuarioId : horario.usuarioId,
-              bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id ? "blue-8" : "yellow-8" : horario.usuarioId == this.getLogin.user.id? "blue-5":"red-5",
+              bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id  ? "blue-8" : "yellow-8" : horario.usuarioId == this.getLogin.user.id ? "blue-5":"red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
               visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : "",
@@ -3398,7 +3393,7 @@ export default defineComponent({
                 telefone: this.user.phone,
                 nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
-                entidadeId: this.user.empresa,
+                entidadeId: '6064614dc7cddfdc2b65144d',
                 coworkingId: coworkingId,
               },
             },
@@ -3678,9 +3673,9 @@ export default defineComponent({
   flex-wrap: wrap;
   align-content: flex-start;
   width: 95%;
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
-  max-height: 130px;
+  max-height: 330px;
   background-color: white;
   border-radius: 8px;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
@@ -3707,33 +3702,13 @@ export default defineComponent({
   justify-content: center;
 }
 
-.new-div {
-  display: flex;
-  justify-content: center;
-}
+
 .descritivo > div > li {
   padding-left: 10px;
-  max-width: 160px;
+  max-width: 350px;
   white-space: nowrap;
   overflow: hidden;
   margin-bottom: 4px;
-}
-
-.descrt {
-  margin-left: 10px;
-}
-.title-modal {
-  color: #e86628;
-}
-
-.btn-modal {
-  color: #21ba45;
-  border: 1px solid #21ba45;
-  border-radius: 4px;
-}
-
-.content-modal {
-  font-weight: bold;
 }
 
 .my-event {
@@ -3802,11 +3777,19 @@ export default defineComponent({
     flex-direction: column;
     max-height: none;
     align-items: center;
+
   }
   .buttonsWrapper > div > button{
     margin: 5px auto;
     top: 10px;
     border-radius: 5px;
+  }
+  .descritivo {
+    max-width: 100vw;
+  }
+
+  .descritivo > div > li {
+    max-width: 80vw;
   }
 }
 
@@ -3854,6 +3837,18 @@ export default defineComponent({
   .container {
     width: 95%;
   }
+}
+
+.ellipsis {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ellipsis:hover {
+    white-space: normal;
+    background-color: rgba(255, 255, 255, 0.9); /* Para criar um fundo semi-transparente para melhor legibilidade */
 }
 
 </style>
