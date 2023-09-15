@@ -3188,7 +3188,7 @@ export default defineComponent({
             horario.usuario = ""
           }
 
-          let usuarioNomeCortado = horario.usuario.trim().split("-")[0]
+          let usuarioNomeCortado = ""
           if (horario.usuario){
             titleBusy = `
               <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
