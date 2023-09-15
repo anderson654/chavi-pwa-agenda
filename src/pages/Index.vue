@@ -3180,7 +3180,6 @@ export default defineComponent({
             const duracao = horario.intervalo / 60000;
            
           let titleBusy = "Ocupado";
-          console.log("PIAZZETTA 🦝 ~ file: Index.vue:3185 ~ formatData ~ horario:", horario, "\n\n", !horario.usuarioEntidade, "\n\n", !horario.usuario)
 
           if (!horario.usuarioEntidade) {
             horario.usuarioEntidade = ""  
@@ -3188,32 +3187,32 @@ export default defineComponent({
           if (!horario.usuario) {
             horario.usuario = ""
           }
-          let nomeCorrigido = horario.usuario.trim().split("-")[0]
-            if (horario.usuario){
-                          titleBusy = `
-                <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
-                    <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-              if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000){   
-                let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
-                titleBusy += `${entidadeNomeCortado} <br/>`;
-              }
-              
-              let usuarioNomeCortado = nomeCorrigido
-              usuarioNomeCortado = usuarioNomeCortado.split(" ")[0]
-              titleBusy += `${usuarioNomeCortado} <br/>`
 
-              titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
+          let usuarioNomeCortado = horario.usuario.trim().split("-")[0]
+          if (horario.usuario){
+            titleBusy = `
+              <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
+                  <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
+            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000){   
+              let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
+              titleBusy += `${entidadeNomeCortado} <br/>`;
             }
+            
+            usuarioNomeCortado = horario.usuario.trim().split("-")[0]
+            usuarioNomeCortado = usuarioNomeCortado.split(" ")[0]
+            titleBusy += `${usuarioNomeCortado} <br/>`
+
+            titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
+          }
                
 
             
-          console.log("PIAZZETTA 🦝 ~ file: Index.vue:3211 ~ formatData ~ horario:", horario)
             optionsOff.push({
               title: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id && horario.esperaPagamento == true ? "PENDENTE<br>PAGAMENTO" : "PENDENTE" : titleBusy,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
-              tooltip:{inicio: inicio.time, fim: final.time, empresa: horario.usuarioEntidade, usuario: nomeCorrigido },
+              tooltip:{inicio: inicio.time, fim: final.time, empresa: horario.usuarioEntidade, usuario: usuarioNomeCortado },
               usuarioId : horario.usuarioId,
               bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id  ? "blue-8" : "yellow-8" : horario.usuarioId == this.getLogin.user.id ? "blue-5":"red-5",
               textColor: "text-white",
@@ -3223,7 +3222,6 @@ export default defineComponent({
               esperaPagamento: horario.esperaPagamento? horario.esperaPagamento : false,
               codigo: horario.codigo ? horario.codigo : " ",
             });
-            console.log("PIAZZETTA 🦝 ~ file: Index.vue:3220 ~ formatData ~ optionsOff:", optionsOff)
 
         }
         this.events = optionsOff;
