@@ -3154,88 +3154,89 @@ export default defineComponent({
     },
     formatData() {
       let optionsOff = [];
-      
+
       if (this.events && this.events.length > 0) {
         this.events.sort((a, b) => {
           return a.timestampInicial < b.timestampInicial ? -1 : 1;
         });
         //verifica horário
-        
+
         for (let horario of this.events) {
 
-            const inicio = parseTimestamp(
-              moment(parseInt(horario.timestampInicial)).format(
-                "YYYY-MM-DD HH:mm"
-              )
-            );
+          const inicio = parseTimestamp(
+            moment(parseInt(horario.timestampInicial)).format(
+              "YYYY-MM-DD HH:mm"
+            )
+          );
 
-            let finalTemp = parseInt(horario.timestampInicial) + parseInt(horario.intervalo)
+          let finalTemp = parseInt(horario.timestampInicial) + parseInt(horario.intervalo)
 
-            const final = parseTimestamp(
-              moment(parseInt(finalTemp)).format(
-                "YYYY-MM-DD HH:mm"
-              )
-            );
+          const final = parseTimestamp(
+            moment(parseInt(finalTemp)).format(
+              "YYYY-MM-DD HH:mm"
+            )
+          );
 
-            const duracao = horario.intervalo / 60000;
-           
-            let titleBusy = "Ocupado";
+          const duracao = horario.intervalo / 60000;
 
-            if (horario.usuario){
-                        titleBusy = `
-              <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
-                  <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000){   
-              let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
-              titleBusy += `${entidadeNomeCortado} <br/>`;
-            }
+          let titleBusy = "Ocupado";
 
-          if (!horario.usuarioEntidade) {
-            horario.usuarioEntidade = ""  
-          }
-          if (!horario.usuario) {
-            horario.usuario = ""
-          }
-
-          let usuarioNomeCortado = ""
-          if (horario.usuario){
+          if (horario.usuario) {
             titleBusy = `
               <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
                   <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000){   
+            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
               let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
               titleBusy += `${entidadeNomeCortado} <br/>`;
             }
-            
-            usuarioNomeCortado = horario.usuario.trim().split("-")[0]
-            usuarioNomeCortado = usuarioNomeCortado.split(" ")[0]
-            titleBusy += `${usuarioNomeCortado} <br/>`
 
-            titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
-          }
-               
+            if (!horario.usuarioEntidade) {
+              horario.usuarioEntidade = ""
+            }
+            if (!horario.usuario) {
+              horario.usuario = ""
+            }
 
-            
+            let usuarioNomeCortado = ""
+            if (horario.usuario) {
+              titleBusy = `
+              <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
+                  <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
+              if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
+                let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
+                titleBusy += `${entidadeNomeCortado} <br/>`;
+              }
+
+              usuarioNomeCortado = horario.usuario.trim().split("-")[0]
+              usuarioNomeCortado = usuarioNomeCortado.split(" ")[0]
+              titleBusy += `${usuarioNomeCortado} <br/>`
+
+              titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
+            }
+
+
+
             optionsOff.push({
               title: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id && horario.esperaPagamento == true ? "PENDENTE<br>PAGAMENTO" : "PENDENTE" : titleBusy,
               date: inicio.date,
               time: inicio.time,
               duration: duracao,
-              tooltip:{inicio: inicio.time, fim: final.time, empresa: horario.usuarioEntidade, usuario: usuarioNomeCortado },
-              usuarioId : horario.usuarioId,
-              bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id  ? "blue-8" : "yellow-8" : horario.usuarioId == this.getLogin.user.id ? "blue-5":"red-5",
+              tooltip: { inicio: inicio.time, fim: final.time, empresa: horario.usuarioEntidade, usuario: usuarioNomeCortado },
+              usuarioId: horario.usuarioId,
+              bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id ? "blue-8" : "yellow-8" : horario.usuarioId == this.getLogin.user.id ? "blue-5" : "red-5",
               textColor: "text-white",
               timestampInicial: horario.timestampInicial,
               visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : "",
               styledBg: "",
-              esperaPagamento: horario.esperaPagamento? horario.esperaPagamento : false,
+              esperaPagamento: horario.esperaPagamento ? horario.esperaPagamento : false,
               codigo: horario.codigo ? horario.codigo : " ",
             });
 
+          }
+          this.events = optionsOff;
         }
-        this.events = optionsOff;
       }
-    },
+    }  ,
     formatDataRotativo(){
       let elementosParaRenderizar = []; // esse array divide cada visita conforme o intervaloMin para renderização
       let quantidadeDeDivisoesQueEstaVisitaOcupa = 0;
