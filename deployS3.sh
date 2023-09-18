@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 quasar build -m pwa
 aws configure set preview.cloudfront true
 aws s3 sync --acl public-read --profile chavi --delete dist/pwa s3://agenda.chavi.com.br

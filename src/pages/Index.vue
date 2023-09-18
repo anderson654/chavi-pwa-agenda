@@ -3179,7 +3179,16 @@ export default defineComponent({
 
             const duracao = horario.intervalo / 60000;
            
-          let titleBusy = "Ocupado";
+            let titleBusy = "Ocupado";
+
+            if (horario.usuario){
+                        titleBusy = `
+              <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
+                  <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
+            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000){   
+              let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
+              titleBusy += `${entidadeNomeCortado} <br/>`;
+            }
 
           if (!horario.usuarioEntidade) {
             horario.usuarioEntidade = ""  
