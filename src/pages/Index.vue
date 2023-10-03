@@ -1216,8 +1216,6 @@ export default defineComponent({
       nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
       if(nome == "hotmilk"){
         return "hotmilk/agenda"
-      }else if(nome == 'habitat'){
-        return "habitatsenai"
       }else{
         return nome
       }

@@ -46,9 +46,9 @@ const routes = [
     children: [{ path: "", component: () => import("pages/Mindhub.vue") }]
   },
   {
-    path: "/habitatsenai",
+    path: "/blazecoworking",
     component: () => import("layouts/MainLayout.vue"),
-    children: [{ path: "", component: () => import("pages/habitatsenai.vue") }]
+    children: [{ path: "", component: () => import("src/pages/blazeCoworking.vue") }]
   },
   {
     path: "/login",

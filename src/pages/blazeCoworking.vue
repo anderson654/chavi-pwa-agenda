@@ -54,7 +54,7 @@
                 />
               </div>
               <div class="col-8 column items-center justify-around">
-                <span style="font-size: 1.2rem; color: teal"
+                <span style="font-size: 1.2rem; color: #993231"
                   >{{ imovel.nome }}
                 </span>
                 <div style="font-size: 0.9rem">
@@ -113,10 +113,10 @@ export default {
   },
   mounted() {
     let coworkingSecao = this.$store.getters.getCoworkingNome;
-    if(coworkingSecao && coworkingSecao != "mindhub"){
+    if(coworkingSecao && coworkingSecao != "blazecoworking"){
         this.$store.dispatch("setarDados", {
         key: "setCoworkingNome",
-        value: "habitatsenai",
+        value: "blazecoworking",
       });   
       this.andarSelecionado = this.$store.getters.getAndarSelecionado
     this.blocoSelecionado = this.$store.getters.getBlocoSelecionado
@@ -174,7 +174,7 @@ export default {
         url: "Imoveis/retornarImoveisAgendamento",
         method: "get",
         params: {
-          entidadeId: "64a5ad988c443bfe124bdf94",
+          entidadeId: "650314ea4f6c8c00e2bf3aa7",
         },
       });
       if (response.status == 200) {
