@@ -38,9 +38,6 @@ export default {
           if (response && response.status == 200) {
             nome = response.data.entidade.nome
             nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
-            if(nome == "habitat"){
-              nome = "habitatsenai"
-            }
           }else {
             nome = ""
           }

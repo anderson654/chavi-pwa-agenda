@@ -79,7 +79,7 @@
 
       <div class="mindhub">
         <q-img
-          src="logo aplicação.png"
+          src="mindhub.png"
           fit="contain"
           height="100px"
           width="150px"
@@ -95,7 +95,7 @@
       </div>
       <div class="chavi">
         <q-img
-          src="habitatsenai.png"
+          src="blazecoworking.png"
           fit="contain"
           height="100px"
           width="150px"
@@ -106,7 +106,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('/habitatsenai')"
+          @click="$router.push('/blazecoworking')"
         />
       </div>
     </div>
