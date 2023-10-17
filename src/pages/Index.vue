@@ -3410,7 +3410,6 @@ export default defineComponent({
                 telefone: this.user.phone,
                 nomeCompleto: nome.trim(),
                 loginCodigo: this.user.codigo,
-                entidadeId: '6064614dc7cddfdc2b65144d',
                 coworkingId: coworkingId,
               },
             },
