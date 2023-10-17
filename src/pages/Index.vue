@@ -2730,7 +2730,11 @@ export default defineComponent({
       Loading.hide();
 
       if (response && response.status == 200) {
-        this.messageFinal = response.data.text.split("<br/>")
+        if (response.data.text) {
+          this.messageFinal = response.data.text.split("<br/>")
+        } else {
+          this.messageFinal = ['Visita agendada Com sucesso']
+        }
         if(response.data && response.data.url){
           this.returnUrl = response.data.url
         }
