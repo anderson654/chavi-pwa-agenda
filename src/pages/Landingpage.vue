@@ -109,6 +109,22 @@
           @click="$router.push('/blazecoworking')"
         />
       </div>
+      <div class="mindhub">
+        <q-img
+          src="h2ucoworking.png"
+          fit="contain"
+          height="100px"
+          width="150px"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+          class="q-my-sm"
+          @click="$router.push('/h2ucoworking')"
+        />
+      </div>
     </div>
 
     <footer reveal elevated>

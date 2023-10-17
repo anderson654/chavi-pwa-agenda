@@ -51,6 +51,11 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/blazeCoworking.vue") }]
   },
   {
+    path: "/h2ucoworking",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("src/pages/H2UCoworking.vue") }]
+  },
+  {
     path: "/login",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Login.vue") }]
