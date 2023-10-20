@@ -113,10 +113,10 @@ export default {
   },
   mounted() {
     let coworkingSecao = this.$store.getters.getCoworkingNome;
-    if(coworkingSecao && coworkingSecao != "blazecoworking"){
+    if(coworkingSecao && coworkingSecao != "blaze"){
         this.$store.dispatch("setarDados", {
         key: "setCoworkingNome",
-        value: "blazecoworking",
+        value: "blaze",
       });   
       this.andarSelecionado = this.$store.getters.getAndarSelecionado
     this.blocoSelecionado = this.$store.getters.getBlocoSelecionado

@@ -46,12 +46,12 @@ const routes = [
     children: [{ path: "", component: () => import("pages/Mindhub.vue") }]
   },
   {
-    path: "/blazecoworking",
+    path: "/blaze",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/blazeCoworking.vue") }]
   },
   {
-    path: "/h2ucoworking",
+    path: "/h2u",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/H2UCoworking.vue") }]
   },
