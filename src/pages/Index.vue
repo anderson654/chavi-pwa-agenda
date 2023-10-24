@@ -919,8 +919,7 @@
           <span class="text-primary" style="font-size:1.2rem">Finalizada</span>
         </q-card-section>
         <q-card-section>
-          <p style="font-size:1.0rem">  {{messageFinal[0]}}  </p>
-          <p style="font-size:1.0rem">  {{messageFinal[1]}}  </p>
+          <p style="font-size: 1.0rem" v-html="messageFinal[0]"></p>
         </q-card-section>
         <q-card-actions align="center">
             <q-btn label="Salvar no calendáriorio" color="accent" @click="cancelMensagemFinal"></q-btn>
@@ -1084,7 +1083,7 @@ export default defineComponent({
       cardPagamento: false,
       visitaSelecionada: {},
       finalizacao: false,
-      messageFinal:"",
+      messageFinal:[],
       returnUrl: "",
       mensagemIcs:"",
       clenteOptions: [],
@@ -2731,9 +2730,9 @@ export default defineComponent({
 
       if (response && response.status == 200) {
         if (response.data.text) {
-          this.messageFinal = response.data.text.split("<br/>")
+          this.messageFinal.push(response.data.text)
         } else {
-          this.messageFinal = ['Visita agendada Com sucesso']
+          this.messageFinal.push('Visita agendada Com sucesso')
         }
         if(response.data && response.data.url){
           this.returnUrl = response.data.url
