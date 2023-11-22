@@ -916,7 +916,7 @@
     <q-dialog v-model="finalizacao">
       <q-card>
         <q-card-section>
-          <span class="text-primary" style="font-size:1.2rem">Finalizada</span>
+          <span class="text-primary" style="font-size:1.2rem">{{lableFinalizado}}</span>
         </q-card-section>
         <q-card-section>
           <p style="font-size: 1.0rem" v-html="messageFinal[0]"></p>
@@ -999,6 +999,7 @@ export default defineComponent({
   },
   data() {
     return {
+      lableFinalizado: "Finalizado",
       dayHeight: 75,
       modalComprarCreditos: {
         dialogAtivo: false,
@@ -1545,13 +1546,27 @@ export default defineComponent({
       } 
 
       else if (!this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Enviar";
-
-      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && this.necessitaPagamento) return "Solicitar";
-      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Solicitar";  
-      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && this.validarExtra()) return "Solicitar";
-      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && !this.validarExtra()) return "Solicitar";
+      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && this.necessitaPagamento) {
+        this.lableFinalizado = 'Pré-reserva em análise'
+        return "Solicitar";
+      }
+      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) {
+        this.lableFinalizado = 'Pré-reserva em análise'
+        return "Solicitar";
+      }
+      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && this.validarExtra()) {
+        this.lableFinalizado = 'Pré-reserva em análise'
+        return "Solicitar";
+      }
+      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && !this.validarExtra()) {
+        this.lableFinalizado = 'Pré-reserva em análise'
+        return "Solicitar";
+      }
       else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && !this.validarExtra()) return "Enviar";
-      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) return "Pagamento";
+      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) {
+        this.lableFinalizado = 'Pré-reserva realizada'
+        return "Solicitar";
+      }
 
     }, 
        
