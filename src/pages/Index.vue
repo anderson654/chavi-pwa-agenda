@@ -2087,7 +2087,16 @@ export default defineComponent({
       return contadorMinutos;
 
     },
-      
+    customRound(minutos){
+      const rest = minutos % this.timeStepMin;
+      let result;
+      if(rest == minutos){
+        result = this.timeStepMin;
+      }else{
+        result = rest > (this.timeStepMin / 2) ? minutos - rest : minutos - rest + this.timeStepMin;   
+      }
+      return result;
+    },
     async escolherHorario(minutos, hora, scope) {
      let gerenciamentoHoras = {};
       if (this.entidadeUsuario) {
@@ -2116,19 +2125,7 @@ export default defineComponent({
         }
       }
 
-      if (this.timeStepMin == 15) {
-        if (minutos > 45) minutos = 60;
-        else if (minutos > 30) minutos = 45;
-        else if (minutos > 15) minutos = 30;
-        else minutos = 15;
-      }
-
-      if (this.timeStepMin == 30) {
-        if (minutos > 30) minutos = 60;
-        else minutos = 30;
-      }
-
-      if (this.timeStepMin == 60) minutos = 60;
+      minutos = this.customRound(minutos);
 
       const horario =
         hora.toString() +
@@ -2376,10 +2373,48 @@ export default defineComponent({
         }
       });
     },
-        
+    checkIntervalBetweenVisits(minutos, scope, intervalo){
+      const eventsOnTheSelectedDay = this.events.filter(data => data.date == scope.timestamp.date);
+      let formatedMinuts = minutos - (minutos % this.timeStepMin);
+      formatedMinuts = formatedMinuts.toString().padStart(2, "0")
+      const selectedDateInStringFormat = scope.timestamp.date + " " + `${scope.timestamp.hour}:${formatedMinuts}:00`;
+      const selectedDateInTimeFormat = new Date(selectedDateInStringFormat).getTime();
+      const intervalInTimeStamp = intervalo * 60 * 1000;
+      
+      const isInValid = eventsOnTheSelectedDay.find((data) => {
+        if(data.timestampInicial > selectedDateInTimeFormat){
+          console.log(new Date(selectedDateInTimeFormat))
+          console.log(new Date(selectedDateInTimeFormat + intervalInTimeStamp))
+          console.log(new Date(data.timestampInicial))
+          return (selectedDateInTimeFormat + intervalInTimeStamp) >= data.timestampInicial
+        }else{
+          const endDateTimeFormat = data.timestampInicial + (data.duration * 60 * 1000);
+          return (endDateTimeFormat + intervalInTimeStamp) > selectedDateInTimeFormat
+        }
+      })
+      
+      if(isInValid){
+        let timeInterval;
+        if(intervalo < 60){
+          timeInterval = ` ${intervalo} minutos`
+        }
+        else{
+          const hours = intervalo / 60;
+          timeInterval = `${Math.floor(hours)} hora`;
+          if(hours == 1.5) timeInterval += " e meia"
+          else if(hours > 1) timeInterval += "s"
+        }
+
+        Dialog.create({
+          title: "intervalo invalido!",
+          message: `Esta sala tem um intervalo definido de ${timeInterval} entre os agendamentos.`
+        });
+        return false;
+      }
+      return true
+    },  
     //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
     async onTimeClick({ event, scope }) {
-      
       let hora = scope.timestamp.hour;
       let minutos = scope.timestamp.minute;
       const dia = moment(scope.timestamp.date);
@@ -2423,6 +2458,10 @@ export default defineComponent({
             });
             return;
           }
+        }
+        if( (this.cliente.preferenciaVisita.funcionamentoIndividual || this.cliente.preferenciaVisita.coworking) &&  this.cliente.preferenciaVisita.temIntervaloEntreAgendamentos){
+          const isValid = this.checkIntervalBetweenVisits(minutos, scope, this.cliente.preferenciaVisita.intervaloEntreAgendamentos)
+          if(!isValid) return;
         }
 
         let diaFuturo = now.add(this.liberarAgendamento, "day");
