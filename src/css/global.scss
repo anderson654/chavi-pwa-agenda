@@ -70,21 +70,6 @@
   --base-button-style : linear-gradient(267deg,#009688 50%,#61f1e3);
 } 
 
-:root.baggio 
-{
-  --base-primary: #009688;
-  --base-secondary : #017065;
-  --base-accent : #015c53;
-  --base-background : rgb(240, 240, 240);
-  --base-background-color : linear-gradient(
-    202deg,
-    rgba(240, 240, 240, 1) 50%,
-    rgb(84, 221, 255) 100%
-  );
-  --base-button : #009688;
-  --base-button-style : linear-gradient(267deg,#009688 50%,#61f1e3);
-} 
-
 
 body {
   background: var( --base-background );
