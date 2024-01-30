@@ -2268,8 +2268,10 @@ export default defineComponent({
             }
           }
         }else if (eventFilter) {
-          const dateTimeFinal = dateTime + ms;
-          
+          let dateTimeFinal = dateTime + ms;
+          if((this.cliente.preferenciaVisita.funcionamentoIndividual || this.cliente.preferenciaVisita.coworking) && this.cliente.preferenciaVisita.temIntervaloEntreAgendamentos){
+            dateTimeFinal += (this.cliente.preferenciaVisita.intervaloEntreAgendamentos * 60 * 1000)
+          }
           if ((eventFilter.timestampInicial >= dateTimeFinal) && inteiro) {
             itens.push(opt);
           }
@@ -2383,9 +2385,6 @@ export default defineComponent({
       
       const isInValid = eventsOnTheSelectedDay.find((data) => {
         if(data.timestampInicial > selectedDateInTimeFormat){
-          console.log(new Date(selectedDateInTimeFormat))
-          console.log(new Date(selectedDateInTimeFormat + intervalInTimeStamp))
-          console.log(new Date(data.timestampInicial))
           return (selectedDateInTimeFormat + intervalInTimeStamp) >= data.timestampInicial
         }else{
           const endDateTimeFormat = data.timestampInicial + (data.duration * 60 * 1000);
