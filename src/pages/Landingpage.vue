@@ -136,6 +136,7 @@
           width: 100%;
           color: white;
           text-align: center;
+          background-color: #fff;
         "
       >
         <span
@@ -174,6 +175,9 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 20px;
+  max-width: 100vw;
+  flex-wrap: wrap;
+  margin-bottom: 80px;
 }
 
 .containerBox > div {
@@ -220,9 +224,5 @@ export default {
 }
 
 @media (max-width: 600px) {
-  .containerBox {
-    flex-direction: column;
-    margin: 0;
-  }
 }
 </style>
