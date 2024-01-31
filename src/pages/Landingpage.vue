@@ -60,23 +60,6 @@
         />
       </div>
 
-      <div class="baggio">
-        <q-img
-          src="baggio_logo.jpg"
-          fit="contain"
-          height="100px"
-          width="150px"
-          :style="
-            $q.platform.is.desktop
-              ? 'min-width: 50px; max-width: 150px'
-              : 'min-width: 70px; max-width: 130px'
-          "
-          no-spinner
-          class="q-my-sm"
-          @click="$router.push('/baggio')"
-        />
-      </div>
-
       <div class="mindhub">
         <q-img
           src="mindhub.png"
@@ -125,6 +108,22 @@
           @click="$router.push('/h2u')"
         />
       </div>
+      <div class="celepar">
+        <q-img
+          src="celepar.png"
+          fit="contain"
+          height="100px"
+          width="150px"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+          class="q-my-sm"
+          @click="$router.push('/celepar')"
+        />
+      </div>
     </div>
 
     <footer reveal elevated>
@@ -137,6 +136,7 @@
           width: 100%;
           color: white;
           text-align: center;
+          background-color: #fff;
         "
       >
         <span
@@ -175,6 +175,9 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 20px;
+  max-width: 100vw;
+  flex-wrap: wrap;
+  margin-bottom: 80px;
 }
 
 .containerBox > div {
@@ -212,18 +215,14 @@ export default {
   border-left: teal 3px solid;
 }
 
-.baggio {
-  border-left: #223764 3px solid;
-}
-
 .mindhub {
   border-left: #7c4ac7 3px solid;
 }
 
+.celepar {
+  border-left: #F15A5B 3px solid;
+}
+
 @media (max-width: 600px) {
-  .containerBox {
-    flex-direction: column;
-    margin: 0;
-  }
 }
 </style>
