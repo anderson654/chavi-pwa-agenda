@@ -42,11 +42,11 @@ module.exports = configure(function (ctx) {
     build: {
       env: ctx.dev
         ? {
-            VUE_APP_API_URL: "http://localhost:3000/api",
+           //VUE_APP_API_URL: "http://localhost:3000/api",
             //VUE_APP_API_URL: 'https://e6e402e894b5.ngrok.io/api',
             //VUE_APP_API_URL: "https://betaserver.chavi.com.br/api",
             //VUE_APP_API_URL: "https://beta2.chavi.com.br/api"
-             //VUE_APP_API_URL: "https://api.chavi.com.br/api",
+            VUE_APP_API_URL: "https://api.chavi.com.br/api",
           }
         : {
             VUE_APP_API_URL: "https://api.chavi.com.br/api",
