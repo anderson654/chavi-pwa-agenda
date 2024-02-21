@@ -3217,6 +3217,13 @@ export default defineComponent({
 
         for (let horario of this.events) {
 
+          if(!horario.usuario){
+            horario.usuario = "Deletado"
+          }
+          if(!horario.usuarioEntidade){
+            horario.usuarioEntidade = ""
+          }
+
           const inicio = parseTimestamp(
             moment(parseInt(horario.timestampInicial)).format(
               "YYYY-MM-DD HH:mm"
@@ -3248,6 +3255,7 @@ export default defineComponent({
               horario.usuarioEntidade = ""
             }
             if (!horario.usuario) {
+              console.log("🚀 ~ formatData ~ horario:", horario)
               horario.usuario = ""
             }
 
