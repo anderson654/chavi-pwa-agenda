@@ -1076,6 +1076,7 @@ export default defineComponent({
         },
       },
       maximoPessoas: "",
+      termosDeUsoCustomizado: undefined,
       eventoOutros: {},
       publicoExterno: false,
       usoDeCreditos: false,
@@ -1144,15 +1145,11 @@ export default defineComponent({
     },
     logo() {
       let path = `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/`;
-      if (
-        this.cliente &&
-        this.cliente.fotoImovel &&
-        this.cliente.fotoImovel.indexOf("https://") > -1
-      )
-        return this.cliente.fotoImovel;
-      return this.cliente && this.cliente.fotoImovel
-        ? path + this.cliente.fotoImovel
-        : false;
+      if ( this.cliente && this.cliente.fotoImovel && this.cliente.fotoImovel.indexOf("https://") > -1){
+          return this.cliente.fotoImovel;
+        }
+
+      return this.cliente && this.cliente.fotoImovel ? path + this.cliente.fotoImovel : false;
     },
     getEndereco() {
       let resultado = "";
@@ -1373,6 +1370,8 @@ export default defineComponent({
           this.parte = 1
         }
       }
+          let holder = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.termosDeUsoCustomizado
+          this.termosDeUsoCustomizado = holder != undefined ? this.formatarTexto(holder) : ''
       const params = this.getParams;
       if (params && params.entidadeId && params.imovelRef) {
         this.user.entidadeId = params.entidadeId;
@@ -1656,8 +1655,8 @@ export default defineComponent({
 
 
 
-    this.modalComprarCreditos.dialogAtivo = false
-  },
+      this.modalComprarCreditos.dialogAtivo = false
+    },
 
     async telaInicial() {
       await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
@@ -3014,6 +3013,7 @@ export default defineComponent({
         return true;
       }
     },
+    
     async carregarHorarios() {
       try {
         Loading.show({
@@ -3689,14 +3689,31 @@ export default defineComponent({
       });
       return filter;
     },
+    formatarTexto(texto) {
+			// Substituir "- " no início da linha por <li>
+		  texto = texto.replace(/^- (?=.)/gm, "<li>");
 
+		  // Fechar tags <li> abertas no final do texto
+		  if (texto.endsWith("- ")) {
+			  texto += "</li>";
+		  }
+			// Substituir \n por <br>
+			texto = texto.replace(/\n/g, "<br>");
+			
+			// Envolver texto entre ** em <strong></strong>
+			texto = texto.replace(/\*(.*?)\*/g, "<strong>$1</strong>");
+
+
+			return texto;
+		},
     termosDeUso() {
+      let message = this.termosDeUsoCustomizado ? this.termosDeUsoCustomizado: "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café."
+      
       Dialog.create({
         title: "Termos de uso da sala",
-        message:
-          "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.",
+        message:message,
         html: true,
-        fullWidth: true,
+        style: {width: "80%"},
         ok: {
           label: "Ok",
           color: "positive",
