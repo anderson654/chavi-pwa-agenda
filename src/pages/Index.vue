@@ -1,985 +1,478 @@
 <template>
-  <q-page class="flex-center column">
-    <!-- SEM IMÓVEL -->
-    <div
-      v-if="semImovel"
-      style="height: 100vvh; font-color: black; font-size: 1.5rem"
-      class="absolute-center row full-width justify-around q-gutter-md"
-    >
-      <q-btn
-        color="primary"
-        style="width: 200px; min-width: 150px; height: 125px"
-        @click="$router.push(`${routeCoworking}`)"
-      >
-      </q-btn>
-    </div>
-    <!-- <div v-if="parte == 4">
-      <button @click="this.parte = 5">Próxima</button>
-    </div> -->
-
-    <!-- CALENDÁRIO -->
-    <div v-else class="flex-center column">
-      <!-- TÍTULOS/HEADES -->
-      <div class="text-center q-my-lg" style="width: 70vw">
-        <div v-if="inForms">
-          <span style="font-size: 1.4rem" v-if="parte == 1">
-            Agora, insira seu telefone.<br />
-            Em seguida, aguarde receber um código por SMS ou whatsapp e insira no campo
-            indicado.
-          </span>
-          <span style="font-size: 1.4rem" v-if="parte == 2">
-            Preencha seus dados:
-          </span>
-          <div v-if="parte == 3">
-            <span style="font-size: 1.4rem">Estamos quase finalizando.</span>
-            <br />
-            <span style="font-size: 1.1rem">
-              Para aumentarmos a segurança da sua visita, precisamos que valide
-              seu documento de identificação (RG ou CNH)
-            </span>
-          </div>
-          <div v-if="parte == 4">
-            <span style="font-size: 1.4rem" class="text-primary">
-              Sua reserva em {{ user.imovelRef }} está quase pronta
-            </span>
-            <div class="full-width flex justify-center q-mt-sm">
-              <q-img
-                v-if="logo"
-                :src="logo"
-                spinner-color="primary"
-                fit="contain"
-                style="max-width: 300px"
-              />
-            </div>
-            <br />
-            <span style="font-size: 1.2rem"
-              >Agora é só revisar os dados e enviar a solicitação de
-              agendamento.</span
-            >
-          </div>
+    <q-page class="flex-center column">
+        <!-- SEM IMÓVEL -->
+        <div v-if="semImovel" style="height: 100vvh; font-color: black; font-size: 1.5rem" class="absolute-center row full-width justify-around q-gutter-md">
+            <q-btn color="primary" style="width: 200px; min-width: 150px; height: 125px" @click="$router.push(`${routeCoworking}`)"> </q-btn>
         </div>
-        <div v-else class="text-center column">
-          <span
-            style="font-size: 1.4rem; color: #505050"
-            v-html="botaoCalendario"
-            @click="goBack"
-          >
-          </span>
-          <span
-            style="font-size: 1.2rem; color: #505050"
-            v-html="tituloCalendario"
-          >
-          </span>
-        </div>
-        <!--AQUI-->
-        <img
+        <!-- <div v-if="parte == 4">
+    <button @click="this.parte = 5">Próxima</button>
+  </div> -->
 
-          :src="logo"
-          spinner-color="#9654ff"
-          class="img-salas"
-        />
-
-      </div>
-
-      <!-- CALENDÁRIO -->
-      <div class="full-width" v-if="!inForms">
-        <div v-if="funcionamentoRotativo" class="container">
-          <div class="container-title">
-            <span>1</span>
-            <p>Quantidade de Posições</p>
-            <span>{{ quantidadePosicoes }}</span>
-          </div>
-          <div class="wrapper-bar">
-            <div v-for="index in quantidadeDeElementos" :key="index" :style="getGradientStyle(index)" ></div>
-          </div>
-        </div>
-        <div class="row justify-center items-center">
-          <div class="col-12 row justify-center items-center">
-            <!-- BTN NAVEGAÇÃO -->
-            <div
-              v-if="
-                imovel.opcoesDeCredito.descritivo &&
-                imovel.opcoesDeCredito.descritivo.length > 0
-              "
-            >
-              <div class="descritivo">
-                <div class="descritivo-title">
-                  <p>Descritivo do imóvel:</p>
-                </div>
-
-                <div
-                  v-for="descritivo in imovel.opcoesDeCredito.descritivo"
-                  :key="descritivo"
-                  class="q-py-xs"
-                >
-                  <li>
-                    <span>
-                      {{ descritivo }}
+        <!-- CALENDÁRIO -->
+        <div v-else class="flex-center column">
+            <!-- TÍTULOS/HEADES -->
+            <div class="text-center q-my-lg" style="width: 70vw">
+                <div v-if="inForms">
+                    <span style="font-size: 1.4rem" v-if="parte == 1">
+                        Agora, insira seu telefone.<br />
+                        Em seguida, aguarde receber um código por SMS ou whatsapp e insira no campo indicado.
                     </span>
-                  </li>
-                </div>
-              </div>
-            </div>
-            <div class="col-12">
-              <navigation-bar
-                @today="onTodayMonth"
-                @prev="onPrevMonth"
-                @next="onNextMonth"
-              />
-            </div>
-            <div
-              class="row justify-center items-center full-width"
-              style="font-size: 1rem"
-            >
-              <span
-                style="color: #505050; font-size: 1.6rem; font-weight: bold"
-              >
-                {{ getMonth.toUpperCase() }}
-              </span>
-            </div>
-            <!-- NAVEGAÇÃO (MESES) VERSÃO MOBILE -->
-            <div style="width: 80%" v-if="!$q.platform.is.desktop">
-              <q-calendar-month
-                ref="calendarMonth"
-                v-model="selectedDate"
-                bordered
-                mini-mode
-                locale="pt-br"
-                :weekdays="getWeekDisplay"
-                :disabled-before="disabledBefore"
-                :disabled-after="disabledAfter"
-                @click-date="onClickDate"
-              />
-            </div>
-          </div>
-          <div
-            class="q-mt-md"
-            style="width: 90%"
-            v-if="!$q.platform.is.desktop"
-          >
-            <q-separator color="primary" size="3px" />
-          </div>
-        </div>
-        <!-- CALENDÁRIO PARA AGENDAMENTO -->
-        <div class="flex flex-center q-pa-md">
-          <div style="width: 80%">
-            
-            <q-calendar
-              ref="calendar"
-              weekday-align="left"
-              :view="$q.platform.is.desktop ? 'week' : 'day'"
-              locale="pt-br"
-              style="width: 100%"
-              :weekdays="getWeekDisplay"
-              :hoverable="true"
-              :interval-minutes="timeStepMin"
-              :interval-start="intervalStart"
-              :interval-count="intervalCount"
-              :disabled-before="disabledBefore"
-              :disabled-after="disabledAfter"
-              bordered
-              hour24-format
-              v-model="selectedDate"
-              @click-time="onTimeClick"
-            >
-             <template #head-intervals="{ scope }">
-                <div style="display: flex; justify-content: flex-end; flex-direction: column; width: 100%; font-size: 10px; font-weight: 700; text-align: center;">
-                  <span>{{horarioMarco(horaInicial)}}</span>
-                </div>
-              </template>
-              
-              <template
-                #day-body="{
-                  scope: { timestamp, timeStartPos, timeDurationHeight },
-                }"
-              >
-                <template v-if="true">
-                  <template
-                    v-for="(event, index) in getEvents(timestamp.date)"
-                    :key="index"
-                  >
-                    <div
-                      v-if="event.time !== undefined"
-                      class="my-event"
-                      :class="badgeClasses(event, 'body')"
-                      :style="
-                        badgeStyles(event, timeStartPos, timeDurationHeight)
-                      "
-                    >
-                      <div class="title" @click="modalExcluirVisita(event)">
-                        <span class="text-center" v-html="event.title" ></span>
-                        <q-tooltip v-if="event.tooltip" anchor="center middle" self="center middle" transition-show="fade">
-                          Empresa: {{ event.tooltip.empresa }} <br/>
-                          Usuário: {{ event.tooltip.usuario }} <br/>
-                          Início: {{ event.tooltip.inicio }} <br/>
-                          Fim: {{ event.tooltip.fim }} <br/>
-                        </q-tooltip> 
-                        <q-tooltip v-else anchor="center middle" self="center middle" transition-show="fade">
-                          início: {{ event.time }} <br/>
-                        </q-tooltip>
-                      </div>
+                    <span style="font-size: 1.4rem" v-if="parte == 2"> Preencha seus dados: </span>
+                    <div v-if="parte == 3">
+                        <span style="font-size: 1.4rem">Estamos quase finalizando.</span>
+                        <br />
+                        <span style="font-size: 1.1rem"> Para aumentarmos a segurança da sua visita, precisamos que valide seu documento de identificação (RG ou CNH) </span>
                     </div>
-                  </template>
-                  <template
-                    v-for="(holiday, index) in getHoliday(timestamp.date)"
-                    :key="index"
-                  >
-                    <div
-                      v-if="holiday && !liberarFeriado"
-                      class="my-event full-width rounded-border bg-grey-7"
-                      style="top: 0px; height: 100%; align-items: flex-start;"
-                    >
-                      <div
-                        class="title text-center"
-                        style="font-size: 1.2rem; color: lightgrey;"
-                      >
-                        Feriado <br />
-                        {{ holiday.dia }}
-                      </div>
+                    <div v-if="parte == 4">
+                        <span style="font-size: 1.4rem" class="text-primary"> Sua reserva em {{ user.imovelRef }} está quase pronta </span>
+                        <div class="full-width flex justify-center q-mt-sm">
+                            <q-img v-if="logo" :src="logo" spinner-color="primary" fit="contain" style="max-width: 300px" />
+                        </div>
+                        <br />
+                        <span style="font-size: 1.2rem">Agora é só revisar os dados e enviar a solicitação de agendamento.</span>
                     </div>
-                  </template>
-                </template>
-              </template>  
-                  
-            </q-calendar>
-            <div class="q-calendar-day__interval--text q-calendar-day__interval--section">
-              <div style="width: 25px; margin-left: 15px;top: -6px; position: relative;">
-                {{horarioMarco(horaFinal)}}
-              </div>
+                </div>
+                <div v-else class="text-center column">
+                    <span style="font-size: 1.4rem; color: #505050" v-html="botaoCalendario" @click="goBack"> </span>
+                    <span style="font-size: 1.2rem; color: #505050" v-html="tituloCalendario"> </span>
+                </div>
+                <!--AQUI-->
+                <img :src="logo" spinner-color="#9654ff" class="img-salas" />
             </div>
-          </div>
-        </div>
-      </div>
-      <q-form
-        v-if="inForms"
-        lang="pt-BR"
-        ref="forms"
-        @submit="onSubmit"
-        @reset="onReset"
-        @validation-error="onValError"
-        style="width: 90vw; max-width: 500px"
-      >
-        <!-- LOGIN -->
-        <div v-show="parte == 1" class="full-width">
-          <!-- LOGIN TELEFONE -->
-          <q-input
-            v-if="!loginEmail"
-            class="parte1 full-width"
-            type="tel"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-model="user.phone"
-            label="Seu Telefone *"
-            hint="(41) 95588-4433"
-            lazy-rules
-            :mask="phoneMask"
-            :debounce="1000"
-            :rules="[
-              (val) =>
-                (val !== null && val !== '') ||
-                'Por favor, insira seu telefone.',
-              (val) =>
-                (val && val.length == 15) ||
-                'Por favor, insira seu telefone no formato (41) 91234-5678.',
-            ]"
-          />
-          <!-- LOGIN EMAIL -->
-          <q-input
-            v-else
-            class="parte1 full-width"
-            type="email"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-model="user.email"
-            label="Seu Email *"
-            lazy-rules
-            :debounce="1000"
-            :rules="[
-              (val) =>
-                (val !== null && val !== '') || 'Por favor, insira seu e-mail.',
-              (val) =>
-                verificarEmail(val) ||
-                'Por favor, insira seu email em um formato correto.',
-            ]"
-          />
-          <!-- CÓDIGO DE VERIFICAÇÃO -->
-          <q-input
-            class="parte1 full-width"
-            type="text"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-if="newUser"
-            v-model="user.name"
-            label="Parece que você é novo por aqui, qual o seu Nome?"
-            lazy-rules
-            :debounce="1000"
-            :rules="[
-              (val) =>
-                (val !== null && val !== '') || 'Por favor, insira seu nome',
-            ]"
-          />
-          <div class="col-3 q-pl-xs">
-				</div>
-          <q-input
-            class="parte1 full-width"
-            type="tel"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            v-if="codeSent"
-            v-model="user.codigoInput"
-            label="Insira o Código aqui"
-            lazy-rules
-            mask="######"
-            :debounce="1000"
-            :rules="[
-              (val) =>
-                (val !== null && val !== '') || 'Por favor, insira seu código.',
-              (val) =>
-                (val && val.length == 6) ||
-                'Por favor, insira seu código corretamente.',
-            ]"
-          />
-          <!-- BOTÕES VALIDAR LOGIN -->
-          <q-btn-group push flat unelevated class="full-width row q-mt-md">
-            <q-btn
-              class="col-12"
-              :label="codeSent ? 'Verificar Código' : 'Enviar Código'"
-              color="positive"
-              @click="!codeSent ? sendCode() : checkCode()"
-            />
-          </q-btn-group>
-        </div>
-        <!-- DADOS DO USER -->
-        <div v-show="parte == 2" class="full-width">
-          <!-- NOME -->
-          />
-          <!-- TELEFONE -->
-          <q-input
-            class="parte1 full-width"
-            type="tel"
-            v-model="user.phone"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            label="Seu Telefone *"
-            hint="(41) 98888-8888"
-            lazy-rules
-            :mask="phoneMask"
-            :readonly="!loginEmail"
-            clearable
-            :debounce="1000"
-            :rules="[
-              (val) =>
-                (val !== null && val !== '') ||
-                'Por favor, insira seu telefone.',
-              (val) =>
-                (val && val.length == 15) ||
-                'Por favor, insira seu telefone no formato desejado.',
-            ]"
-          >
-            <template v-slot:append>
-              <q-btn
-                style="font-size: 0.7rem"
-                icon="logout"
-                flat
-                dense
-                color="secondary"
-                @click="logout()"
-              />
+
+            <!-- CALENDÁRIO -->
+            <div class="full-width" v-if="!inForms">
+                <div v-if="funcionamentoRotativo" class="container">
+                    <div class="container-title">
+                        <span>1</span>
+                        <p>Quantidade de Posições</p>
+                        <span>{{ quantidadePosicoes }}</span>
+                    </div>
+                    <div class="wrapper-bar">
+                        <div v-for="index in quantidadeDeElementos" :key="index" :style="getGradientStyle(index)"></div>
+                    </div>
+                </div>
+                <div class="row justify-center items-center">
+                    <div class="col-12 row justify-center items-center">
+                        <!-- BTN NAVEGAÇÃO -->
+                        <div v-if="imovel.opcoesDeCredito.descritivo && imovel.opcoesDeCredito.descritivo.length > 0">
+                            <div class="descritivo">
+                                <div class="descritivo-title">
+                                    <p>Descritivo do imóvel:</p>
+                                </div>
+
+                                <div v-for="descritivo in imovel.opcoesDeCredito.descritivo" :key="descritivo" class="q-py-xs">
+                                    <li>
+                                        <span>
+                                            {{ descritivo }}
+                                        </span>
+                                    </li>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <navigation-bar @today="onTodayMonth" @prev="onPrevMonth" @next="onNextMonth" />
+                        </div>
+                        <div class="row justify-center items-center full-width" style="font-size: 1rem">
+                            <span style="color: #505050; font-size: 1.6rem; font-weight: bold">
+                                {{ getMonth.toUpperCase() }}
+                            </span>
+                        </div>
+                        <!-- NAVEGAÇÃO (MESES) VERSÃO MOBILE -->
+                        <div style="width: 80%" v-if="!$q.platform.is.desktop">
+                            <q-calendar-month ref="calendarMonth" v-model="selectedDate" bordered mini-mode locale="pt-br" :weekdays="getWeekDisplay" :disabled-before="disabledBefore" :disabled-after="disabledAfter" @click-date="onClickDate" />
+                        </div>
+                    </div>
+                    <div class="q-mt-md" style="width: 90%" v-if="!$q.platform.is.desktop">
+                        <q-separator color="primary" size="3px" />
+                    </div>
+                </div>
+                <!-- CALENDÁRIO PARA AGENDAMENTO -->
+                <div class="flex flex-center q-pa-md">
+                    <div style="width: 80%">
+                        <q-calendar ref="calendar" weekday-align="left" :view="$q.platform.is.desktop ? 'week' : 'day'" locale="pt-br" style="width: 100%" :weekdays="getWeekDisplay" :hoverable="true" :interval-minutes="timeStepMin" :interval-start="intervalStart" :interval-count="intervalCount" :disabled-before="disabledBefore" :disabled-after="disabledAfter" bordered hour24-format v-model="selectedDate" @click-time="onTimeClick">
+                            <template #head-intervals="{ scope }">
+                                <div style="display: flex; justify-content: flex-end; flex-direction: column; width: 100%; font-size: 10px; font-weight: 700; text-align: center">
+                                    <span>{{ horarioMarco(horaInicial) }}</span>
+                                </div>
+                            </template>
+
+                            <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
+                                <template v-if="true">
+                                    <template v-for="(event, index) in getEvents(timestamp.date)" :key="index">
+                                        <div v-if="event.time !== undefined" class="my-event" :class="badgeClasses(event, 'body')" :style="badgeStyles(event, timeStartPos, timeDurationHeight)">
+                                            <div class="title" @click="modalExcluirVisita(event)">
+                                                <span class="text-center" v-html="event.title"></span>
+                                                <q-tooltip v-if="event.tooltip" anchor="center middle" self="center middle" transition-show="fade">
+                                                    Empresa: {{ event.tooltip.empresa }} <br />
+                                                    Usuário: {{ event.tooltip.usuario }} <br />
+                                                    Início: {{ event.tooltip.inicio }} <br />
+                                                    Fim: {{ event.tooltip.fim }} <br />
+                                                </q-tooltip>
+                                                <q-tooltip v-else anchor="center middle" self="center middle" transition-show="fade"> início: {{ event.time }} <br /> </q-tooltip>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template v-for="(holiday, index) in getHoliday(timestamp.date)" :key="index">
+                                        <div v-if="holiday && !liberarFeriado" class="my-event full-width rounded-border bg-grey-7" style="top: 0px; height: 100%; align-items: flex-start">
+                                            <div class="title text-center" style="font-size: 1.2rem; color: lightgrey">
+                                                Feriado <br />
+                                                {{ holiday.dia }}
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                            </template>
+                        </q-calendar>
+                        <div class="q-calendar-day__interval--text q-calendar-day__interval--section">
+                            <div style="width: 25px; margin-left: 15px; top: -6px; position: relative">
+                                {{ horarioMarco(horaFinal) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <q-form v-if="inForms" lang="pt-BR" ref="forms" @submit="onSubmit" @reset="onReset" @validation-error="onValError" style="width: 90vw; max-width: 500px">
+                <!-- LOGIN -->
+                <div v-show="parte == 1" class="full-width">
+                    <!-- LOGIN TELEFONE -->
+                    <q-input v-if="!loginEmail" class="parte1 full-width" type="tel" label-color="primary" style="font-size: 1.2rem" v-model="user.phone" label="Seu Telefone *" hint="(41) 95588-4433" lazy-rules :mask="phoneMask" :debounce="1000" :rules="[(val) => (val !== null && val !== '') || 'Por favor, insira seu telefone.', (val) => (val && val.length == 15) || 'Por favor, insira seu telefone no formato (41) 91234-5678.']" />
+                    <!-- LOGIN EMAIL -->
+                    <q-input v-else class="parte1 full-width" type="email" label-color="primary" style="font-size: 1.2rem" v-model="user.email" label="Seu Email *" lazy-rules :debounce="1000" :rules="[(val) => (val !== null && val !== '') || 'Por favor, insira seu e-mail.', (val) => verificarEmail(val) || 'Por favor, insira seu email em um formato correto.']" />
+                    <!-- CÓDIGO DE VERIFICAÇÃO -->
+                    <q-input class="parte1 full-width" type="text" label-color="primary" style="font-size: 1.2rem" v-if="newUser" v-model="user.name" label="Parece que você é novo por aqui, qual o seu Nome?" lazy-rules :debounce="1000" :rules="[(val) => (val !== null && val !== '') || 'Por favor, insira seu nome']" />
+                    <div class="col-3 q-pl-xs"></div>
+                    <q-input class="parte1 full-width" type="tel" label-color="primary" style="font-size: 1.2rem" v-if="codeSent" v-model="user.codigoInput" label="Insira o Código aqui" lazy-rules mask="######" :debounce="1000" :rules="[(val) => (val !== null && val !== '') || 'Por favor, insira seu código.', (val) => (val && val.length == 6) || 'Por favor, insira seu código corretamente.']" />
+                    <!-- BOTÕES VALIDAR LOGIN -->
+                    <q-btn-group push flat unelevated class="full-width row q-mt-md">
+                        <q-btn class="col-12" :label="codeSent ? 'Verificar Código' : 'Enviar Código'" color="positive" @click="!codeSent ? sendCode() : checkCode()" />
+                    </q-btn-group>
+                </div>
+                <!-- DADOS DO USER -->
+                <div v-show="parte == 2" class="full-width">
+                    <!-- NOME -->
+                    />
+                    <!-- TELEFONE -->
+                    <q-input class="parte1 full-width" type="tel" v-model="user.phone" label-color="primary" style="font-size: 1.2rem" label="Seu Telefone *" hint="(41) 98888-8888" lazy-rules :mask="phoneMask" :readonly="!loginEmail" clearable :debounce="1000" :rules="[(val) => (val !== null && val !== '') || 'Por favor, insira seu telefone.', (val) => (val && val.length == 15) || 'Por favor, insira seu telefone no formato desejado.']">
+                        <template v-slot:append>
+                            <q-btn style="font-size: 0.7rem" icon="logout" flat dense color="secondary" @click="logout()" />
+                        </template>
+                    </q-input>
+                    <!-- EMAIL -->
+                    <q-input class="parte1 full-width" type="email" v-model="user.email" v-if="utilizarEmail" label-color="primary" style="font-size: 1.2rem" label="Seu E-mail" lazy-rules clearable :debounce="1000" :rules="[(val) => (val) => verificarEmail(val) || 'Insira um e-mail válido']">
+                        <template v-slot:append>
+                            <q-btn v-if="loginEmail" style="font-size: 0.7rem" icon="logout" flat dense color="secondary" @click="logout()" />
+                        </template>
+                    </q-input>
+                    <!-- CPF -->
+                    <q-input v-if="utilizarCPF" class="parte1 full-width" type="tel" v-model="user.cpf" label-color="primary" style="font-size: 1.2rem" label="Seu CPF *" hint="000.000.000-00" lazy-rules clearable mask="###.###.###-##" :debounce="1000" :rules="[(val) => (val !== null && val !== '') || 'Por favor, insira seu CPF.', (val) => verificarCPF(val) || 'Digite um CPF válido']" />
+                    <!-- BOTÕES DE AÇÃO -->
+                    <div class="full-width q-mt-xl">
+                        <q-btn-group push flat class="row full-width justify-center q-mb-xs">
+                            <q-btn
+                                class="col-10 red-button"
+                                style="font-size: 0.7rem"
+                                label="Escolher outro horário"
+                                @click="
+                                    inForms = false;
+                                    events.pop();
+                                "
+                            />
+                        </q-btn-group>
+                        <q-btn-group push flat unelevated class="full-width row">
+                            <q-btn label="Limpar" type="reset" class="q-mr-xs col-6 red-button" />
+                            <q-btn class="col-6 q-ml-xs purple-button" label="Próximo" @click="nextStep()" />
+                        </q-btn-group>
+                    </div>
+                </div>
+                <!-- AQUISIÇÃO DAS FOTOS DOS DOCUMENTOS -->
+                <div v-show="parte == 3 && utilizarDocumentos" class="full-width q-mt-lg">
+                    <div v-if="isDesktop" class="full-width text-center">
+                        <span class="full-width" style="font-size: 1.1rem"> Caso queria, escaneie esse QRCode para continuar pelo smartphone. </span>
+                        <div>
+                            <vue-qrcode :value="qrcode" :options="{ width: 200 }"></vue-qrcode>
+                        </div>
+                    </div>
+                    <div class="full-width">
+                        <div class="full-width text-center" style="font-size: 1.1rem">
+                            <span><strong>Primeiro</strong>, tire ou selecione uma <strong>foto frontal</strong> seu documento de identificação</span>
+                        </div>
+                        <div class="full-width row">
+                            <div class="col-12 q-pr-xs">
+                                <q-file v-model="fotoFrente" accept="image/*" :max-files="1" clearable borderless label-color="primary" label="Anexar Foto Frontal">
+                                    <template v-slot:prepend>
+                                        <q-icon name="attach_file" />
+                                    </template>
+                                </q-file>
+                            </div>
+                        </div>
+                        <div class="full-width q-mt-md text-center" style="font-size: 1.1rem">
+                            <span><strong>Segundo</strong>, tire ou selecione uma <strong>foto do verso</strong> do seu documento de identificação</span>
+                        </div>
+                        <div class="full-width row">
+                            <div class="col-12 q-pr-xs">
+                                <q-file v-model="fotoVerso" accept="image/*" :max-files="1" clearable borderless label-color="primary" label="Anexar Foto do Verso">
+                                    <template v-slot:prepend>
+                                        <q-icon name="attach_file" />
+                                    </template>
+                                </q-file>
+                            </div>
+                        </div>
+                        <div class="full-width text-center q-mt-md" style="font-size: 1.1rem">
+                            <span><strong>Terceiro</strong>, tire ou selecione uma <strong>selfie</strong> para comparar com seu documento</span>
+                        </div>
+                        <div class="full-width row">
+                            <div class="col-12 q-pr-xs">
+                                <q-file v-model="fotoSelfie" accept="image/*" :max-files="1" clearable borderless label-color="primary" label="Anexar Selfie">
+                                    <template v-slot:prepend>
+                                        <q-icon name="attach_file" />
+                                    </template>
+                                </q-file>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="full-width q-mt-sm q-mb-md">
+                        <q-btn-group push flat unelevated class="full-width row">
+                            <q-btn outline label="Voltar" color="secondary" class="col-6 q-mr-xs" @click="parte -= 1" />
+                            <q-btn class="col-6 q-ml-xs" label="Revisar" color="positive" @click="parte += 1" />
+                        </q-btn-group>
+                    </div>
+                </div>
+                <!-- REVISÃO DOS DADOS -->
+                <div v-if="parte == 4" class="full-width flex flex-left">
+                    <div class="full-width" style="font-size: 1.2rem">
+                        <div class="row margin-bt">
+                            <div class="col-3">Nome:</div>
+                            <div class="col-9 text-bold">{{ getPrimeiroNome }}</div>
+                        </div>
+                        <div class="row margin-bt" v-if="isCoworking && user.empresa">
+                            <div class="col-3">Empresa:</div>
+                            <div class="col-9 text-bold">{{ user.empresa }}</div>
+                        </div>
+                        <div class="row margin-bt">
+                            <div class="col-3">Telefone:</div>
+                            <div class="col-9 text-bold">{{ user.phone }}</div>
+                        </div>
+                        <div class="row margin-bt" v-if="utilizarEmail">
+                            <div class="col-3">E-mail:</div>
+                            <div class="col-9 text-bold" style="overflow-wrap: break-word; word-wrap: break-word; hyphens: auto; white-space: normal">
+                                {{ user.email }}
+                            </div>
+                        </div>
+                        <div class="row margin-bt" v-if="utilizarCPF">
+                            <div class="col-3">CPF:</div>
+                            <div class="col-9-shrink text-bold">{{ user.cpf }}</div>
+                        </div>
+                        <div class="row margin-bt">
+                            <div class="col-3">Data:</div>
+                            <div class="col text-bold">{{ parseData }}</div>
+                        </div>
+
+                        <div class="row margin-bt" v-if="getEndereco">
+                            <div class="col-3">Local:</div>
+
+                            <div class="col-9 text-bold" v-html="getEnderecoHtml"></div>
+                        </div>
+                        <div v-if="validarValor()">
+                            <div class="row">
+                                <div class="col-5">Preço 15 minutos:</div>
+                                <div class="col-7 text-bold">R$ {{ filtraValor(valorDaSala) }}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-5">Preço total:</div>
+                                <div class="col-7 text-bold">
+                                    R$
+                                    {{ filtraValor() }}
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="validarExtra()">
+                            <div class="row">
+                                <div class="col-5">Créditos:</div>
+                                <div class="col-7 text-bold">{{ creditosExtraAgendamento.creditos }} Faltantes</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-5">Preço:</div>
+                                <div class="col-7 text-bold">
+                                    R$
+                                    {{ creditosExtraAgendamento.custo }}
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="!user.hasDocs && utilizarDocumentos" class="row q-mt-md">
+                            <div class="col-5">Foto Frente:</div>
+                            <div class="col-7">
+                                <q-img v-if="fotoFrente" :src="getFotoFrente" spinner-color="white" style="height: 140px; max-width: 150px" />
+                            </div>
+                            <div class="col-5 q-my-md">Foto Verso:</div>
+                            <div class="col-7 q-my-md">
+                                <q-img v-if="fotoVerso" :src="getFotoAtras" spinner-color="white" style="height: 140px; max-width: 150px" />
+                            </div>
+                            <div class="col-5">Foto Selfie:</div>
+                            <div class="col-7">
+                                <q-img v-if="fotoSelfie" :src="getFotoSelfie" spinner-color="white" style="height: 140px; max-width: 150px" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-h8 q-mt-md text-justify">
+                        <!-- TODO: Ajustar checkbox -->
+                        <q-checkbox v-model="user.terms" />
+                        <span>
+                            Declaro que li e concordo com os
+                            <a href="https://chavi.com.br/termos" target="_blank"> termos de uso e privacidade </a>
+                            .
+                        </span>
+                    </div>
+                    <div class="text-h8 q-mt-md text-justify">
+                        <q-checkbox v-model="user.use" />
+                        <span>
+                            Declaro que li e concordo com os
+                            <!-- <a @click="termosDeUso" class="fakelink"> termos de utilização da sala</a>. -->
+                            <a @click="termosDeUso" :href="pathPdf" class="fakelink" target="_blank">termos de utilização da sala</a>.
+                        </span>
+                    </div>
+                    <div class="buttonsWrapper">
+                        <q-btn-group push flat unelevated class="full-width row q-my-md q-ml-sm">
+                            <q-btn outline label="Voltar" color="secondary" class="col-6 q-mr-xs" @click="utilizarDocumentos && !user.hasDocs ? (parte -= 1) : this.$router.back()" />
+
+                            <q-btn v-if="validarStatusProcesso()" class="col-6 q-ml-xs" :label="validarStatusProcesso()" type="submit" color="positive" />
+                            <!-- <div 
+            id="wallet_container"
+            v-if="validarStatusProcesso() == 'Pagamento'"
+            ></div> -->
+                        </q-btn-group>
+                    </div>
+                </div>
+            </q-form>
+
+            <template>
+                <div>
+                    <q-dialog v-model="modalComprarCreditos.dialogAtivo">
+                        <q-card>
+                            <q-card-section>
+                                <strong style="font-size: large; font-weight: 700">Compra de créditos extras </strong>
+                            </q-card-section>
+                            <q-card-section>
+                                <span class="text-black" style="font-size: 1rem">
+                                    <p>Você não possui créditos suficientes<br />Gostaria de comprar créditos?</p>
+
+                                    <p style="margin-top: 10px; text-align: center">
+                                        Créditos faltantes:
+                                        <strong>
+                                            {{ creditosExtraAgendamento.creditos }}
+                                        </strong>
+                                    </p>
+                                    <p style="margin-top: 10px; text-align: center">
+                                        Custo total: <strong> {{ creditosExtraAgendamento.custo }} R$ </strong>
+                                    </p>
+                                </span>
+                                <p style="text-align: center">voltar ao site após a compra</p>
+                            </q-card-section>
+                            <q-card-actions align="center">
+                                <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
+                                <q-btn label="Confirmar" color="positive" @click="confirmarDialogo" :disable="!creditosExtraAgendamento.creditos"></q-btn>
+                            </q-card-actions>
+                        </q-card>
+                    </q-dialog>
+                </div>
             </template>
-          </q-input>
-          <!-- EMAIL -->
-          <q-input
-            class="parte1 full-width"
-            type="email"
-            v-model="user.email"
-            v-if="utilizarEmail"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            label="Seu E-mail"
-            lazy-rules
-            clearable
-            :debounce="1000"
-            :rules="[
-              (val) => (val) =>
-                verificarEmail(val) || 'Insira um e-mail válido',
-            ]"
-          >
-            <template v-slot:append>
-              <q-btn
-                v-if="loginEmail"
-                style="font-size: 0.7rem"
-                icon="logout"
-                flat
-                dense
-                color="secondary"
-                @click="logout()"
-              />
-            </template>
-          </q-input>
-          <!-- CPF -->
-          <q-input
-            v-if="utilizarCPF"
-            class="parte1 full-width"
-            type="tel"
-            v-model="user.cpf"
-            label-color="primary"
-            style="font-size: 1.2rem"
-            label="Seu CPF *"
-            hint="000.000.000-00"
-            lazy-rules
-            clearable
-            mask="###.###.###-##"
-            :debounce="1000"
-            :rules="[
-              (val) =>
-                (val !== null && val !== '') || 'Por favor, insira seu CPF.',
-              (val) => verificarCPF(val) || 'Digite um CPF válido',
-            ]"
-          />
-          <!-- BOTÕES DE AÇÃO -->
-          <div class="full-width q-mt-xl">
-            <q-btn-group
-              push
-              flat
-              class="row full-width justify-center q-mb-xs"
-            >
-              <q-btn
-                class="col-10 red-button"
-                style="font-size: 0.7rem"
-                label="Escolher outro horário"
-                @click="
-                  inForms = false;
-                  events.pop();
-                "
-              />
-            </q-btn-group>
-            <q-btn-group push flat unelevated class="full-width row">
-              <q-btn
-                label="Limpar"
-                type="reset"
-                class="q-mr-xs col-6 red-button"
-              />
-              <q-btn
-                class="col-6 q-ml-xs purple-button"
-                label="Próximo"
-                @click="nextStep()"
-              />
-            </q-btn-group>
-          </div>
         </div>
-        <!-- AQUISIÇÃO DAS FOTOS DOS DOCUMENTOS -->
-        <div
-          v-show="parte == 3 && utilizarDocumentos"
-          class="full-width q-mt-lg"
-        >
-          <div v-if="isDesktop" class="full-width text-center">
-            <span class="full-width" style="font-size: 1.1rem">
-              Caso queria, escaneie esse QRCode para continuar pelo smartphone.
-            </span>
-            <div>
-              <vue-qrcode
-                :value="qrcode"
-                :options="{ width: 200 }"
-              ></vue-qrcode>
+        <q-dialog v-model="cardVisita">
+            <div class="shadow-8 bg-grey-2 justify-center" style="border-radius: 2vw; width: 100%; max-width: 350px">
+                <div class="full-width" style="background-color: #505050">
+                    <div class="col-8 text-center justify-center items-center q-pt-md q-px-md">
+                        <span class="text-h6 text-white">
+                            {{ visitaSelecionada.imovel.nome }}
+                        </span>
+                    </div>
+                </div>
+                <div class="q-my-xs full-width q-px-md text-center">
+                    <div class="column full-width justify-center">
+                        <div class="full-width" style="display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+                            <div class="full-widith button-wrapper" style="box-shadow: none; display: flex; gap: 10px">
+                                <q-btn outline label="voltar" color="positive" class="col-6 q-my-xs" style="max-width: 250px" @click="cardVisita = false" />
+                                <q-btn outline label="Excluir" color="negative" class="col-6 q-my-xs" style="max-width: 250px" @click="deletar(visitaSelecionada.id)" />
+                            </div>
+                            <br />
+                        </div>
+                        <div class="full-width text-center" style="font-size: 1rem" v-if="visitaSelecionada && visitaSelecionada.tipoVisita != 'Acesso Irrestrito'">
+                            <span style="color: #505050"
+                                >O seu horário de acesso
+                                {{ visitaSelecionada.validadeInicial > new Date().getTime() ? "será: " : visitaSelecionada.validadeFinal < new Date().getTime() ? "foi: " : "é: " }}
+                                <br />
+                                <strong>{{ getHorario(visitaSelecionada.validadeInicial, "HH:mm") }}</strong>
+                                até
+                                <strong>{{ getHorario(visitaSelecionada.validadeFinal, "HH:mm") }}</strong></span
+                            >
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="full-width">
-            <div class="full-width text-center" style="font-size: 1.1rem">
-              <span
-                ><strong>Primeiro</strong>, tire ou selecione uma
-                <strong>foto frontal</strong> seu documento de
-                identificação</span
-              >
+        </q-dialog>
+        <q-dialog v-model="cardPagamento">
+            <div class="shadow-8 bg-grey-2 justify-center" style="border-radius: 2vw; width: 100%; max-width: 350px">
+                <div class="full-width" style="background-color: #505050">
+                    <div class="col-8 text-center justify-center items-center q-pt-md q-px-md">
+                        <span class="text-h6 text-white"> Pagamento pendente </span>
+                    </div>
+                </div>
+                <div class="q-my-xs full-width q-px-md text-center">
+                    <div class="column full-width justify-center">
+                        <div class="full-width" style="display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+                            <div class="full-widith button-wrapper" style="box-shadow: none; display: flex; gap: 10px">
+                                <q-btn outline label="voltar" color="negative" class="col-6 q-my-xs" style="max-width: 250px" @click="cardPagamento = false" />
+                                <q-btn outline label="Pagar" color="positive" class="col-6 q-my-xs" style="max-width: 250px" @click="checkoutPagamento(visitaSelecionada)" />
+                            </div>
+                            <br />
+                        </div>
+                        <div class="full-width text-center" style="font-size: 1rem">
+                            <span style="color: #505050"
+                                >Finalize o pagamento da sua reserva para agendar a vista.
+                                <br />
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="full-width row">
-              <div class="col-12 q-pr-xs">
-                <q-file
-                  v-model="fotoFrente"
-                  accept="image/*"
-                  :max-files="1"
-                  clearable
-                  borderless
-                  label-color="primary"
-                  label="Anexar Foto Frontal"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="attach_file" />
-                  </template>
-                </q-file>
-              </div>
-            </div>
-            <div
-              class="full-width q-mt-md text-center"
-              style="font-size: 1.1rem"
-            >
-              <span
-                ><strong>Segundo</strong>, tire ou selecione uma
-                <strong>foto do verso</strong> do seu documento de
-                identificação</span
-              >
-            </div>
-            <div class="full-width row">
-              <div class="col-12 q-pr-xs">
-                <q-file
-                  v-model="fotoVerso"
-                  accept="image/*"
-                  :max-files="1"
-                  clearable
-                  borderless
-                  label-color="primary"
-                  label="Anexar Foto do Verso"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="attach_file" />
-                  </template>
-                </q-file>
-              </div>
-            </div>
-            <div
-              class="full-width text-center q-mt-md"
-              style="font-size: 1.1rem"
-            >
-              <span
-                ><strong>Terceiro</strong>, tire ou selecione uma
-                <strong>selfie</strong> para comparar com seu documento</span
-              >
-            </div>
-            <div class="full-width row">
-              <div class="col-12 q-pr-xs">
-                <q-file
-                  v-model="fotoSelfie"
-                  accept="image/*"
-                  :max-files="1"
-                  clearable
-                  borderless
-                  label-color="primary"
-                  label="Anexar Selfie"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="attach_file" />
-                  </template>
-                </q-file>
-              </div>
-            </div>
-          </div>
-          <div class="full-width q-mt-sm q-mb-md">
-            <q-btn-group push flat unelevated class="full-width row">
-              <q-btn
-                outline
-                label="Voltar"
-                color="secondary"
-                class="col-6 q-mr-xs"
-                @click="parte -= 1"
-              />
-              <q-btn
-                class="col-6 q-ml-xs"
-                label="Revisar"
-                color="positive"
-                @click="parte += 1"
-              />
-            </q-btn-group>
-          </div>
-        </div>
-        <!-- REVISÃO DOS DADOS -->
-        <div v-if="parte == 4" class="full-width flex flex-left">
-          <div class="full-width" style="font-size: 1.2rem">
-            <div class="row margin-bt">
-              <div class="col-3">Nome:</div>
-              <div class="col-9 text-bold">{{ getPrimeiroNome }} </div>
-            </div>
-            <div class="row margin-bt" v-if="isCoworking && user.empresa">
-              <div class="col-3">Empresa:</div>
-              <div class="col-9 text-bold">{{ user.empresa }} </div>
-            </div>
-            <div class="row margin-bt">
-              <div class="col-3">Telefone:</div>
-              <div class="col-9 text-bold">{{ user.phone }} </div>
-            </div>
-            <div class="row margin-bt" v-if="utilizarEmail">
-              <div class="col-3">E-mail:</div>
-              <div
-                class="col-9 text-bold"
-                style=" overflow-wrap: break-word; word-wrap: break-word; hyphens: auto; white-space: normal;">
-                {{ user.email }}
-              </div>
-            </div>
-            <div class="row margin-bt" v-if="utilizarCPF">
-              <div class="col-3">CPF:</div>
-              <div class="col-9-shrink text-bold">{{ user.cpf }}</div>
-            </div>
-            <div class="row margin-bt">
-              <div class="col-3">Data:</div>
-              <div class="col text-bold">{{ parseData }}</div>
-            </div>
+        </q-dialog>
 
-            <div class="row margin-bt" v-if="getEndereco">
-              <div class="col-3">Local:</div>
-
-              <div class="col-9 text-bold" v-html="getEnderecoHtml"></div>
-            </div>
-            <div v-if="validarValor()">
-              <div class="row">
-                <div class="col-5">Preço 15 minutos:</div>
-                <div class="col-7 text-bold">
-                  R$ {{ filtraValor(valorDaSala) }}
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-5">Preço total:</div>
-                <div class="col-7 text-bold">
-                  R$
-                  {{ filtraValor() }}
-                </div>
-            </div>
-          </div>
-            <div v-if="validarExtra()">
-              <div class="row">
-                <div class="col-5">Créditos:</div>
-                <div class="col-7 text-bold">
-                 {{ creditosExtraAgendamento.creditos }} Faltantes
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-5">Preço:</div>
-                <div class="col-7 text-bold">
-                  R$
-                  {{ creditosExtraAgendamento.custo }}
-                </div>
-         
-  
-            </div>
-              
-            </div>
-            <div v-if="!user.hasDocs && utilizarDocumentos" class="row q-mt-md">
-              <div class="col-5">Foto Frente:</div>
-              <div class="col-7">
-                <q-img
-                  v-if="fotoFrente"
-                  :src="getFotoFrente"
-                  spinner-color="white"
-                  style="height: 140px; max-width: 150px"
-                />
-              </div>
-              <div class="col-5 q-my-md">Foto Verso:</div>
-              <div class="col-7 q-my-md">
-                <q-img
-                  v-if="fotoVerso"
-                  :src="getFotoAtras"
-                  spinner-color="white"
-                  style="height: 140px; max-width: 150px"
-                />
-              </div>
-              <div class="col-5">Foto Selfie:</div>
-              <div class="col-7">
-                <q-img
-                  v-if="fotoSelfie"
-                  :src="getFotoSelfie"
-                  spinner-color="white"
-                  style="height: 140px; max-width: 150px"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="text-h8 q-mt-md text-justify">
-            <!-- TODO: Ajustar checkbox -->
-            <q-checkbox v-model="user.terms" />
-            <span>
-              Declaro que li e concordo com os
-              <a href="https://chavi.com.br/termos" target="_blank">
-                termos de uso e privacidade
-              </a>
-              .
-            </span>
-          </div>
-          <div class="text-h8 q-mt-md text-justify">
-            <q-checkbox v-model="user.use" />
-            <span>
-              Declaro que li e concordo com os
-              <a @click="termosDeUso" class="fakelink">
-                termos de utilização da sala</a
-              >.
-            </span>
-          </div>
-          <div class="buttonsWrapper">
-            <q-btn-group push flat unelevated class="full-width row q-my-md q-ml-sm">
-              <q-btn
-              outline
-              label="Voltar"
-              color="secondary"
-              class="col-6 q-mr-xs"
-              @click="
-                utilizarDocumentos && !user.hasDocs
-                  ? (parte -= 1)
-                  : this.$router.back()
-              "
-              />          
-            
-              <q-btn
-              v-if="validarStatusProcesso()"
-              class="col-6 q-ml-xs"
-              :label="validarStatusProcesso()"
-              type="submit"
-              color="positive"            
-              />
-              <!-- <div 
-              id="wallet_container"
-              v-if="validarStatusProcesso() == 'Pagamento'"
-              ></div> -->
-            </q-btn-group>
-          </div>
-        </div>
-      </q-form>
-
-      <template>
-        <div>
-          <q-dialog v-model="modalComprarCreditos.dialogAtivo">
+        <q-dialog v-model="finalizacao">
             <q-card>
-              <q-card-section>
-                <strong style="font-size: large; font-weight: 700;">Compra de créditos extras </strong>
-              </q-card-section>
-              <q-card-section>
-                <span class='text-black' style='font-size: 1rem'>
-                  <p>Você não possui créditos suficientes<br/>Gostaria de comprar créditos?</p>
-
-                  <p style="margin-top: 10px; text-align: center">Créditos faltantes: <strong>
-                    {{ creditosExtraAgendamento.creditos }}
-                  </strong></p>
-                  <p style="margin-top: 10px; text-align: center">Custo total: <strong>
-                    {{ creditosExtraAgendamento.custo }} R$
-                  </strong></p>
-                </span>
-                <p style="text-align: center">voltar ao site após a compra</p>
-              </q-card-section>
-              <q-card-actions align="center">
-                <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
-                <q-btn label="Confirmar" color="positive" @click="confirmarDialogo" :disable="!creditosExtraAgendamento.creditos"></q-btn>
-              </q-card-actions>
+                <q-card-section>
+                    <span class="text-primary" style="font-size: 1.2rem">{{ lableFinalizado }}</span>
+                </q-card-section>
+                <q-card-section>
+                    <p style="font-size: 1rem" v-html="messageFinal[0]"></p>
+                </q-card-section>
+                <q-card-actions align="center">
+                    <q-btn label="Salvar no calendáriorio" color="accent" @click="cancelMensagemFinal"></q-btn>
+                    <q-btn label="Novo agendamento" color="primary" @click="$router.push(`/${routeCoworking}`)"></q-btn>
+                    <q-btn label="Ver agendamento" class="button-secondary" @click="okMensagemFinal"></q-btn>
+                </q-card-actions>
             </q-card>
-          </q-dialog>
+        </q-dialog>
+    </q-page>
+    <footer>
+        <div style="height: 40px; width: 100%; color: white; text-align: center; background-color: rgba(240, 240, 240, 0.9)">
+            <div class="bg-grey-3 footer flex flex-center">
+                <div class="footer-content">
+                    <span style="color: #505050">Desenvolvido por</span>
+                    <q-img src="chavi_marca.png" fit="contain" width="100px" :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'" no-spinner class="q-my-sm" style="cursor: pointer; filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg) brightness(96%) contrast(81%)" @click="openLink('https://chavi.com.br', '_blank')" />
+                </div>
+            </div>
         </div>
-      </template>
-
-    </div>
-    <q-dialog v-model="cardVisita">
-        <div
-            class="shadow-8 bg-grey-2 justify-center"
-            style=" border-radius: 2vw; width: 100%; max-width: 350px;"
-          >
-              <div
-                class="full-width"
-                style="background-color: #505050; "
-              >
-                <div
-                  class="col-8 text-center justify-center items-center q-pt-md q-px-md "
-                >
-                  <span class="text-h6 text-white">
-                    {{
-                      visitaSelecionada.imovel.nome
-                    }}
-                  </span>
-                </div>
-              </div>
-              <div class="q-my-xs full-width q-px-md text-center">
-                <div class="column full-width justify-center">
-                  <div
-                    class="full-width"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      white-space: nowrap;
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                    "
-                  >
-                  <div 
-                    class="full-widith button-wrapper" 
-                    style="box-shadow: none; display:flex; gap: 10px;"
-                  >
-                    <q-btn
-                      outline
-                      label="voltar"
-                      color="positive"
-                      class="col-6 q-my-xs"
-                      style="max-width: 250px;"
-                      @click="cardVisita = false"
-                    />
-                    <q-btn
-                      outline
-                      label="Excluir"
-                      color="negative"
-                      class="col-6 q-my-xs" 
-                      style="max-width: 250px;"
-                      @click="deletar(visitaSelecionada.id)"
-                    />
-                  </div>
-                    <br />
-                  </div>
-                  <div
-                    class="full-width text-center"
-                    style="font-size: 1rem"
-                    v-if="visitaSelecionada && visitaSelecionada.tipoVisita != 'Acesso Irrestrito'"
-                  >
-                    <span style="color: #505050"
-                      >O seu horário de acesso
-                      {{
-                        visitaSelecionada.validadeInicial > new Date().getTime()
-                          ? "será: "
-                          : visitaSelecionada.validadeFinal < new Date().getTime()
-                          ? "foi: "
-                          : "é: "
-                      }}
-                      <br />
-                      <strong>{{
-                        getHorario(visitaSelecionada.validadeInicial, "HH:mm")
-                      }}</strong>
-                      até
-                      <strong>{{
-                        getHorario(visitaSelecionada.validadeFinal, "HH:mm")
-                      }}</strong></span
-                    >
-                  </div>
-                </div>
-              </div>
-            
-          </div>
-    </q-dialog>
-    <q-dialog v-model="cardPagamento">
-        <div
-            class="shadow-8 bg-grey-2 justify-center"
-            style=" border-radius: 2vw; width: 100%; max-width: 350px;"
-          >
-              <div
-                class="full-width"
-                style="background-color: #505050; "
-              >
-                <div
-                  class="col-8 text-center justify-center items-center q-pt-md q-px-md "
-                >
-                  <span class="text-h6 text-white">
-                    Pagamento pendente                    
-                  </span>
-                </div>
-              </div>
-              <div class="q-my-xs full-width q-px-md text-center">
-                <div class="column full-width justify-center">
-                  <div
-                    class="full-width"
-                    style="
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      white-space: nowrap;
-                      overflow: hidden;
-                      text-overflow: ellipsis;
-                    "
-                  >
-                  <div 
-                    class="full-widith button-wrapper" 
-                    style="box-shadow: none; display:flex; gap: 10px;"
-                  >
-                    <q-btn
-                      outline
-                      label="voltar"
-                      color="negative"
-                      class="col-6 q-my-xs"
-                      style="max-width: 250px;"
-                      @click="cardPagamento = false"
-                    />
-                    <q-btn
-                      outline
-                      label="Pagar"
-                      color="positive"
-                      class="col-6 q-my-xs" 
-                      style="max-width: 250px;"
-                      @click="checkoutPagamento(visitaSelecionada)"
-                    />
-                  </div>
-                    <br />
-                  </div>
-                  <div
-                    class="full-width text-center"
-                    style="font-size: 1rem"
-                  >
-                    <span style="color: #505050"
-                      >Finalize o pagamento da sua reserva para agendar a vista.
-                      <br />
-                    </span>
-                  </div>
-                  
-                </div>
-              </div>
-            
-          </div>
-    </q-dialog>
-
-    <q-dialog v-model="finalizacao">
-      <q-card>
-        <q-card-section>
-          <span class="text-primary" style="font-size:1.2rem">{{lableFinalizado}}</span>
-        </q-card-section>
-        <q-card-section>
-          <p style="font-size: 1.0rem" v-html="messageFinal[0]"></p>
-        </q-card-section>
-        <q-card-actions align="center">
-            <q-btn label="Salvar no calendáriorio" color="accent" @click="cancelMensagemFinal"></q-btn>
-            <q-btn label="Novo agendamento" color="primary" @click="$router.push(`/${routeCoworking}`)"></q-btn>
-            <q-btn label="Ver agendamento" class="button-secondary" @click="okMensagemFinal"></q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-  </q-page>
-  <footer>
-      <div
-      style="
-          height: 40px;
-          width: 100%;
-          color: white;
-          text-align: center; 
-          background-color: 
-          rgba(240, 240, 240, 0.9);"
-      >
-      <div class="bg-grey-3 footer flex flex-center">
-        <div class="footer-content">
-          <span style="color: #505050;">Desenvolvido por</span>
-          <q-img
-            src="chavi_marca.png"
-            fit="contain"
-            width="100px"
-            :style="$q.platform.is.desktop ? 'width: 100px' : 'width: 80px'"
-            no-spinner
-            class="q-my-sm"
-            style="
-              cursor: pointer;
-              filter: invert(23%) sepia(99%) saturate(4%) hue-rotate(359deg)
-                brightness(96%) contrast(81%);
-            "
-            @click="openLink('https://chavi.com.br', '_blank')"
-          />
-        </div>
-      </div>
-      </div>
-  </footer>
+    </footer>
 </template>
-
-
 
 <script>
 import { defineComponent } from "vue";
-import { Loading, Notify, } from "quasar";
+import { Loading, Notify } from "quasar";
 import * as moment from "moment";
 import { QCalendarDay } from "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.esm.js";
 import { QCalendarMonth } from "@quasar/quasar-ui-qcalendar/dist/QCalendarMonth.esm.js";
 import NavigatioBar from "components/NavigationBar.vue";
 import axios from "axios";
-import {
-  addToDate,
-  parseTimestamp,
-  parseTime,
-  today,
-  parsed,
-  isBetweenDates,
-} from "@quasar/quasar-ui-qcalendar/dist/index.esm.js";
+import { addToDate, parseTimestamp, parseTime, today, parsed, isBetweenDates } from "@quasar/quasar-ui-qcalendar/dist/index.esm.js";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarVariables.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarTransitions.css";
 import "@quasar/quasar-ui-qcalendar/dist/QCalendarDay.css";
@@ -989,2858 +482,2418 @@ import { getLogin } from "src/store/module-example/getters";
 import ListaParticipanteVue from "src/components/ListaParticipante.vue";
 
 export default defineComponent({
-  name: "PageIndex",
-  components: {
-    "q-calendar": QCalendarDay,
-    "navigation-bar": NavigatioBar,
-    "q-calendar-month": QCalendarMonth,
-    "style-bloco": StyleBloco,
-    "lista-participantes" : ListaParticipanteVue
-  },
-  data() {
-    return {
-      lableFinalizado: "Finalizado",
-      dayHeight: 75,
-      modalComprarCreditos: {
-        dialogAtivo: false,
-        creditos: 0,
-        custo: 0
-      },
-      contador: 0,
-      idImovel: "",
-      seMesmoDia: "",
-      salasHotMilkValidarEntrada: false,
-      emailAvisoAgendamento: "",
-      whatsappAvisoAgendamento: "",
-      inForms: false,
-      codeSent: false,
-      semImovel: false,
-      parte: 1,
-      selectedDate: "",
-      valorDoAgendamento: 0,
-      duracao: "",
-      type: "",
-      cliente: {},
-      events: [],
-      /* Info User */
-      fotoFrente: [],
-      fotoSelfie: [],
-      fotoVerso: [],
-      gerenciamentoCreditos : {},
-      user: {
-        name: "",
-        empresa: undefined,
-        phone: "",
-        cpf: "",
-        email: "",
-        terms: false,
-        use: false,
-        hasDocs: false,
-      },
-      newUser: false,
-      isRegistredUser: false,
-      /* Opções calendario */
-      utilizarDocumentos: true,
-      verificarDocumentos: true,
-      aprovarVisita: false,
-      utilizarEmail: true,
-      loginEmail: false,
-      utilizarCPF: false,
-      /* Opções visitas */
-      isCoworking: false,
-      domingo: false,
-      liberarFeriado: false,
-      habilitarPublicoExterno: false,
-      horaFinal: 24,
-      horaInicial: 0,
-      timeStepMin: 15,
-      agendamentoUnico : false,
-      tempoTotalMaximo : 0,
-      necessitaAprovacao: false,
-      creditosExtraAgendamento : {},
-      validaNecessitaCredito : false,
-      validaNecessitaExtra : false,
-      validaNecessitaAprovacao : false,
-      chaveAgendamento: "",
-      liberarAgendamento: -1,
-      sabado: false,
-      tempoMaximo: 60,
-      tempoMinimoAprovacao: 0,
-      numeroVisitantesExternos: 0,
-      redirecionarPagamento: true,
-      entidadeUsuario: "",
-      imovel: {
-        opcoesDeCredito: {
-          descritivo: [],
-          tipoEvento: {},
-        },
-      },
-      maximoPessoas: "",
-      termosDeUsoCustomizado: undefined,
-      eventoOutros: {},
-      publicoExterno: false,
-      usoDeCreditos: false,
-      custoBase : 0,
-      cardVisita: false,
-      cardPagamento: false,
-      visitaSelecionada: {},
-      finalizacao: false,
-      messageFinal:[],
-      returnUrl: "",
-      mensagemIcs:"",
-      clenteOptions: [],
-      colors: [
-        '#EDD9A3',
-        '#F1C18E',
-        '#F79C79',
-        '#F98477',
-        '#F2637F',
-        '#EA4F88',
-        '#CA3C97',
-        '#B1339E',
-        '#872CA2',
-        '#5A2995'
-      ],
-    };
-  },
-  computed: {
-    quantidadeDeElementos(){
-      if(this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho > 10){
-        return 10
-      }else {
-        return Number(this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
-      }
-    },  
-    funcionamentoRotativo(){
-      if(this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.posicoesDeTrabalho){
-        return this.imovel.opcoesAgendamentoIndividual.posicoesDeTrabalho && this.imovel.opcoesAgendamentoIndividual.funcionamentoIndividual;
-      }
-    },
-    quantidadePosicoes(){
-      if (this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho){
-        return  Number(this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho)
-      } else {
-        return 0;
-      }
-    },
-    parseData() {
-      if (this.user.validadeInicial && this.user.validadeFinal) {
-        const inicial = moment(new Date(this.user.validadeInicial));
-        const final = moment(new Date(this.user.validadeFinal));
-        this.seMesmoDia =
-          inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
-
-        if (this.seMesmoDia) {
-          this.seMesmoDia =
-            inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm");
-        } else {
-          this.seMesmoDia =
-            inicial.format("DD/MM/YYYY HH:mm") +
-            " - " +
-            final.format("DD/MM/YYYY HH:mm");
-        }
-        return this.seMesmoDia;
-      }
-      return "";
-    },
-    logo() {
-      let path = `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/`;
-      if ( this.cliente && this.cliente.fotoImovel && this.cliente.fotoImovel.indexOf("https://") > -1){
-          return this.cliente.fotoImovel;
-        }
-
-      return this.cliente && this.cliente.fotoImovel ? path + this.cliente.fotoImovel : false;
-    },
-    getEndereco() {
-      let resultado = "";
-      if (this.cliente && this.cliente.enderecoImovel) {
-        resultado = this.user.imovelRef + " - " + this.cliente.enderecoImovel;
-      } else if (this.user.imovelRef) {
-        resultado = this.user.imovelRef;
-      }
-      return resultado;
-    },
-    getEnderecoHtml() {
-      let resultado = this.user.imovelRef;
-      return resultado.replace("\n", "");
-    },
-
-    // pega o primeiro Nome
-    getPrimeiroNome(){
-      let res = this.user.name.split(" ");
-      return res[0];
-    },
-
-    botaoCalendario() {
-      return `<button
-      class="red-button"style="max-width: 120px; border: none; border-radius: 16px; cursor: pointer; height: 40px;
-      margin-top: 8px;
-      margin-bottom: 16px;
-      ;">
-          <span class="material-icons" style="scale: 2.8;">arrow_left</span>
-          voltar
-        </button>
-        <br>`;
-    },
-
-    tituloCalendario() {
-      let ref = this.user.imovelRef;
-      return !this.isCoworking
-        ? `Agende o melhor  dia<br> e hora para utilizar:<br> <strong> <p style='font-size: 1.8rem; margin-bottom: 16px;'> ${ref} . </strong> </p>`
-        : `
-        <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px; margin-bottom: 5px" >Agende o melhor<br>dia e hora para utilizar:<br></p>
-          <p style="margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
-    },
-
-//===============================================================================
-    isHotmilk() {
-      return (
-        this.cliente &&
-        this.cliente.nome &&
-        (this.cliente.nome.toString().toLowerCase() == "hotmilk" ||
-          this.cliente.nome.toString().toLowerCase() == "dormakaba")
-      );
-//==============================================================================
-      //código comentado para iniibir a parte de créditos
-
-//===============================================================================
-    },
-    isAgora() {
-      return this.cliente.nome == "Ágora Tech Park";
-    },
-    routeCoworking() {
-      let nome = this.cliente.nome
-      nome = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
-      if(nome == "hotmilk"){
-        return "hotmilk/agenda"
-      }else{
-        return nome
-      }
-    },
-
-    getMonth() {
-      const mes = [
-        "",
-        "Janeiro",
-        "Fevereiro",
-        "Março",
-        "Abril",
-        "Maio",
-        "Junho",
-        "Julho",
-        "Agosto",
-        "Setembro",
-        "Outubro",
-        "Novembro",
-        "Dezembro",
-      ];
-      const mesNum = this.selectedDate
-        ? this.selectedDate.split("-")[1]
-        : moment().format("MM");
-
-      return mes[parseInt(mesNum)];
-    },
-    isDesktop() {
-      return this.$q.platform.is.desktop;
-    },
-    getFotoFrente() {
-      try {
-        return URL.createObjectURL(this.fotoFrente);
-      } catch {
-        return this.fotoFrente;
-      }
-    },
-    getFotoAtras() {
-      try {
-        return URL.createObjectURL(this.fotoVerso);
-      } catch {
-        return this.fotoVerso;
-      }
-    },
-    getFotoSelfie() {
-      try {
-        return URL.createObjectURL(this.fotoSelfie);
-      } catch {
-        return this.fotoSelfie;
-      }
-    },
-    login: {
-      get() {
-        return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
-      },
-      set(value) {
-        const key = "setLogin";
-        this.$store.dispatch("setarDados", { key: key, value: value });
-      },
-    },
-    eventsMap() {
-      const map = {};
-      this.events.forEach((event) => {
-        map[event.date] = map[event.date] ? map[event.date] : [];
-        map[event.date].push(event);
-        if (event.days) {
-          let timestamp = parseTimestamp(event.date);
-          let days = event.days;
-          do {
-            timestamp = addToDate(timestamp, { day: 1 });
-            if (!map[timestamp.date]) {
-              map[timestamp.date] = [];
-            }
-            map[timestamp.date].push(event);
-          } while (--days > 0);
-        }
-      });
-      return map;
-    },
-    intervalStart() {
-      let intervalo = 60 / this.timeStepMin;
-      return this.horaInicial * intervalo;
-    },
-    
-    intervalCount() {
-      let horas = this.horaFinal - this.horaInicial;
-      let intervalo = 60 / this.timeStepMin;
-      return horas * intervalo;
-    },
-    disabledBefore() {
-      let ts = parseTimestamp(today());
-      ts = addToDate(ts, { day: -1 });
-      return ts.date;
-    },
-    disabledAfter() {
-      if (!this.liberarAgendamento || this.liberarAgendamento < 0) return;
-      let ts = parseTimestamp(today());
-      ts = addToDate(ts, {
-        day: this.liberarAgendamento + 1,
-      });
-      return ts.date;
-    },
-    phoneMask() {
-      return "(##) #####-####";
-    },
-    getWeekDisplay() {
-      let week = [1, 2, 3, 4, 5];
-      if (this.domingo) week.unshift(0);
-      if (this.sabado) week.push(6);
-      setTimeout(() => {
-        this.onNextMonth();
-        setTimeout(() => {
-          this.onTodayMonth();
-        }, 200);
-      }, 200);
-      return week;
-    },
-    isUsoDeCreditos(){
-      if((this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras)){
-        return true
-      }
-      return false;
-    },
-
-  },
-  mounted() {
-    try {
-      this.selectedDate = today();      
-
-      if (this.login && this.login.user) {
-        this.user = {
-          name: this.login.user.nome.split("-")[0].trim(),
-          empresa: this.getLogin.user.entidade.name,
-          phone: this.login.user.telefone,
-          email: this.login.user.email,
-          cpf: this.login.user.cpf,
-          hasDocs:
-            this.login.user.fotoSelfie &&
-            this.login.user.fotoFrente &&
-            this.login.user.fotoAtras,
-          terms: false,
-          use: false,
-        };
-        this.maximoPessoas =
-          this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
-        if (this.user.email.includes("@chaviuser")) this.user.email = "";
-        if(this.isUsoDeCreditos){
-          this.usoDeCreditos = true
-        }
-      } else {
-        if(this.isHotmilk){
-          this.$router.push("/login");
-        }else{
-          this.inForms = true
-          this.parte = 1
-        }
-      }
-          let holder = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.termosDeUsoCustomizado
-          this.termosDeUsoCustomizado = holder != undefined ? this.formatarTexto(holder) : ''
-      const params = this.getParams;
-      if (params && params.entidadeId && params.imovelRef) {
-        this.user.entidadeId = params.entidadeId;
-        this.user.imovelRef = params.imovelRef;
-        this.user.validadeInicial = this.login.validadeInicial
-          ? this.login.validadeInicial
-          : "";
-        this.user.validadeFinal = this.login.validadeFinal
-          ? this.login.validadeFinal
-          : "";
-        this.carregarHorarios();
-        this.montarQrcode();
-      }
-      this.semImovel = false;
-      if (!params || !params.entidadeId || !params.imovelRef)
-        this.semImovel = true;
-      this.setHoliday(new Date().getFullYear());
-
-    } catch (e) {
-      console.log("Erro ao carregar ", e);
-      this.semImovel = true;
-    }
-    if (this.semImovel){
-      let nomeCoworking = this.$store.getters.getCoworkingNome
-      this.$store.dispatch("setarDados", {
-            key: "setLogin",
-            value: [],
-          });
-      if(nomeCoworking){
-        if(nomeCoworking == "hotmilk"){
-          this.$router.push(`/${nomeCoworking}/agenda`)
-        }else{
-          this.$router.push(`/${nomeCoworking}`) 
-        }
-      }else{
-        this.$store.dispatch("setarDados", {
-            key: "setLogin",
-            value: [],
-          });
-          this.$router.push("/");
-      }
-    }
-  },
-  methods: {
-    getGradientStyle(index) {
-      let gradientStyle = {background: this.colors[index-1]};
-      if (index == 1){
-        gradientStyle.borderRadius = "5px 0 0 5px";
-      }else if (this.quantidadeDeElementos == index){
-        gradientStyle.borderRadius = "0 5px 5px 0 ";
-      }
-
-      return gradientStyle;
-    },
-    async adicionarCreditosExtras(){
-      let data = {
-        entidade: this.getLogin.user.entidadeId,
-        creditos: this.$store.getters.getExtra
-      }
-      if(data.creditos > 0){
-        let response = await this.executeMethod({
-            url: `Entidades/adicionarCreditosExtras`,
-            method: "post",
-            data: data
-          });
-        if(response && response.status == 200){
-          this.$store.dispatch("setarDados", { key: "setExtra", value: 0 });
-        }
-      }else{
-        return
-      }
-    },
-    async deletar(id){
-      let horarioAtual = Date.now();
-      if ((this.visitaSelecionada.validadeInicial - 1800000) < horarioAtual && this.visitaSelecionada.imovel.opcoesAgendamentoIndividual.custaCreditos){
-        Notify.create({
-          message: "O tempo máximo para exclução da visita é 30 minutos antes da reserva.",
-          type: "negative",
-        });
-        return
-      }else{
-        let response = await this.executeMethod({
-          url: `Visitas/excluiVisitaDevolveHoras/${id}`,
-          method: "delete",
-        });
-      }
-      this.carregarHorarios()
-      this.cardVisita = false
-    },
-    async modalExcluirVisita(event){
-      if(event.bgcolor == "blue-5"){
-        if(event.visitaCodigo){
-          let request = {
-            url:"visitas/obter/"+ event.visitaCodigo,
-            method:"get",
-          };
-  
-          const response = await this.executeMethod(request, false);
-          if(response.status == 200){
-            this.visitaSelecionada = response.data
-            this.cardVisita = true
-          }
-        }else{
-          return
-        }
-      }else if(event.bgcolor == "blue-8"  && event.esperaPagamento){
-        if(event.codigo){
-          let request = {
-            url:"convites/obtemPorCodigo/"+ event.codigo,
-            method:"get",
-          };
-  
-          const response = await this.executeMethod(request, false);
-          if(response.status == 200){
-            this.visitaSelecionada = response.data
-            this.cardVisita = true
-          }
-        }else{
-          return
-        }
-      }else{
-        return
-      }
-  },
-    getHorario(time, format) {
-      return moment(time).format(format);
-    }, 
-    getImage(visita) {
-      let path = `http://api.chavi.com.br/api/StorageContainers/fotoImovel/download/`;
-
-      if (visita && visita.foto) {
-        return path + visita.foto;
-      }else{
-        return "chavi_imovel.png";
-      }
-
-    },
-    validarValor(){
-      let valida = this.validarElementosValor() && !this.validarExtra();
-      return valida;
-    },
-    validarElementosValor(){
-      return (!this.validaNecessitaCredito&&this.validaNecessitaAprovacao&&this.necessitaPagamento)
-          || (!this.validaNecessitaCredito&&!this.validaNecessitaAprovacao&&this.necessitaPagamento)  
-          || (this.validaNecessitaCredito&&this.validaNecessitaAprovacao) 
-    },
-    validarExtra(){
-      let extra = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra;
-
-      if (extra && this.creditosExtraAgendamento && this.creditosExtraAgendamento != {})
-      {
-        if ( this.creditosExtraAgendamento.creditos > 0 &&  this.creditosExtraAgendamento.custo > 0){
- 
-          return true;
-          
-        }
-         
-        else{
-      
-          return false;
-          
-        }
-          
-      }
-    },
-    validarStatusProcesso(){
-
-      if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito)
-      {
-        return "Pagamento";
-      } 
-
-      else if (!this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Enviar";
-      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && this.necessitaPagamento) {
-        this.lableFinalizado = 'Pré-reserva em análise'
-        return "Solicitar";
-      }
-      else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) {
-        this.lableFinalizado = 'Pré-reserva em análise'
-        return "Solicitar";
-      }
-      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && this.validarExtra()) {
-        this.lableFinalizado = 'Pré-reserva em análise'
-        return "Solicitar";
-      }
-      else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && !this.validarExtra()) {
-        this.lableFinalizado = 'Pré-reserva em análise'
-        return "Solicitar";
-      }
-      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && !this.validarExtra()) return "Enviar";
-      else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) {
-        this.lableFinalizado = 'Pré-reserva realizada'
-        return "Solicitar";
-      }
-
-    }, 
-       
-        
-    validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras){
-      return (funcionamentoIndividual && custaCreditos && coworking && consomeHoras && (this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId));      
-    },
-    //verificar créditos retorna false se não tiver créditos
-    verificarCreditos(horasMensaisDisponiveis, horasExtras, valor,coworking, consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos) {
-  
-      if((this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras))){
-        const calculoCusto = this.calcularCusto(valor,consumoCreditos, custoBase);
-      
-        if ((horasMensaisDisponiveis + horasExtras) < calculoCusto) {
-          if (!this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra) {
-          
-            let message = `<p>Você não possui créditos suficientes</p>
-                        <p>Entre em contato com o Estabelecimento para adquirir créditos</p>`;
-            Dialog.create({
-              title: "Aviso",
-              //link ainda não implemenado
-              message:message,
-              html: true,
-              ok: {
-                label: "ok",
-                color: "positive",
-              },
-            }).onOk(() => {
-              
-            });
-            return false;
-          }else{
-             let creditosFaltantes = Math.ceil(calculoCusto - (horasMensaisDisponiveis + horasExtras))
-             this.creditosExtraAgendamento.creditos = creditosFaltantes;
-             this.creditosExtraAgendamento.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
-             this.modalComprarCreditos.dialogAtivo = true;
-             return true;
-            }
-         
-        }
-        return true;
-      }
-      return true;
-
-    },
-    fecharDialogo(){
-      this.modalComprarCreditos.dialogAtivo = false;
-      this.utilizarDocumentos && !this.user.hasDocs
-                  ? (this.parte -= 1)
-                  : this.$router.back()
-    },
-    confirmarDialogo(){
-      this.modalComprarCreditos.dialogAtivo = false
-    },
-    async gerarBoletoConvite() {
-
-      //gerarBoletoConvite
-      this.checkoutPagamentoConvite();
-      this.modalComprarCreditos.dialogAtivo = false
-      
-    },
-  
-    async gerarBoleto() {
-
-      const data = {
-        creditosConsumidos : this.modalComprarCreditos.creditosConsumidos,
-        horasMensaisDisponiveis :  this.modalComprarCreditos.horasMensaisDisponiveis,
-        horasExtras : this.modalComprarCreditos.horasExtras,
-        creditos: this.modalComprarCreditos.creditos,
-        preco:this.modalComprarCreditos.custo,
-        imovel: this.idImovel,
-        entidade: this.$store.getters.getImovelAgendamento.entidadeId
-      };
-   
-
-      let request = {
-        url: "Entidades/comprarCreditos",
-        method: "post",
-        data: data,
-      };
-      const response = await this.executeMethod(request, false);
-      const publicKey = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.chaveAgendamento
-      if(response && response.status == 200){
-        this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
-      }
-      return;
-
-
-
-      this.modalComprarCreditos.dialogAtivo = false
-    },
-
-    async telaInicial() {
-      await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
-      await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
-      this.semImovel = true;
-      this.$router.push(`/${this.routeCoworking}`);
-    },
-
-    goBack() {
-      this.$router.go(-2);
-    },
-    async logout(force) {
-      if (force) {
-        this.user.name = "";
-        this.user.empresa = "";
-        this.user.phone = "";
-        this.user.cpf = "";
-        this.user.email = "";
-        await this.$store.dispatch("setarDados", {
-          key: "setLogin",
-          value: [],
-        });
-
-        this.$store.dispatch("setarDados", {
-          key: "setEstadoInicial",
-          value: true,
-        });
-
-        return;
-      }
-      Dialog.create({
-        title: "Aviso",
-        message: `<p>Retornar para a tela inicial?</p> <p>Você irá deslogar</p>`,
-        html:true,
-        ok: {
-          label: "Sim",
-          color: "positive",
-        },
-        cancel: {
-          label: "Não",
-          color: "negative",
-        },
-      }).onOk(async () => {
-        this.user.name = "";
-        this.user.empresa = "";
-        this.user.phone = "";
-        this.user.cpf = "";
-        this.user.email = "";
-        await this.$store.dispatch("setarDados", {
-          key: "setLogin",
-          value: [],
-        });
-        this.parte = 1;
-        this.inForms = true;
-        this.telaInicial()
-      });
-    },
-    nomeEntidadeId(){
-      return "hotmilk"
-    },
-    montarQrcode() {
-      let url = "";
-      if (this.user && this.user.entidadeId && this.user.imovelRef) {
-        url +=
-          "https://agenda.chavi.com.br/" +
-          this.user.entidadeId +
-          "/" +
-          this.user.imovelRef;
-      }
-      let infos = {};
-      if (this.login && this.login.id && this.login.user) {
-        infos.id = this.login.id;
-        infos.userId = this.login.userId;
-        infos.user = {
-          nome: this.login.user.nome,
-          telefone: this.login.user.telefone,
-          email: this.user.email ? this.user.email : this.login.user.email,
-          cpf: this.user.cpf ? this.user.cpf : this.login.user.cpf,
-          id: this.login.userId,
-          fotoSelfie: this.login.user.fotoSelfie,
-          fotoFrente: this.login.user.fotoFrente,
-          fotoAtras: this.login.user.fotoAtras,
-        };
-      }
-      if (this.user.validadeInicial)
-        infos.validadeInicial = this.user.validadeInicial;
-      if (this.user.validadeFinal)
-        infos.validadeFinal = this.user.validadeFinal;
-
-      if (infos) url += "/?login=" + JSON.stringify(infos);
-      try {
-        this.qrcode = encodeURI(url);
-      } catch {
-        this.qrcode = url;
-      }
-    },
-    onTodayMonth() {
-      if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.moveToToday();
-      else this.$refs.calendar.moveToToday();
-    },
-    onPrevMonth() {
-      if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.prev();
-      else this.$refs.calendar.prev();
-    },
-    onNextMonth() {
-      if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.next();
-      else this.$refs.calendar.next();
-    },
-    onClickDate(data) {
-      console.log("onMoved", JSON.stringify(data));
-    },
-    async nextStep() {
-      if (!this.$refs.forms.validate()) {
-        return;
-      }
-      this.montarQrcode();
-
-      this.utilizarDocumentos && !this.user.hasDocs
-        ? (this.parte += 1)
-        : (this.parte += 2);
-
-    },
-    badgeClasses(event, type) {
-      const isHeader = type === "header";
-      return {
-        [`${event.textColor} bg-${event.bgcolor}`]: true,
-        "full-width": !isHeader && (!event.side || event.side === "full"),
-        "left-side": !isHeader && event.side === "left",
-        "right-side": !isHeader && event.side === "right",
-        "rounded-border": true,
-        "borderDivCalendar" : true,
-      };
-    },
-    badgeStyles(event, timeStartPos, timeDurationHeight) {
-      const s = {};
-      if (timeStartPos && timeDurationHeight) {
-        s.top = timeStartPos(event.time) + "px";
-        s.height = timeDurationHeight(event.duration) + "px";
-      }
-      s["align-items"] = "flex-start";
-      s["background-color"] = `${event.styledBg} !important`;
-      if(this.funcionamentoRotativo && ( event.quantidade !== this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho)) s["pointer-events"] = "none";
-      return s;
-    },
-
-    getEvents(dt) {
-      const events = this.eventsMap[dt] || [];
-      if (events.length === 1) {
-        events[0].side = "full";
-      }
-      return events;
-    },
-    horarioMarco(horaCalendario){
-      if (horaCalendario && horaCalendario != ""){
-        let horaMoment = moment(horaCalendario, 'HH:mm');
-        return horaMoment.format('HH:mm');
-      }
-      else{
-        return "";
-      }
-    },
-    qualEvento(informacao, minutos, hora, scope) {
-        let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1)
-        Dialog.create({
-          title: informacaoM,
-          message:`
-                    <div style="margin-bottom: 10px;">
-                      <textarea name="textarea" style="width:100%;height:150px; border: none; background-color: lightgrey;" id="texto" placeholder="Descreva aqui"></textarea>
-                    </div>
-                    <div>
-                      <input type="checkbox" id="checkbox"/>
-                      <label for="checkbox">Público externo</label>
-                    </div>`,
-        html : true,
-          cancel: true,
-          persistent: true,
-        }).onOk((data) => {
-          let texto = document.getElementById("texto").value
-          this.publicoExterno = document.getElementById("checkbox").checked
-          this.eventoOutros = { label: informacao, value: texto };
-          this.escolherHorario(minutos, hora, scope);
-      });
-    },
-    quantasPessoas() {
-      Dialog.create({
-        title:
-          '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
-        message: `
-              <span>
-                Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
-                Insira 0 (zero) caso não haja participantes externos.
-              </span>
-            `,
-        prompt: {
-          model: 0,
-          type: "number",
-        },
-        ok: {
-          label: "Continuar",
-          color: "positive",
-          flat: true,
-        },
-        cancel: {
-          label: "Escolher outro horário",
-          color: "primary",
-          flat: true,
-        },
-        html: true,
-      })
-        .onOk((res) => {
-          Loading.show();
-          setTimeout(() => {
-            if (res > this.maximoPessoas + 1) {
-              Notify.create({
-                message: "Mais pessoas que a capacidade da sala",
-                type: "warning",
-              });
-            }
-            this.inForms = true;
-            if (res > this.$store.imovelAgeda) {
-              this.numeroVisitantesExternos = res;
-            }
-
-            if (this.login && this.login.id && this.login.user) {
-              this.entidadeUsuario = this.login.user.entidade.id;
-              if (
-                !this.utilizarEmail &&
-                !this.utilizarDocumentos &&
-                !this.utilizarCPF &&
-                (this.isCoworking
-                  ? this.user.empresa && this.user.empresa != ""
-                  : true)
-              ){
-                this.parte = 4;
-              } else {
-                this.user.empresa = this.getLogin.user.entidade.nome
-                this.parte = 4
-              }
-            }
-            Loading.hide();
-          }, 1500);
-        })
-        .onCancel(() => {
-          this.events.pop();
-        });
-    },
-
-    adicionaTempoPorExtenso(opcaoPasso){
-
-      const delimitadorHora = 60;
-
-      if (opcaoPasso.value < delimitadorHora){
-        opcaoPasso.label = `${opcaoPasso.label  + ' Minutos '}`;
-      }
-      else if (opcaoPasso.value > delimitadorHora){
-        opcaoPasso.label = `${opcaoPasso.label + ' Horas '}`;
-      }
-      else{
-        opcaoPasso.label = `${opcaoPasso.label + ' Hora '}`;
-      }
-
-      return opcaoPasso;
-    },
-    calcularCusto(opcaoPasso,consumoCreditos, custoBase){
-      return ( Number(opcaoPasso) / 60 ) *  Number(custoBase) *  consumoCreditos;
-    },
-    adicionaCreditoExtenso(opcaoPasso,funcionamentoIndividual,custaCreditos,consumoCreditos,coworking,consomeHoras,custoBase){
-
-      if(this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)){
-
-        let calculoCusto = this.calcularCusto(opcaoPasso.value,consumoCreditos, custoBase);
-
-        opcaoPasso.label += `(${calculoCusto.toFixed(2)} créditos)`;
-      }
-
-      return opcaoPasso;
-
-    },
-    escreveItemHorario(contadorTempoIntervalo){
-      let opcao = this.criaItemListaHorarios(contadorTempoIntervalo);
-      return this.adicionaTempoPorExtenso(opcao);
-    },
-    criaItemListaHorarios(contadorTempoIntervalo){
-
-      const tempoDelimitador = 60;
-
-      if (contadorTempoIntervalo < tempoDelimitador){
-        return {  label: contadorTempoIntervalo.toString(), value : contadorTempoIntervalo};
-      }
-      else{
-        let timeHora = moment.duration(contadorTempoIntervalo,"minutes") ;
-        timeHora = moment.utc(timeHora.asMilliseconds()).format("HH:mm");
-        return { label: timeHora.toString(), value : contadorTempoIntervalo};
-      }
-
-    },
-
-
-    tempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao) {
-
-      if(itens.length == 0){
-        return '';
-      }
-
-      let tempoMinimo;
-      itens.forEach(element => {
-        if (element?.value <= tempoMinimoAprovacao){
-          tempoMinimo = element?.value;
-        }
-      });
-
-      return this.escreveItemHorario(tempoMinimo).label;
-
-    },
-    validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao,aprovarVisita, necessitaAprovacao, funcionamentoIndividual){
-
-      if ((typeof tempoMinimoAprovacao === "undefined") || (typeof aprovarVisita === "undefined") || (typeof necessitaAprovacao === "undefined"))
-      {
-        return "";
-      }
-
-      if (funcionamentoIndividual && necessitaAprovacao && tempoMinimoAprovacao <= 0){
-        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
-      }	
-      else if (funcionamentoIndividual && necessitaAprovacao && tempoMinimoAprovacao >0 ){
-        return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
-      }	 
-      else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
-        return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens,tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
-      }
-
-      else if (!funcionamentoIndividual &&  !aprovarVisita) {
-        return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
-      }
-      else{
-        return "";
-      }
-
-    },
-
-    construirOpcoesAgendamento(validadInicial,timeHoraFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos){
-
-      if((timeStepMin <= 0)&&(tempoMaximo <=0)&&(!timeHoraFinal)&&(!validadInicial)){
-        return [];
-      }
-
-      let opcoes = [];
-      let contadorTempoIntervalo = timeStepMin;
-
-      const horaMomentInicial = moment(validadInicial);
-
-      let horaMomentFinal = moment(timeHoraFinal, 'HH:mm')
-      horaMomentFinal.set('year', validadInicial.getFullYear());
-      horaMomentFinal.set('month',validadInicial.getMonth());
-      horaMomentFinal.set('date',validadInicial.getDate());
-
-      let horaIntervalo = horaMomentInicial.clone();
-      horaIntervalo.add(contadorTempoIntervalo, 'minutes');
-
-
-      while ((contadorTempoIntervalo <= tempoMaximo)&&((horaMomentFinal.isAfter(horaIntervalo))||horaMomentFinal.isSame(horaIntervalo))){
-        
-            let opcao = this.escreveItemHorario(contadorTempoIntervalo);            
-            opcao = this.adicionaCreditoExtenso(opcao,funcionamentoIndividual,custaCreditos,consumoCreditos,coworking,consomeHoras,custoBase);
-            opcoes.push(opcao);
-
-        contadorTempoIntervalo += timeStepMin ;
-        horaIntervalo.add(timeStepMin, 'minutes');
-      }
-
-      return opcoes;
-
-    },
-
-    calcularTempoMaximoAgendamento(dataMarco, horaInicial, horaFinal,tempoTotalMaximo,horarios){
-     
-      const data = moment(dataMarco); // Obtém o momento atual
-
-      let horaMomentInicial = moment(horaInicial, 'HH:mm');
-      let horaMomentFinal = moment(horaFinal, 'HH:mm')
-
-      const momentInicial = horaMomentInicial.set({
-        date: data.date(),
-        month: data.month(),
-        year: data.year()
-      });
-
-      const momentFinal = horaMomentFinal.set({
-        date: data.date(),
-        month: data.month(),
-        year: data.year()
-      });
-
-      let agendamentosUsuario = horarios.filter((agendamento) => {	
-
-        let usuarioValidado = agendamento.usuarioId == this.getLogin.user.id;
-
-        let timeStampInicial = parseInt(agendamento.timestampInicial);    
-        let intervalo =  agendamento.duration * 60000;
-        let timeStampFinal = timeStampInicial + intervalo;
-      	let hora= moment(timeStampInicial)
-        let horaFinal= moment(timeStampFinal)      	
-        let  validadepois = hora.isSameOrAfter(momentInicial);	
-        let validaAntes = horaFinal.isBefore(momentFinal);	
-      	return validadepois && validaAntes && usuarioValidado;
-      }) 
-     
-   
- 
-      let contador = 0;
-      for (let index = 0; index < agendamentosUsuario.length; index++) {
-
-        let timeStampInicial = parseInt(agendamentosUsuario[index].timestampInicial);    
-        let intervaloSelect =  agendamentosUsuario[index].duration * 60000;
-        let timeStampFinal = timeStampInicial + intervaloSelect;
-        let validaInicial = new Date(timeStampInicial);
-        let validaFinal = new Date(timeStampFinal);
-
-        let intervalo = validaInicial - validaFinal;
- 
-        contador += Math.abs(intervalo);
-
-      }
-
-      let contadorMinutos = contador / 60000;
-
-      return contadorMinutos;
-
-    },
-    customRound(minutos){
-      const rest = minutos % this.timeStepMin;
-      let result;
-      if(rest == minutos){
-        result = this.timeStepMin;
-      }else{
-        result = rest > (this.timeStepMin / 2) ? minutos - rest : minutos - rest + this.timeStepMin;   
-      }
-      return result;
-    },
-    async escolherHorario(minutos, hora, scope) {
-     let gerenciamentoHoras = {};
-      if (this.entidadeUsuario) {
-        let request = {
-          url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
-          method: "get",
-        };
-
-        const response = await this.executeMethod(request, false);
-
-        if(response && response.status == 200){
-          gerenciamentoHoras = response.data;
-        }
-      }
-      //let gerenciamentoCreditos = {};
-      if (this.imovel) {
-        let request = {
-          url: `entidades/gerenciamentoDeCreditos/${this.user.entidadeId}/${this.idImovel}`,
-          method: "get",
-        };
-        
-        const response = await this.executeMethod(request, false);
-
-        if(response && response.status == 200){
-          this.gerenciamentoCreditos = response.data;
-        }
-      }
-
-      minutos = this.customRound(minutos);
-
-      const horario =
-        hora.toString() +
-        ":" +
-        (minutos - this.timeStepMin == 0
-          ? "00"
-          : minutos - this.timeStepMin
-        ).toString();
-
-      if (minutos == 60) hora = parseInt(hora) + 1;
-
-      const validadeInicial = new Date(
-          (scope.timestamp.date + " " + horario).replace(/\-/g, "/")
-        );
-
-      this.user.validadeInicial = validadeInicial.getTime();;
-
-      /* Dados da Entidade */
-      const coworking =  this.gerenciamentoCreditos.coworking;
-      const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
-      const custoBase = this.gerenciamentoCreditos.custoBase;
-      /* Dados do Imovel */
-      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
-      const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
-      const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
-   
-      const horaInicial = this.horaInicial;
-      const horaFinal = this.horaFinal;
-      const timeStepMin =this.timeStepMin;
-      const tempoMaximo = this.tempoMaximo; 
-
-      this.validaNecessitaCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
- 
-      
-      let horariosOcupados = this.events;
-      let totalHorarioAgendamentos = this.tempoTotalMaximo;
-      let unico = this.agendamentoUnico;
-
-      if(unico && totalHorarioAgendamentos > 0){      
-        let maximoValidador = this.calcularTempoMaximoAgendamento(validadeInicial,horaInicial, horaFinal,totalHorarioAgendamentos,horariosOcupados);
-        
-        let maximo = 0 
-        if ( maximoValidador <= totalHorarioAgendamentos) {
-        
-          let restanteMaximo = Math.abs(maximoValidador - totalHorarioAgendamentos);
-
-          if (tempoMaximo > restanteMaximo){
-            maximo = restanteMaximo;
-          }
-          else{
-            maximo = tempoMaximo;
-          
-          }
-
-
-
-          if (maximo > 0){       
-            let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,maximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
-            this.acionarModal(scope,horario,gerenciamentoHoras,options);
-          }
-          else{        
-            Dialog.create({
-            title:
-              '<span class="text-primary" style="font-size:1.2rem">Limite Atingido!</span>',
-            message:
-              '<span style="font-size:1.0rem"> '+
-              "<br/> Você não pode realizar mais agendamentos para esta sala. </span>",
-            ok: "Entendido",
-            html: true,
-            });
- 
-          }
-        }
-        else{        
-          Dialog.create({
-          title:
-            '<span class="text-primary" style="font-size:1.2rem">Limite Atingido!</span>',
-          message:
-            '<span style="font-size:1.0rem"> '+
-            "<br/> Você não pode realizar mais agendamentos para esta sala. </span>",
-          ok: "Entendido",
-          html: true,
-          });
-          // Notificar erro
-        }
-      }      
-      else
-      {
-        let options = this.construirOpcoesAgendamento(validadeInicial,horaFinal,timeStepMin,tempoMaximo,coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos);
-        this.acionarModal(scope,horario,gerenciamentoHoras,options);
-      }
-    },
-    acionarModal(scope, horario, gerenciamentoHoras, options){
-
-      /* Dados da Entidade */
-      const coworking =  this.gerenciamentoCreditos.coworking;
-      const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
-      const custoBase = this.gerenciamentoCreditos.custoBase;
-      /* Dados do Imovel */
-      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
-      const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
-      const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
-
-      let message;
-      const date = scope.timestamp.date;
-      const dateTime = new Date(
-        (date + " " + horario).replace(/\-/g, "/")
-      ).getTime();
-
-      let itens = [];
-      let multiplicaMs = 60 * 1000;
-
-      for (const opt of options) {
-        const inteiro = Number(opt.value) % Number(this.timeStepMin) == 0
-        const ms = Number(opt.value) * multiplicaMs;
-        let eventFilter;
-
-        if(this.funcionamentoRotativo){
-          eventFilter = this.events.filter((item) => {
-            return item.quantidade == this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho;
-          });
-        }else{
-          eventFilter = this.events.find((item) => {
-            return item.timestampInicial > dateTime;
-          });
-        }
-
-        if(this.funcionamentoRotativo){ 
-          const dateTimeFinal = dateTime + ms;
-          
-          let haveBreakpoint = eventFilter.find((item) => {
-            return (item.timestampInicial) == dateTimeFinal - this.imovel.opcoesAgendamentoIndividual.intervaloMin * 60 * 1000;
-          })
-
-          if (haveBreakpoint){
-            break
-          }else{
-            if (inteiro) {
-              itens.push(opt);
-            }
-          }
-        }else if (eventFilter) {
-          let dateTimeFinal = dateTime + ms;
-          if((this.cliente.preferenciaVisita.funcionamentoIndividual || this.cliente.preferenciaVisita.coworking) && this.cliente.preferenciaVisita.temIntervaloEntreAgendamentos){
-            dateTimeFinal += (this.cliente.preferenciaVisita.intervaloEntreAgendamentos * 60 * 1000)
-          }
-          if ((eventFilter.timestampInicial >= dateTimeFinal) && inteiro) {
-            itens.push(opt);
-          }
-        } else if (inteiro) {
-          itens.push(opt);
-        }
-      }
-  
-     
-      if(this.validaNecessitaCredito){
-        message = `<span class='text-black' style='font-size: 1rem'>
-            <center>Selecione a duração da sua utilização</center>`          
-
-              if((!isNaN( gerenciamentoHoras.horasMensaisDisponiveis))&&(!isNaN( gerenciamentoHoras.horasExtras))){
-                let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras ;
- 
-                message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
-                        ${creditoUsuario.toFixed(2)}
-                        </strong></p>
-                      </span>`;
-              }
-              else{
-                message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos:
-                   <strong> 0 </strong></p>
-                  </span>`;
-              }
-       
-           message +=  "</span> <center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
-           message += `</span>`
-      } else {
-          message = `<span class='text-black' style='font-size: 1rem'>
-            <center>Selecione a duração da sua utilização</center>`
-          message +=  "<center>" + this.validacaoTempoMinimoAprovacaoLabel(itens,this.tempoMinimoAprovacao,this.aprovarVisita,this.necessitaAprovacao, funcionamentoIndividual) + "<center>"
-          message += `</span>`
-        }
-      Dialog.create({
-        title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
-        message: message,
-        options: {
-          type: "radio",
-          model: this.duracao,
-          items: itens,
-        },
-        ok: {
-          flat: true,
-          color: "positive",
-          label: "Confirmar",
-        },
-        cancel: {
-          flat: true,
-          label: "Escolher outro",
-        },
-        html: true,
-        persistent: true,
-      }).onOk((data) => {
-        
-        const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
-        const necessitaAprovacao = this.necessitaAprovacao;
-        const aprovarVisita = this.aprovarVisita;
-
-        const validadeFinal = this.user.validadeInicial + Number(data) * 60000;
-        this.user.validadeFinal = validadeFinal;
-        this.validaNecessitaAprovacao = this.validaAprovacao(necessitaAprovacao,aprovarVisita,this.user.validadeInicial,validadeFinal, tempoMinimoAprovacao, funcionamentoIndividual)
-       
-
-        if (!this.verificarCreditos(gerenciamentoHoras.horasMensaisDisponiveis,gerenciamentoHoras.horasExtras,
-          Number(data),coworking,consomeHoras,custoBase,funcionamentoIndividual,custaCreditos,consumoCreditos)) {
-          return;
-        }
-
-        const visita = {
-          title: "Horário Selecionado",
-          date: scope.timestamp.date,
-          time: horario,
-          duration: Number(data),
-          bgcolor: "green-10",
-          textColor: "text-white",
-        };
-        this.events.push(visita);
-
-        this.montarQrcode();
-
-        if (this.habilitarPublicoExterno) {
-          this.quantasPessoas();
-        } else {
-          Loading.show();
-          setTimeout(() => {
-            this.inForms = true;
-            if (this.login && this.login.id && this.login.user) {
-              if (
-                !this.utilizarEmail &&
-                !this.utilizarDocumentos &&
-                !this.utilizarCPF
-              )
-                this.parte = 4;
-
-              else this.parte = 2;
-            }
-            Loading.hide();
-          }, 1500);
-        }
-      });
-    },
-    checkIntervalBetweenVisits(minutos, scope, intervalo){
-      const eventsOnTheSelectedDay = this.events.filter(data => data.date == scope.timestamp.date);
-      let formatedMinuts = minutos - (minutos % this.timeStepMin);
-      formatedMinuts = formatedMinuts.toString().padStart(2, "0")
-      const selectedDateInStringFormat = scope.timestamp.date + " " + `${scope.timestamp.hour}:${formatedMinuts}:00`;
-      const selectedDateInTimeFormat = new Date(selectedDateInStringFormat).getTime();
-      const intervalInTimeStamp = intervalo * 60 * 1000;
-      
-      const isInValid = eventsOnTheSelectedDay.find((data) => {
-        if(data.timestampInicial > selectedDateInTimeFormat){
-          return (selectedDateInTimeFormat + intervalInTimeStamp) >= data.timestampInicial
-        }else{
-          const endDateTimeFormat = data.timestampInicial + (data.duration * 60 * 1000);
-          return (endDateTimeFormat + intervalInTimeStamp) > selectedDateInTimeFormat
-        }
-      })
-      
-      if(isInValid){
-        let timeInterval;
-        if(intervalo < 60){
-          timeInterval = ` ${intervalo} minutos`
-        }
-        else{
-          const hours = intervalo / 60;
-          timeInterval = `${Math.floor(hours)} hora`;
-          if(hours == 1.5) timeInterval += " e meia"
-          else if(hours > 1) timeInterval += "s"
-        }
-
-        Dialog.create({
-          title: "intervalo invalido!",
-          message: `Esta sala tem um intervalo definido de ${timeInterval} entre os agendamentos.`
-        });
-        return false;
-      }
-      return true
-    },  
-    //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
-    async onTimeClick({ event, scope }) {
-      let hora = scope.timestamp.hour;
-      let minutos = scope.timestamp.minute;
-      const dia = moment(scope.timestamp.date);
-      const now = moment();
-
-      this.entidadeUsuario = this.getLogin.user.entidadeId;
-
-      if (this.contador == 0) {
-        let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
-        const trueKeys = [];
-        for (const key in obj) {
-          if (obj[key]) {
-            let keyLabel = key.toString();
-            keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
-            if (keyLabel == "Reuniao") keyLabel = "Reunião";
-            trueKeys.push({ label: keyLabel, value: `${key}` });
-          }
-        }
-
-        //verifica se o horário esta certo para criar visita
-        const now_vector = now.format("MM DD HH mm").split(" ");
-        const minutes_base_ref = now
-          .subtract(this.timeStepMin, "minutes")
-          .format("mm");
-        if (scope.timestamp.past) {
-          if (
-            !(
-              dia == parseInt(now_vector[1]) &&
-              hora == parseInt(now_vector[2]) &&
-              minutos < parseInt(now_vector[3]) &&
-              minutos > parseInt(minutes_base_ref)
-            )
-          ) {
-            Dialog.create({
-              title:
-                "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-              message:
-                "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
-              html: true,
-              ok: "Ok",
-            });
-            return;
-          }
-        }
-        if( (this.cliente.preferenciaVisita.funcionamentoIndividual || this.cliente.preferenciaVisita.coworking) &&  this.cliente.preferenciaVisita.temIntervaloEntreAgendamentos){
-          const isValid = this.checkIntervalBetweenVisits(minutos, scope, this.cliente.preferenciaVisita.intervaloEntreAgendamentos)
-          if(!isValid) return;
-        }
-
-        let diaFuturo = now.add(this.liberarAgendamento, "day");
-
-        if (this.liberarAgendamento > -1 && dia > diaFuturo) {
-          Dialog.create({
-            title:
-              "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-            message:
-              "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
-            html: true,
-            ok: "Ok",
-          });
-          return;
-        }
-        //tipo de evento - outros chama outra modal que pede o que é
-        await new Promise((resolve, reject) => {
-          Dialog.create({
-            title: "Tipo de evento",
-            message: "Escolha o tipo de evento:",
-            options: {
-              type: "radio",
-              model: "",
-              items: trueKeys,
+    name: "PageIndex",
+    components: {
+        "q-calendar": QCalendarDay,
+        "navigation-bar": NavigatioBar,
+        "q-calendar-month": QCalendarMonth,
+        "style-bloco": StyleBloco,
+        "lista-participantes": ListaParticipanteVue,
+    },
+    data() {
+        return {
+            pathPdf: "",
+            lableFinalizado: "Finalizado",
+            dayHeight: 75,
+            modalComprarCreditos: {
+                dialogAtivo: false,
+                creditos: 0,
+                custo: 0,
             },
-            cancel: true,
-            persistent: true,
-          })
-            .onOk((data) => {
-              const filtro = ["outros", "evento"];
-              if (filtro.includes(data)) {
-                this.qualEvento(data, minutos, hora, scope);
-
-              } else {
-                this.eventoOutros.label = data;
-                this.escolherHorario(minutos, hora, scope);
-              }
-              resolve();
-            })
-            .onCancel(() => {
-              this.contador = 0;
-              reject();
-            })
-            .onDismiss(() => {
-              reject();
-            });
-        });
-      }
-    },
-    filtraValor(valorDaSala) {
-      if (valorDaSala) {
-        let filtroValorDaSala = valorDaSala.toString();
-        if (filtroValorDaSala.length == 1 || filtroValorDaSala.length == 2) {
-          return `${valorDaSala}.00`;
-        }
-      }
-
-      let valor =
-        this.valorDaSala *
-        (this.diferencaEmMinutos(
-          this.user.validadeInicial,
-          this.user.validadeFinal
-        ) /
-          15);
-      let filtro = valor.toString();
-
-      if (filtro.length == 1 || filtro.length == 2) {
-        filtro = `${filtro}.00`;
-      }
-
-      if (filtro.length == 3 && filtro[2] !== ".") {
-        filtro = `${filtro}.00`;
-      }
-      return filtro;
-    },
-    validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial, validadeFinal, tempoMinimoAprovacao,funcionamentoIndividual){
-   
-      let paraAprovarPorTempoMinimo = false
-  
-
-      if (funcionamentoIndividual == true && this.necessitaAprovacao == true 
-        && tempoMinimoAprovacao > 0){      
-
-        let duracao = (validadeInicial - validadeFinal) / 60000       
-       
-        paraAprovarPorTempoMinimo = Math.abs(duracao)  > tempoMinimoAprovacao
-      
-      }
-      else if (funcionamentoIndividual == false && aprovarVisita 
-        && tempoMinimoAprovacao > 0) {
-
-        let duracao =  (validadeInicial - validadeFinal) / 60000
-        paraAprovarPorTempoMinimo = Math.abs(duracao) > tempoMinimoAprovacao
-      }
-
-      if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao > 0 
-        && paraAprovarPorTempoMinimo){
-        this.user.paraAprovar = true;
-
-			  return true;
-      } 
-      else if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao > 0 
-        && !paraAprovarPorTempoMinimo){
-        this.user.paraAprovar = false;
- 
-			  return false;
-      } 
-      else if (funcionamentoIndividual == true && necessitaAprovacao){
-        this.user.paraAprovar = true; 
-			  return true;
-      }	   		
-     
-      else if (funcionamentoIndividual == false && aprovarVisita && tempoMinimoAprovacao > 0 && paraAprovarPorTempoMinimo) {
-        this.user.paraAprovar = true;
-  
-        return true;
-      }
-      else if (funcionamentoIndividual == false && aprovarVisita && tempoMinimoAprovacao > 0 && !paraAprovarPorTempoMinimo) {
-        this.user.paraAprovar = false;
-    
-        return false;
-      }
-      else if (funcionamentoIndividual == true && necessitaAprovacao == false ){
-        this.user.paraAprovar = false;
-        return false;
-      }
-      else if (funcionamentoIndividual == false && !aprovarVisita){
-        this.user.paraAprovar = true;
-        return true;
-      }
-
-    },
-    async validaCriacaoVisitaPagamento(){
-     
-     /* Dados da Entidade */
-     const coworking =  this.gerenciamentoCreditos.coworking;
-     const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
-     /* Dados do Imovel */
-     const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
-     const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
-
-     const necessitaPagamento = this.necessitaPagamento;
-
-     const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
-     const necessitaAprovacao = this.necessitaAprovacao;
-     const aprovarVisita = this.aprovarVisita;
-     const validadeInicial = this.user.validadeInicial;
-     const validadeFinal = this.user.validadeFinal;
-
-     let validaUsoCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
-     let validaAprovacao = this.validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial,validadeFinal, tempoMinimoAprovacao,funcionamentoIndividual)
-     
-     if (!validaAprovacao&&!validaUsoCredito&&necessitaPagamento){
-
-       this.checkoutPagamentoConvite();
-     }
-     else{  
-
-       if (validaUsoCredito&&!validaAprovacao&&this.validarExtra())
-       {
-         this.checkoutPagamentoConvite();
-       }
-     }
-
-   },
-
-    //não existe nescessita pagamento - Verficar se é pra tirar
-    async validaCriacaoVisita(){
-     
-      /* Dados da Entidade */
-      const coworking =  this.gerenciamentoCreditos.coworking;
-      const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
-      /* Dados do Imovel */
-      const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
-      const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
-
-      const necessitaPagamento = this.necessitaPagamento;
-
-      const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
-      const necessitaAprovacao = this.necessitaAprovacao;
-      const aprovarVisita = this.aprovarVisita;
-      const validadeInicial = this.user.validadeInicial;
-      const validadeFinal = this.user.validadeFinal;
-
-      let validaUsoCredito = this.validaUsoCredito(funcionamentoIndividual,custaCreditos,coworking,consomeHoras)
-      let validaAprovacao = this.validaAprovacao(necessitaAprovacao,aprovarVisita,validadeInicial,validadeFinal, tempoMinimoAprovacao,funcionamentoIndividual)
-      
-      if (!validaAprovacao&&!validaUsoCredito&&necessitaPagamento){
-
-        this.checkoutPagamentoConvite();
-      }
-      else{  
-
-        if (validaUsoCredito&&!validaAprovacao&&this.validarExtra())
-        {
-          this.checkoutPagamentoConvite();
-        }
-        else{
-          this.criacaoVisita();
-        }
-      }
-
-    },
-    async onSubmit() {
-      this.validaCriacaoVisita();
-    },
-    async criacaoVisita(){
- 
-      if (
-        this.fotoFrente &&
-        this.fotoFrente.length &&
-        this.fotoFrente.length == 0
-      ) {
-        Notify.create({
-          message: "Insira a foto da frente do seu documento",
-          type: "warning",
-        });
-        return;
-      }
-
-      if (
-        this.fotoVerso &&
-        this.fotoVerso.length &&
-        this.fotoVerso.length == 0
-      ) {
-        Notify.create({
-          message: "Insira a foto do verso do seu documento",
-          type: "warning",
-        });
-        return;
-      }
-
-      if (
-        this.fotoSelfie &&
-        this.fotoSelfie.length &&
-        this.fotoSelfie.length == 0
-      ) {
-        Notify.create({ message: "Insira uma selfie sua", type: "warning" });
-        return;
-      }
-
-      if (!this.user.terms) {
-        Notify.create({
-          message: "Para prosseguir, aceite os termos de uso e privacidade",
-          type: "warning",
-        });
-        return;
-      }
-      if (!this.user.use) {
-        Notify.create({
-          message: "Para prosseguir, aceite os termos de utilização da sala",
-          type: "warning",
-        });
-        return;
-      }
-      Loading.show({ message: "Gerando a visita..." });
-      this.user.numeroVisitantesExternos = parseInt(
-        this.numeroVisitantesExternos
-      );
-
-      let user = {
-        ...this.user,
-      };
- 
-      user.entidadeUsuario = this.getLogin.user.entidadeId
-
-      if (this.necessitaAprovacao) {
-        user.necessitaAprovacao = true;
-      }
-
-      if (this.whatsappAvisoAgendamento) {
-        user.whatsappAvisoAgendamento = this.whatsappAvisoAgendamento;
-      }
-
-      if (this.emailAvisoAgendamento) {
-        user.emailAvisoAgendamento = this.emailAvisoAgendamento;
-      }
-
-      if (this.eventoOutros) {
-        user.eventoOutros = JSON.stringify(this.eventoOutros);
-        user.publicoExterno = this.publicoExterno
-      }
-      
-      let request = {
-        url: "Visitas/validarVisita",
-        method: "post",
-        data: user,
-      };
-
-      if (!this.user.hasDocs) {
-
-        this.user.fotoFrente = await this.compressImage(this.fotoFrente);
-        this.user.fotoAtras = await this.compressImage(this.fotoVerso);
-        this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
-
-        const blobFrente = {
-          blob: new Blob([this.user.fotoFrente]),
-          name: this.user.fotoFrente.name,
-        };
-        const blobAtras = {
-          blob: new Blob([this.user.fotoAtras]),
-          name: this.user.fotoAtras.name,
-        };
-        const blobSelfie = {
-          blob: new Blob([this.user.fotoSelfie]),
-          name: this.user.fotoSelfie.name,
-        };
-
-        let formData = new FormData();
-        Object.keys(user).forEach((key) => formData.append(key, user[key]));
-        formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
-        formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
-        formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
-
-        request.headers = { "Content-Type": "multipart/form-data" };
-        request.data = formData;
-      }
-      const response = await this.executeMethod(request, false);
-      Loading.hide();
-
-      if (response && response.status == 200) {
-        if (response.data.text) {
-          this.messageFinal.push(response.data.text)
-        } else {
-          this.messageFinal.push('Visita agendada Com sucesso')
-        }
-        if(response.data && response.data.url){
-          this.returnUrl = response.data.url
-        }
-
-        if (
-          response.data.responseWpp &&
-          response.data.responseWpp.statusCode &&
-          response.data.responseWpp.statusCode != 200
-        ) {
-          Notify.create({
-            message:
-              "Algo inesperado aconteceu, não foi possível enviar mensagem via Whats App.",
-          });
-        }
-        if (response.data.ics){
-          this.mensagemIcs = response.data.ics;
-          }
-        this.mensagemIcs = response.data.ics;
-        this.finalizacao = true
-
-      } else if (response && response.status) {
-      
-        const message = response.data
-          ? response.data
-          : response.message
-          ? response.message
-          : "";
-        Dialog.create({
-          title:
-            '<span class="text-primary" style="font-size:1.2rem">Aconteceu algo inesperado!</span>',
-          message:
-            '<span style="font-size:1.0rem"> ' +
-            message +
-            "<br/> Revise os dados e tente novamente. </span>",
-          ok: "Entendido",
-          html: true,
-        });
-      }
-    },
-
-    okMensagemFinal(){
-      this.$store.dispatch("setarDados", { key: "setParams", value: {} });
-      this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
-      this.semImovel = true;
-      this.openURL(`https://agenda.chavi.com.br/${this.routeCoworking}`, "_self");
-      if (this.returnUrl){
-        this.openURL(this.returnUrl, "_self");
-      }
-    },
-
-    async cancelMensagemFinal(){
-            window.open(
-              `${process.env.VUE_APP_API_URL}/StorageContainers/ics/download/${this.mensagemIcs}`,
-              "_system"
-              ,
-            );
-            Dialog.create({
-              title:
-                '<span class="text-primary" style="font-size:1.2rem">Download do agendamento sendo feito</span>',
-              message:
-                '<span style="font-size:1.0rem">Após o download, abra o arquivo para marcar o agendamento em sua agenda</span>',
-              ok: "Abrir visita",
-              persistent: true,
-              html: true,
-            }).onOk(() => {
-              this.$store.dispatch("setarDados", {
-                key: "setParams",
-                value: {},
-              });
-              this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
-              this.semImovel = true;
-              if (this.returnUrl)
-                this.openURL(this.returnUrl, "_self");
-              else this.openURL("https://agenda.chavi.com.br/"+ this.routeCoworking, "_self");
-            });
-    },
-
-    async gerarConvitePagamento(VisitaConvite){
-      let request = {
-        url: "Convites/validarConvite",
-        method: "post",
-        data: VisitaConvite,
-        encaminharPagamento : true
-      };
-
-      const response = await this.executeMethod(request, false);
-      return response;
-    },
-
-    async checkoutPagamento(convite) {
-
-      let data;
-      if (convite.convitePagamento){
-        data = {
-          id: convite.id,
-          sala: "",
-          tempoDeUso: this.diferencaEmMinutos(
-            convite.dadosVisita.validadeInicial,
-            convite.dadosVisita.validadeFinal
-          ),
-          preco: convite.convitePagamento.custoFaltante,          
-          imovel:convite.dadosVisita.imovelId
-        };
-      }
-      else{
-        data = {
-          id: convite.id,
-          sala: "",//this.visita.imovelRef,
-          tempoDeUso: this.diferencaEmMinutos(
-            convite.dadosVisita.validadeInicial,
-            convite.dadosVisita.validadeFinal
-          ),
-          preco:
-            this.valorDaSala *
-            (this.diferencaEmMinutos(
-              convite.dadosVisita.validadeInicial,
-              convite.dadosVisita.validadeFinal
-            ) /
-              15),
-          imovel: convite.dadosVisita.imovelId
-        };
-      }      
-
-      let request = {
-        url: "Entidades/checkoutPagamento",
-        method: "post",
-        data: data,
-      };
-
-      const response = await this.executeMethod(request, false);
-
-      const mp = new MercadoPago(this.chaveAgendamento, {
-        locale: "pt-BR",
-      });
-      mp.checkout({
-        preference: {
-          id: response.data,
-        },
-        render: {
-          container: ".cho-container",
-          label: "Efetuar pagamento",
-        },
-        autoOpen: true,
-      });
-
-      return;
-    },
-    async checkoutPagamentoConvite() {
-
-      let visitaConvite =  await this.criarVisita();  
-      const response = await this.gerarConvitePagamento(visitaConvite)
-
-      if (response && response.status == 200) {
-        let idPreferencia = response.data.globalId;
-
-        this.user.entidadeUsuario = this.entidadeUsuario;
-        const mp = new MercadoPago(this.chaveAgendamento, {
-          locale: "pt-BR",
-        });
-        mp.checkout({
-          preference: {
-            id: idPreferencia,
-          },
-          render: {
-            container: ".cho-container",
-            label: "Efetuar pagamento",
-          },
-          autoOpen: true,
-        });
-         return;
-     
-      }
-      else{
-        return;
-      }
-    },
-    diferencaEmMinutos(inicial, final) {
-      const dataInicio = moment(inicial);
-      const dataFim = moment(final);
-
-      const calcula = dataFim.diff(dataInicio, "minutes");
-
-      return calcula;
-    },
-
-    openURL(link, target) {
-      window.open(link, target);
-    },
-    onReset() {
-      this.user.name = "";
-      this.user.empresa = "";
-      this.user.cpf = "";
-      this.user.email = "";
-    },
-    onValError(ref) {
-      this.parte = 2;
-    },
-    verificarEmail(valor) {
-      const regexp = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?/i;
-      const regexp2 = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]/i;
-      return regexp.test(valor) || regexp2.test(valor) || !this.utilizarEmail;
-    },
-    verificarCPF(valor) {
-      if (valor) {
-        var soma;
-        var resto;
-        soma = 0;
-        const cpf = valor.toString().replace(/\.|\-/g, "");
-        if (cpf == "00000000000") return false;
-
-        for (let i = 1; i <= 9; i++)
-          soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
-        resto = (soma * 10) % 11;
-
-        if (resto == 10 || resto == 11) resto = 0;
-        if (resto != parseInt(cpf.substring(9, 10))) return false;
-
-        soma = 0;
-        for (let i = 1; i <= 10; i++)
-          soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
-        resto = (soma * 10) % 11;
-
-        if (resto == 10 || resto == 11) resto = 0;
-        if (resto != parseInt(cpf.substring(10, 11))) return false;
-        return true;
-      }
-    },
-    
-    async carregarHorarios() {
-      try {
-        Loading.show({
-          message: "Carregando dados",
-        });
-        const cliente = this.user.entidadeId;
-        let requestH = {
-        url: "Historicos/comprasCreditos",
-        method: "post",
-        data: {data: {coworkingId: this.$store.getters.getImovelAgendamento.entidadeId}},
-      };
-      const historico = await this.executeMethod(requestH, false);
-        
-        const imovel = this.user.imovelRef;
-        if (cliente) {
-          const response = await this.executeMethod({
-            url: "Visitas/horariosOcupados",
-            method: "GET",
-            params: {
-              clienteId: cliente,
-              imovelRef: imovel,
+            contador: 0,
+            idImovel: "",
+            seMesmoDia: "",
+            salasHotMilkValidarEntrada: false,
+            emailAvisoAgendamento: "",
+            whatsappAvisoAgendamento: "",
+            inForms: false,
+            codeSent: false,
+            semImovel: false,
+            parte: 1,
+            selectedDate: "",
+            valorDoAgendamento: 0,
+            duracao: "",
+            type: "",
+            cliente: {},
+            events: [],
+            /* Info User */
+            fotoFrente: [],
+            fotoSelfie: [],
+            fotoVerso: [],
+            gerenciamentoCreditos: {},
+            user: {
+                name: "",
+                empresa: undefined,
+                phone: "",
+                cpf: "",
+                email: "",
+                terms: false,
+                use: false,
+                hasDocs: false,
             },
-          });
-
-          if (response && response.status == 200) {
-            this.cliente = response.data.entidade;
-
-            this.idImovel = response.data.idImovel;
-            this.imovel = response.data.imovel;
-            if(this.imovel.opcoesDeCredito.descritivo && this.imovel.opcoesDeCredito.descritivo.length > 0){
-              this.imovel.opcoesDeCredito.descritivo = this.imovel.opcoesDeCredito.descritivo.filter(e => {
-                if(typeof(e) == "string"){
-                  let descricao = e.trim()
-                  return descricao.length > 0
-                }
-              })
-            }
-            this.$store.dispatch("setarDados", {
-              key: "setLogo",
-              value: this.cliente.logo,
-            });
-            //Verifica se a sala necessita aprovacao
-            if (response.data.entidade.preferenciaVisita.necessitaAprovacao || response.data.imovel.opcoesAgendamentoIndividual.necessitaAprovacao){
-              this.necessitaAprovacao = true
-            }else{
-              this.necessitaAprovacao = false
-            }
-
-
-            //Verifica se a sala tem agendamentoUnico
-            if (response.data.imovel.opcoesAgendamentoIndividual.agendamentoUnico){
-        
-              this.agendamentoUnico = true;
-              if (response.data.imovel.opcoesAgendamentoIndividual.tempoTotalMaximo > 0){
-                this.tempoTotalMaximo = response.data.imovel.opcoesAgendamentoIndividual.tempoTotalMaximo;
-              }else{
-                this.tempoTotalMaximo = 0
-              }
-            }else{
-              this.agendamentoUnico = false            
-              this.tempoTotalMaximo = 0
-           
-            }
-
-              response.data.imovel.opcoesAgendamentoIndividual.necessitaPagamento
-              ? (this.necessitaPagamento = true)
-              : (this.necessitaPagamento = false);
-
-
-            if(response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento || response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento){
-              if(response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento){
-                this.whatsappAvisoAgendamento =
-                  response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento
-              }else{
-                this.whatsappAvisoAgendamento =
-                  response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento
-              }
-            }
-
-            if(response.data.entidade.preferenciaVisita.emailAvisoAgendamento || response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento){
-              if(response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento){
-                this.emailAvisoAgendamento =
-                  response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento
-              }else{
-                this.emailAvisoAgendamento =
-                  response.data.entidade.preferenciaVisita.emailAvisoAgendamento
-              }
-            }
-         
-              if ( response.data.imovel.opcoesAgendamentoIndividual.custaCreditos && response.data.entidade.preferenciaVisita.cobrarCreditoExtra &&  response.data.entidade.preferenciaVisita.chaveAgendamento != "")
-            
-              {
-                response.data.entidade.preferenciaVisita.chaveAgendamento
-                ? (this.chaveAgendamento =
-                  response.data.entidade.preferenciaVisita.chaveAgendamento)
-                : (this.chaveAgendamento = "");
-              }
-              else{
-                response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento
-                ? (this.chaveAgendamento =
-                    response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento)
-                : (this.chaveAgendamento = "");
-              }
-
-            response.data.imovel.opcoesAgendamentoIndividual.valorDaSala
-              ? (this.valorDaSala =
-                  Number(response.data.imovel.opcoesAgendamentoIndividual.valorDaSala))
-              : (this.valorDaSala = 0);
-
-            if (this.cliente){
-              this.custoBase = this.cliente.custoBase ? this.cliente.custoBase : 0;
-            }
-
-            if (this.cliente && this.cliente.preferenciaUsuario) {
-              this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
-              this.utilizarDocumentos =
-                this.cliente.preferenciaUsuario.utilizarDocumentos;
-              this.verificarDocumentos =
-                this.cliente.preferenciaUsuario.verificarDocumentos;
-              this.utilizarEmail =
-                this.cliente.preferenciaUsuario.utilizarEmail;
-              this.loginEmail = this.cliente.preferenciaUsuario.loginEmail;
-              this.aprovarVisita =
-                this.cliente.preferenciaUsuario.aprovarVisita;
-            }
-            if (this.cliente && this.cliente.preferenciaVisita) {
-              this.tempoMinimoAprovacao = this.cliente.preferenciaVisita
-                .tempoMinimoAprovacao
-                ? this.cliente.preferenciaVisita.tempoMinimoAprovacao
-                : 0;
-              this.tempoMaximo = this.cliente.preferenciaVisita.tempoMaximo
-                ? this.cliente.preferenciaVisita.tempoMaximo
-                : 60;
-              this.isCoworking = this.cliente.preferenciaVisita.coworking
-                ? this.cliente.preferenciaVisita.coworking
-                : false;
-              this.sabado = this.cliente.preferenciaVisita.sabado
-                ? true
-                : false;
-              this.liberarFeriado = this.cliente.preferenciaVisita.feriado;
-              this.domingo = this.cliente.preferenciaVisita.domingo
-                ? true
-                : false;
-
-              if (this.cliente.preferenciaVisita.intervaloMin) {
-                this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin;
-                this.duracao =
-                  this.cliente.preferenciaVisita.intervaloMin.toString();
-              }
-              if (this.cliente.preferenciaVisita.horaInicial) {
-                this.horaInicial = this.cliente.preferenciaVisita.horaInicial
-                  .toString()
-                  .split(":")[0];
-              }
-              if (this.cliente.preferenciaVisita.horaFinal) {
-                this.horaFinal = this.cliente.preferenciaVisita.horaFinal
-                  .toString()
-                  .split(":")[0];
-              }
-              if (this.cliente.preferenciaVisita.liberarAgendamento) {
-                this.liberarAgendamento = this.cliente.preferenciaVisita
-                  .liberarAgendamento
-                  ? this.cliente.preferenciaVisita.liberarAgendamento
-                  : -1;
-              }
-              this.habilitarPublicoExterno = this.cliente.preferenciaVisita
-                .habilitarPublicoExterno
-                ? this.cliente.preferenciaVisita.habilitarPublicoExterno
-                : false;
-            }
-            this.events = response.data.horarios;
-            
-            if(this.funcionamentoRotativo){
-              this.formatDataRotativo();
-            }else{
-              this.formatData();
-            }
-          } else {
-            Notify.create({
-              message:
-                "Não foi possível localizar o imóvel ou sala em questão. Verifique o seu link de acesso e tente novamente",
-              type: "warning",
-            });
-            this.semImovel = true;
-          }
-        }
-      } catch (e) {
-        console.log(e);
-      } finally {
-        Loading.hide();
-      }
-    },
-    formatData() {
-      let optionsOff = [];
-
-      if (this.events && this.events.length > 0) {
-        this.events.sort((a, b) => {
-          return a.timestampInicial < b.timestampInicial ? -1 : 1;
-        });
-        //verifica horário
-
-        for (let horario of this.events) {
-
-          if(!horario.usuario){
-            horario.usuario = "Deletado"
-          }
-          if(!horario.usuarioEntidade){
-            horario.usuarioEntidade = ""
-          }
-
-          const inicio = parseTimestamp(
-            moment(parseInt(horario.timestampInicial)).format(
-              "YYYY-MM-DD HH:mm"
-            )
-          );
-
-          let finalTemp = parseInt(horario.timestampInicial) + parseInt(horario.intervalo)
-
-          const final = parseTimestamp(
-            moment(parseInt(finalTemp)).format(
-              "YYYY-MM-DD HH:mm"
-            )
-          );
-
-          const duracao = horario.intervalo / 60000;
-
-          let titleBusy = "Ocupado";
-
-          if (horario.usuario) {
-            titleBusy = `
-              <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
-                  <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
-              let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
-              titleBusy += `${entidadeNomeCortado} <br/>`;
-            }
-
-            if (!horario.usuarioEntidade) {
-              horario.usuarioEntidade = ""
-            }
-            if (!horario.usuario) {
-              console.log("🚀 ~ formatData ~ horario:", horario)
-              horario.usuario = ""
-            }
-
-            let usuarioNomeCortado = ""
-            if (horario.usuario) {
-              titleBusy = `
-              <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
-                  <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-              if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
-                let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0]
-                titleBusy += `${entidadeNomeCortado} <br/>`;
-              }
-
-              usuarioNomeCortado = horario.usuario.trim().split("-")[0]
-              usuarioNomeCortado = usuarioNomeCortado.split(" ")[0]
-              titleBusy += `${usuarioNomeCortado} <br/>`
-
-              titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`
-            }
-
-
-
-            optionsOff.push({
-              title: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id && horario.esperaPagamento == true ? "PENDENTE<br>PAGAMENTO" : "PENDENTE" : titleBusy,
-              date: inicio.date,
-              time: inicio.time,
-              duration: duracao,
-              tooltip: { inicio: inicio.time, fim: final.time, empresa: horario.usuarioEntidade, usuario: usuarioNomeCortado },
-              usuarioId: horario.usuarioId,
-              bgcolor: horario.paraAprovar ? horario.usuarioId == this.getLogin.user.id ? "blue-8" : "yellow-8" : horario.usuarioId == this.getLogin.user.id ? "blue-5" : "red-5",
-              textColor: "text-white",
-              timestampInicial: horario.timestampInicial,
-              visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : "",
-              styledBg: "",
-              esperaPagamento: horario.esperaPagamento ? horario.esperaPagamento : false,
-              codigo: horario.codigo ? horario.codigo : " ",
-            });
-
-          }
-          this.events = optionsOff;
-        }
-      }
-    }  ,
-    formatDataRotativo(){
-      let elementosParaRenderizar = []; // esse array divide cada visita conforme o intervaloMin para renderização
-      let quantidadeDeDivisoesQueEstaVisitaOcupa = 0;
-      let intervaloMinimoEmMilessegundos = this.imovel.opcoesAgendamentoIndividual.intervaloMin * 60 * 1000;
-      let optionsOff = [];
-
-      if (this.events && this.events.length > 0) {
-        this.events.sort((a, b) => {
-          return a.timestampInicial < b.timestampInicial ? -1 : 1;
-        });
-
-        for (let horario of this.events) {
-          horario.timestampInicial = Number(horario.timestampInicial);
-
-          // esses dois if corrigems horarios quebrados para prosseguir com o sistema
-          if (horario.timestampInicial % intervaloMinimoEmMilessegundos != 0){
-            horario.timestampInicial -= horario.timestampInicial % intervaloMinimoEmMilessegundos
-          }
-          if (horario.intervalo % intervaloMinimoEmMilessegundos != 0){
-            horario.intervalo += (horario.intervalo % intervaloMinimoEmMilessegundos)- intervaloMinimoEmMilessegundos; 
-          }
-
-          quantidadeDeDivisoesQueEstaVisitaOcupa = horario.intervalo / intervaloMinimoEmMilessegundos;          
-          if(elementosParaRenderizar.length == 0){
-            for (let i=0; quantidadeDeDivisoesQueEstaVisitaOcupa > i; i++){
-              elementosParaRenderizar.push({
-                InicioDaDivisao: horario.timestampInicial + (intervaloMinimoEmMilessegundos * i),
-                usuarioIds: [horario.usuarioId],
-                quantidade: 1
-              })
-            }
-          }else {
-            for (let i=0; quantidadeDeDivisoesQueEstaVisitaOcupa > i; i++){
-              let inicioDessaDivisao = horario.timestampInicial + intervaloMinimoEmMilessegundos * i;
-              let adicionou = false;
-
-              for (let index = 0; elementosParaRenderizar.length > index; index++){
-                if(elementosParaRenderizar[index].InicioDaDivisao == inicioDessaDivisao){
-                  elementosParaRenderizar[index].quantidade++;
-                  elementosParaRenderizar[index].usuarioIds.push(horario.usuarioId);
-                  adicionou = true;
-                }
-              }
-              if(adicionou){continue}
-              else{
-                  elementosParaRenderizar.push({
-                  InicioDaDivisao: inicioDessaDivisao,
-                  usuarioIds: [horario.usuarioId],
-                  quantidade: 1
-                })
-              }
-            }
-          }
-        }
-
-        for (let index=0; elementosParaRenderizar.length > index; index++){
-          // clonagem do formData original
-          const inicio = parseTimestamp(
-            moment(parseInt(elementosParaRenderizar[index].InicioDaDivisao)).format(
-              "YYYY-MM-DD HH:mm"
-            )
-          );
-
-          const duracao = intervaloMinimoEmMilessegundos / 60000;
-          let titleBusy = "Ocupado";
-
-          titleBusy = `
-            <div class="column justify-center text-center align-center" style="white-space: pre-wrap;">
-                <div class="full-width text-center row">`;
-
-          titleBusy += `<div class="full-width text-center" style="color: #000;">${elementosParaRenderizar[index].quantidade} / ${this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho} </div> </div>`
-          
-
-          let indexColor = Math.floor((elementosParaRenderizar[index].quantidade * this.quantidadeDeElementos) / this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
-
-          optionsOff.push({
-            title: titleBusy,
-            date: inicio.date,
-            time: inicio.time,
-            duration: duracao,
-            usuarioId : "",
-            bgcolor: "",
-            textColor: "text-white",
-            timestampInicial: elementosParaRenderizar[index].InicioDaDivisao,
-            visitaCodigo: "",
-            styledBg: this.colors[indexColor],
-            quantidade: elementosParaRenderizar[index].quantidade,
-          });
-        }
-        this.events = optionsOff;
-      }
-    },
-
-    async sendCode() {
-      let response;
-      if (
-        !this.user ||
-        (this.loginEmail && !this.user.email) ||
-        (!this.loginEmail && !this.user.phone)
-      ) {
-        return;
-      }
-      Loading.show({ message: "Verificando cadastro do usuário" });
-      if (this.loginEmail)
-        response = await this.executeMethod({
-          url: "Usuarios/verificarEmail",
-          method: "post",
-          data: { email: this.user.email },
-        });
-      else
-        response = await this.executeMethod(
-          {
-            url: "Usuarios/loginTelefone",
-            method: "post",
-            data: { telefone: this.user.phone },
-          },
-          false
-        );
-      if (response.status == 200 || response.status == 201) {
-        Notify.create({
-          message: "Código de Confirmação enviado com Sucesso.",
-          type: "positive",
-        });
-        this.codeSent = true;
-        this.newUser = response.status == 200 ? false : true;
-        if (response.status === 201) {
-          this.user.codigo = response.data;
-        }
-        if(this.newUser){
-          this.carregarClientes()
-        }
-      } else {
-        Notify.create({
-          message: "Erro ao enviar Informações ao Servidor.",
-          type: "negative",
-        });
-      }
-      Loading.hide();
-    },
-    async checkCode() {
-      let response;
-      const nome = this.user.name
-      const coworkingId = this.$store.getters.getImovelAgendamento.entidadeId
-      if (this.newUser) {
-        Loading.show({ delay: 400 });
-        if (this.loginEmail)
-          response = await this.executeMethod(
-            {
-              url: "Usuarios/cadastroPorEmail",
-              method: "post",
-              data: {
-                dados: {
-                  email: this.user.email,
-                  nome: nome.trim(),
-                  codigo: this.user.codigo,
-                  entidadeId: this.user.empresa,
-                  coworkingId: coworkingId,
+            newUser: false,
+            isRegistredUser: false,
+            /* Opções calendario */
+            utilizarDocumentos: true,
+            verificarDocumentos: true,
+            aprovarVisita: false,
+            utilizarEmail: true,
+            loginEmail: false,
+            utilizarCPF: false,
+            /* Opções visitas */
+            isCoworking: false,
+            domingo: false,
+            liberarFeriado: false,
+            habilitarPublicoExterno: false,
+            horaFinal: 24,
+            horaInicial: 0,
+            timeStepMin: 15,
+            agendamentoUnico: false,
+            tempoTotalMaximo: 0,
+            necessitaAprovacao: false,
+            creditosExtraAgendamento: {},
+            validaNecessitaCredito: false,
+            validaNecessitaExtra: false,
+            validaNecessitaAprovacao: false,
+            chaveAgendamento: "",
+            liberarAgendamento: -1,
+            sabado: false,
+            tempoMaximo: 60,
+            tempoMinimoAprovacao: 0,
+            numeroVisitantesExternos: 0,
+            redirecionarPagamento: true,
+            entidadeUsuario: "",
+            imovel: {
+                opcoesDeCredito: {
+                    descritivo: [],
+                    tipoEvento: {},
                 },
-              },
             },
-            false
-          );
-        else
-          response = await this.executeMethod(
-            {
-              url: "Usuarios/cadastrar",
-              method: "post",
-              data: {
-                telefone: this.user.phone,
-                nomeCompleto: nome.trim(),
-                loginCodigo: this.user.codigo,
-                coworkingId: coworkingId,
-              },
-            },
-            false
-          );
-        Loading.hide();
-        if (response.status != 200) {
-          Notify.create({
-            message:
-              "Não foi possível cadastrar o Usuário. Por favor, tente novamente.",
-            type: "warning",
-          });
-          inForms = false;
-          return;
-        } else if (response.status == 200) this.newUser = false;
-      }
-      Loading.show({ delay: 400 });
-      response = await this.executeMethod(
-        {
-          url: "Usuarios/novoLogin",
-          method: "post",
-          data: {
-            username: this.loginEmail ? this.user.email : this.user.phone,
-            codigo: this.user.codigoInput,
-          },
+            maximoPessoas: "",
+            eventoOutros: {},
+            publicoExterno: false,
+            usoDeCreditos: false,
+            custoBase: 0,
+            cardVisita: false,
+            cardPagamento: false,
+            visitaSelecionada: {},
+            finalizacao: false,
+            messageFinal: [],
+            returnUrl: "",
+            mensagemIcs: "",
+            clenteOptions: [],
+            colors: ["#EDD9A3", "#F1C18E", "#F79C79", "#F98477", "#F2637F", "#EA4F88", "#CA3C97", "#B1339E", "#872CA2", "#5A2995"],
+        };
+    },
+    computed: {
+        quantidadeDeElementos() {
+            if (this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho > 10) {
+                return 10;
+            } else {
+                return Number(this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
+            }
         },
-        false
-      );
-      Loading.hide();
-      if (response.status == 200) {
-        await this.$store.dispatch("setarDados", {
-          key: "setLogin",
-          value: response.data,
-        });
+        funcionamentoRotativo() {
+            if (this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.posicoesDeTrabalho) {
+                return this.imovel.opcoesAgendamentoIndividual.posicoesDeTrabalho && this.imovel.opcoesAgendamentoIndividual.funcionamentoIndividual;
+            }
+        },
+        quantidadePosicoes() {
+            if (this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho) {
+                return Number(this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
+            } else {
+                return 0;
+            }
+        },
+        parseData() {
+            if (this.user.validadeInicial && this.user.validadeFinal) {
+                const inicial = moment(new Date(this.user.validadeInicial));
+                const final = moment(new Date(this.user.validadeFinal));
+                this.seMesmoDia = inicial.format("DD/MM/YYYY") == final.format("DD/MM/YYYY");
 
-        this.user.empresa = this.getLogin.user.entidade.nome
-        this.user.cpf = response.data.user.cpf;
-        this.user.email = response.data.user.email;
-        this.user.hasDocs =
-          response.data.user.fotoFrente &&
-          response.data.user.fotoAtras &&
-          response.data.user.fotoSelfie;
-        if (this.user.email.includes("@chaviuser")) this.user.email = "";
-        if (this.user.validadeInicial) this.parte += 1;
-        else this.inForms = false;
-        if (!this.utilizarEmail && !this.utilizarDocumentos) this.nextStep();
-        if(this.isUsoDeCreditos){
-          this.usoDeCreditos = true
+                if (this.seMesmoDia) {
+                    this.seMesmoDia = inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("HH:mm");
+                } else {
+                    this.seMesmoDia = inicial.format("DD/MM/YYYY HH:mm") + " - " + final.format("DD/MM/YYYY HH:mm");
+                }
+                return this.seMesmoDia;
+            }
+            return "";
+        },
+        logo() {
+            let path = `${process.env.VUE_APP_API_URL}/StorageContainers/fotoImovel/download/`;
+            if (this.cliente && this.cliente.fotoImovel && this.cliente.fotoImovel.indexOf("https://") > -1) return this.cliente.fotoImovel;
+            return this.cliente && this.cliente.fotoImovel ? path + this.cliente.fotoImovel : false;
+        },
+        getEndereco() {
+            let resultado = "";
+            if (this.cliente && this.cliente.enderecoImovel) {
+                resultado = this.user.imovelRef + " - " + this.cliente.enderecoImovel;
+            } else if (this.user.imovelRef) {
+                resultado = this.user.imovelRef;
+            }
+            return resultado;
+        },
+        getEnderecoHtml() {
+            let resultado = this.user.imovelRef;
+            return resultado.replace("\n", "");
+        },
+
+        // pega o primeiro Nome
+        getPrimeiroNome() {
+            let res = this.user.name.split(" ");
+            return res[0];
+        },
+
+        botaoCalendario() {
+            return `<button
+    class="red-button"style="max-width: 120px; border: none; border-radius: 16px; cursor: pointer; height: 40px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    ;">
+        <span class="material-icons" style="scale: 2.8;">arrow_left</span>
+        voltar
+      </button>
+      <br>`;
+        },
+
+        tituloCalendario() {
+            let ref = this.user.imovelRef;
+            return !this.isCoworking
+                ? `Agende o melhor  dia<br> e hora para utilizar:<br> <strong> <p style='font-size: 1.8rem; margin-bottom: 16px;'> ${ref} . </strong> </p>`
+                : `
+      <p style="font-family:'igualfina'; font-weight: lighter; line-height: 25px; margin-bottom: 5px" >Agende o melhor<br>dia e hora para utilizar:<br></p>
+        <p style="margin:0; pedding:0; font-size:1.67rem;font-family:'igualnegrito'; margin-bottom: 15px;">${ref.split("-")[0].toUpperCase()}</p> `;
+        },
+
+        //===============================================================================
+        isHotmilk() {
+            return this.cliente && this.cliente.nome && (this.cliente.nome.toString().toLowerCase() == "hotmilk" || this.cliente.nome.toString().toLowerCase() == "dormakaba");
+            //==============================================================================
+            //código comentado para iniibir a parte de créditos
+
+            //===============================================================================
+        },
+        isAgora() {
+            return this.cliente.nome == "Ágora Tech Park";
+        },
+        routeCoworking() {
+            let nome = this.cliente.nome;
+            nome = nome
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .split(" ")[0];
+            if (nome == "hotmilk") {
+                return "hotmilk/agenda";
+            } else {
+                return nome;
+            }
+        },
+
+        getMonth() {
+            const mes = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const mesNum = this.selectedDate ? this.selectedDate.split("-")[1] : moment().format("MM");
+
+            return mes[parseInt(mesNum)];
+        },
+        isDesktop() {
+            return this.$q.platform.is.desktop;
+        },
+        getFotoFrente() {
+            try {
+                return URL.createObjectURL(this.fotoFrente);
+            } catch {
+                return this.fotoFrente;
+            }
+        },
+        getFotoAtras() {
+            try {
+                return URL.createObjectURL(this.fotoVerso);
+            } catch {
+                return this.fotoVerso;
+            }
+        },
+        getFotoSelfie() {
+            try {
+                return URL.createObjectURL(this.fotoSelfie);
+            } catch {
+                return this.fotoSelfie;
+            }
+        },
+        login: {
+            get() {
+                return JSON.parse(JSON.stringify(this.$store.getters.getLogin));
+            },
+            set(value) {
+                const key = "setLogin";
+                this.$store.dispatch("setarDados", { key: key, value: value });
+            },
+        },
+        eventsMap() {
+            const map = {};
+            this.events.forEach((event) => {
+                map[event.date] = map[event.date] ? map[event.date] : [];
+                map[event.date].push(event);
+                if (event.days) {
+                    let timestamp = parseTimestamp(event.date);
+                    let days = event.days;
+                    do {
+                        timestamp = addToDate(timestamp, { day: 1 });
+                        if (!map[timestamp.date]) {
+                            map[timestamp.date] = [];
+                        }
+                        map[timestamp.date].push(event);
+                    } while (--days > 0);
+                }
+            });
+            return map;
+        },
+        intervalStart() {
+            let intervalo = 60 / this.timeStepMin;
+            return this.horaInicial * intervalo;
+        },
+
+        intervalCount() {
+            let horas = this.horaFinal - this.horaInicial;
+            let intervalo = 60 / this.timeStepMin;
+            return horas * intervalo;
+        },
+        disabledBefore() {
+            let ts = parseTimestamp(today());
+            ts = addToDate(ts, { day: -1 });
+            return ts.date;
+        },
+        disabledAfter() {
+            if (!this.liberarAgendamento || this.liberarAgendamento < 0) return;
+            let ts = parseTimestamp(today());
+            ts = addToDate(ts, {
+                day: this.liberarAgendamento + 1,
+            });
+            return ts.date;
+        },
+        phoneMask() {
+            return "(##) #####-####";
+        },
+        getWeekDisplay() {
+            let week = [1, 2, 3, 4, 5];
+            if (this.domingo) week.unshift(0);
+            if (this.sabado) week.push(6);
+            setTimeout(() => {
+                this.onNextMonth();
+                setTimeout(() => {
+                    this.onTodayMonth();
+                }, 200);
+            }, 200);
+            return week;
+        },
+        isUsoDeCreditos() {
+            if (this.getLogin.user.entidade.gerenciamentoDeSalas.consomeHoras) {
+                return true;
+            }
+            return false;
+        },
+    },
+    mounted() {
+        try {
+            this.selectedDate = today();
+
+            if (this.login && this.login.user) {
+                this.user = {
+                    name: this.login.user.nome.split("-")[0].trim(),
+                    empresa: this.getLogin.user.entidade.name,
+                    phone: this.login.user.telefone,
+                    email: this.login.user.email,
+                    cpf: this.login.user.cpf,
+                    hasDocs: this.login.user.fotoSelfie && this.login.user.fotoFrente && this.login.user.fotoAtras,
+                    terms: false,
+                    use: false,
+                };
+                this.maximoPessoas = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.numeroMaximoPessoas;
+                if (this.user.email.includes("@chaviuser")) this.user.email = "";
+                if (this.isUsoDeCreditos) {
+                    this.usoDeCreditos = true;
+                }
+            } else {
+                if (this.isHotmilk) {
+                    this.$router.push("/login");
+                } else {
+                    this.inForms = true;
+                    this.parte = 1;
+                }
+            }
+            const params = this.getParams;
+            if (params && params.entidadeId && params.imovelRef) {
+                this.user.entidadeId = params.entidadeId;
+                this.user.imovelRef = params.imovelRef;
+                this.user.validadeInicial = this.login.validadeInicial ? this.login.validadeInicial : "";
+                this.user.validadeFinal = this.login.validadeFinal ? this.login.validadeFinal : "";
+                this.carregarHorarios();
+                this.montarQrcode();
+            }
+            this.semImovel = false;
+            if (!params || !params.entidadeId || !params.imovelRef) this.semImovel = true;
+            this.setHoliday(new Date().getFullYear());
+        } catch (e) {
+            console.log("Erro ao carregar ", e);
+            this.semImovel = true;
         }
-        this.user.name = this.getLogin.user.nome
-        this.carregarHorarios()
-      } else {
-        Notify.create({
-          message: "Número de Telefone inválido ou Código SMS incorreto.",
-          type: "warning",
-        });
-      }
-
+        if (this.semImovel) {
+            let nomeCoworking = this.$store.getters.getCoworkingNome;
+            this.$store.dispatch("setarDados", {
+                key: "setLogin",
+                value: [],
+            });
+            if (nomeCoworking) {
+                if (nomeCoworking == "hotmilk") {
+                    this.$router.push(`/${nomeCoworking}/agenda`);
+                } else {
+                    this.$router.push(`/${nomeCoworking}`);
+                }
+            } else {
+                this.$store.dispatch("setarDados", {
+                    key: "setLogin",
+                    value: [],
+                });
+                this.$router.push("/");
+            }
+        }
     },
-    async criarVisita() {
-      this.user.numeroVisitantesExternos = parseInt(
-        this.numeroVisitantesExternos
-      );
+    methods: {
+        getGradientStyle(index) {
+            let gradientStyle = { background: this.colors[index - 1] };
+            if (index == 1) {
+                gradientStyle.borderRadius = "5px 0 0 5px";
+            } else if (this.quantidadeDeElementos == index) {
+                gradientStyle.borderRadius = "0 5px 5px 0 ";
+            }
 
-      let user = {
-        ...this.user,
-      };
+            return gradientStyle;
+        },
+        async adicionarCreditosExtras() {
+            let data = {
+                entidade: this.getLogin.user.entidadeId,
+                creditos: this.$store.getters.getExtra,
+            };
+            if (data.creditos > 0) {
+                let response = await this.executeMethod({
+                    url: `Entidades/adicionarCreditosExtras`,
+                    method: "post",
+                    data: data,
+                });
+                if (response && response.status == 200) {
+                    this.$store.dispatch("setarDados", { key: "setExtra", value: 0 });
+                }
+            } else {
+                return;
+            }
+        },
+        async deletar(id) {
+            let horarioAtual = Date.now();
+            if (this.visitaSelecionada.validadeInicial - 1800000 < horarioAtual && this.visitaSelecionada.imovel.opcoesAgendamentoIndividual.custaCreditos) {
+                Notify.create({
+                    message: "O tempo máximo para exclução da visita é 30 minutos antes da reserva.",
+                    type: "negative",
+                });
+                return;
+            } else {
+                let response = await this.executeMethod({
+                    url: `Visitas/excluiVisitaDevolveHoras/${id}`,
+                    method: "delete",
+                });
+            }
+            this.carregarHorarios();
+            this.cardVisita = false;
+        },
+        async modalExcluirVisita(event) {
+            if (event.bgcolor == "blue-5") {
+                if (event.visitaCodigo) {
+                    let request = {
+                        url: "visitas/obter/" + event.visitaCodigo,
+                        method: "get",
+                    };
 
-      user.entidadeUsuario = this.getLogin.user.entidadeId
+                    const response = await this.executeMethod(request, false);
+                    if (response.status == 200) {
+                        this.visitaSelecionada = response.data;
+                        this.cardVisita = true;
+                    }
+                } else {
+                    return;
+                }
+            } else if (event.bgcolor == "blue-8" && event.esperaPagamento) {
+                if (event.codigo) {
+                    let request = {
+                        url: "convites/obtemPorCodigo/" + event.codigo,
+                        method: "get",
+                    };
 
-      if (this.necessitaAprovacao) {
-        user.necessitaAprovacao = true;
-      }
+                    const response = await this.executeMethod(request, false);
+                    if (response.status == 200) {
+                        this.visitaSelecionada = response.data;
+                        this.cardVisita = true;
+                    }
+                } else {
+                    return;
+                }
+            } else {
+                return;
+            }
+        },
+        getHorario(time, format) {
+            return moment(time).format(format);
+        },
+        getImage(visita) {
+            let path = `http://api.chavi.com.br/api/StorageContainers/fotoImovel/download/`;
 
-      if (this.whatsappAvisoAgendamento) {
-        user.whatsappAvisoAgendamento = this.whatsappAvisoAgendamento;
-      }
+            if (visita && visita.foto) {
+                return path + visita.foto;
+            } else {
+                return "chavi_imovel.png";
+            }
+        },
+        validarValor() {
+            let valida = this.validarElementosValor() && !this.validarExtra();
+            return valida;
+        },
+        validarElementosValor() {
+            return (!this.validaNecessitaCredito && this.validaNecessitaAprovacao && this.necessitaPagamento) || (!this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.necessitaPagamento) || (this.validaNecessitaCredito && this.validaNecessitaAprovacao);
+        },
+        validarExtra() {
+            let extra = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra;
 
-      if (this.emailAvisoAgendamento) {
-        user.emailAvisoAgendamento = this.emailAvisoAgendamento;
-      }
+            if (extra && this.creditosExtraAgendamento && this.creditosExtraAgendamento != {}) {
+                if (this.creditosExtraAgendamento.creditos > 0 && this.creditosExtraAgendamento.custo > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        },
+        validarStatusProcesso() {
+            if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito) {
+                return "Pagamento";
+            } else if (!this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Enviar";
+            else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && this.necessitaPagamento) {
+                this.lableFinalizado = "Pré-reserva em análise";
+                return "Solicitar";
+            } else if (this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) {
+                this.lableFinalizado = "Pré-reserva em análise";
+                return "Solicitar";
+            } else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && this.validarExtra()) {
+                this.lableFinalizado = "Pré-reserva em análise";
+                return "Solicitar";
+            } else if (this.validaNecessitaAprovacao && this.validaNecessitaCredito && !this.validarExtra()) {
+                this.lableFinalizado = "Pré-reserva em análise";
+                return "Solicitar";
+            } else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && !this.validarExtra()) return "Enviar";
+            else if (this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.validarExtra()) {
+                this.lableFinalizado = "Pré-reserva realizada";
+                return "Solicitar";
+            }
+        },
 
-      if (this.eventoOutros) {
-        user.eventoOutros = JSON.stringify(this.eventoOutros);
-        user.publicoExterno = this.publicoExterno
-      }
+        validaUsoCredito(funcionamentoIndividual, custaCreditos, coworking, consomeHoras) {
+            return funcionamentoIndividual && custaCreditos && coworking && consomeHoras && this.getLogin.user.entidadeId != this.$store.getters.getImovelAgendamento.entidadeId;
+        },
+        //verificar créditos retorna false se não tiver créditos
+        verificarCreditos(horasMensaisDisponiveis, horasExtras, valor, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos) {
+            if (this.validaUsoCredito(funcionamentoIndividual, custaCreditos, coworking, consomeHoras)) {
+                const calculoCusto = this.calcularCusto(valor, consumoCreditos, custoBase);
 
-      if (!this.user.hasDocs) {
-        
-        this.user.fotoFrente = await this.compressImage(this.fotoFrente);
-        this.user.fotoAtras = await this.compressImage(this.fotoVerso);
-        this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
+                if (horasMensaisDisponiveis + horasExtras < calculoCusto) {
+                    if (!this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra) {
+                        let message = `<p>Você não possui créditos suficientes</p>
+                      <p>Entre em contato com o Estabelecimento para adquirir créditos</p>`;
+                        Dialog.create({
+                            title: "Aviso",
+                            //link ainda não implemenado
+                            message: message,
+                            html: true,
+                            ok: {
+                                label: "ok",
+                                color: "positive",
+                            },
+                        }).onOk(() => {});
+                        return false;
+                    } else {
+                        let creditosFaltantes = Math.ceil(calculoCusto - (horasMensaisDisponiveis + horasExtras));
+                        this.creditosExtraAgendamento.creditos = creditosFaltantes;
+                        this.creditosExtraAgendamento.custo = creditosFaltantes * Number(this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.custoCreditoExtra);
+                        this.modalComprarCreditos.dialogAtivo = true;
+                        return true;
+                    }
+                }
+                return true;
+            }
+            return true;
+        },
+        fecharDialogo() {
+            this.modalComprarCreditos.dialogAtivo = false;
+            this.utilizarDocumentos && !this.user.hasDocs ? (this.parte -= 1) : this.$router.back();
+        },
+        confirmarDialogo() {
+            this.modalComprarCreditos.dialogAtivo = false;
+        },
+        async gerarBoletoConvite() {
+            //gerarBoletoConvite
+            this.checkoutPagamentoConvite();
+            this.modalComprarCreditos.dialogAtivo = false;
+        },
 
-        const blobFrente = {
-          blob: new Blob([this.user.fotoFrente]),
-          name: this.user.fotoFrente.name,
-        };
-        const blobAtras = {
-          blob: new Blob([this.user.fotoAtras]),
-          name: this.user.fotoAtras.name,
-        };
-        const blobSelfie = {
-          blob: new Blob([this.user.fotoSelfie]),
-          name: this.user.fotoSelfie.name,
-        };
+        async gerarBoleto() {
+            const data = {
+                creditosConsumidos: this.modalComprarCreditos.creditosConsumidos,
+                horasMensaisDisponiveis: this.modalComprarCreditos.horasMensaisDisponiveis,
+                horasExtras: this.modalComprarCreditos.horasExtras,
+                creditos: this.modalComprarCreditos.creditos,
+                preco: this.modalComprarCreditos.custo,
+                imovel: this.idImovel,
+                entidade: this.$store.getters.getImovelAgendamento.entidadeId,
+            };
 
-        user.fotos = {blobFrente, blobAtras, blobSelfie}
-      }
+            let request = {
+                url: "Entidades/comprarCreditos",
+                method: "post",
+                data: data,
+            };
+            const response = await this.executeMethod(request, false);
+            const publicKey = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.chaveAgendamento;
+            if (response && response.status == 200) {
+                this.$store.dispatch("setarDados", { key: "setExtra", value: this.modalComprarCreditos.creditos });
+            }
+            return;
 
-      return user;
+            this.modalComprarCreditos.dialogAtivo = false;
+        },
+
+        async telaInicial() {
+            await this.$store.dispatch("setarDados", { key: "setParams", value: {} });
+            await this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+            this.semImovel = true;
+            this.$router.push(`/${this.routeCoworking}`);
+        },
+
+        goBack() {
+            this.$router.go(-2);
+        },
+        async logout(force) {
+            if (force) {
+                this.user.name = "";
+                this.user.empresa = "";
+                this.user.phone = "";
+                this.user.cpf = "";
+                this.user.email = "";
+                await this.$store.dispatch("setarDados", {
+                    key: "setLogin",
+                    value: [],
+                });
+
+                this.$store.dispatch("setarDados", {
+                    key: "setEstadoInicial",
+                    value: true,
+                });
+
+                return;
+            }
+            Dialog.create({
+                title: "Aviso",
+                message: `<p>Retornar para a tela inicial?</p> <p>Você irá deslogar</p>`,
+                html: true,
+                ok: {
+                    label: "Sim",
+                    color: "positive",
+                },
+                cancel: {
+                    label: "Não",
+                    color: "negative",
+                },
+            }).onOk(async () => {
+                this.user.name = "";
+                this.user.empresa = "";
+                this.user.phone = "";
+                this.user.cpf = "";
+                this.user.email = "";
+                await this.$store.dispatch("setarDados", {
+                    key: "setLogin",
+                    value: [],
+                });
+                this.parte = 1;
+                this.inForms = true;
+                this.telaInicial();
+            });
+        },
+        nomeEntidadeId() {
+            return "hotmilk";
+        },
+        montarQrcode() {
+            let url = "";
+            if (this.user && this.user.entidadeId && this.user.imovelRef) {
+                url += "https://agenda.chavi.com.br/" + this.user.entidadeId + "/" + this.user.imovelRef;
+            }
+            let infos = {};
+            if (this.login && this.login.id && this.login.user) {
+                infos.id = this.login.id;
+                infos.userId = this.login.userId;
+                infos.user = {
+                    nome: this.login.user.nome,
+                    telefone: this.login.user.telefone,
+                    email: this.user.email ? this.user.email : this.login.user.email,
+                    cpf: this.user.cpf ? this.user.cpf : this.login.user.cpf,
+                    id: this.login.userId,
+                    fotoSelfie: this.login.user.fotoSelfie,
+                    fotoFrente: this.login.user.fotoFrente,
+                    fotoAtras: this.login.user.fotoAtras,
+                };
+            }
+            if (this.user.validadeInicial) infos.validadeInicial = this.user.validadeInicial;
+            if (this.user.validadeFinal) infos.validadeFinal = this.user.validadeFinal;
+
+            if (infos) url += "/?login=" + JSON.stringify(infos);
+            try {
+                this.qrcode = encodeURI(url);
+            } catch {
+                this.qrcode = url;
+            }
+        },
+        onTodayMonth() {
+            if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.moveToToday();
+            else this.$refs.calendar.moveToToday();
+        },
+        onPrevMonth() {
+            if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.prev();
+            else this.$refs.calendar.prev();
+        },
+        onNextMonth() {
+            if (!this.$q.platform.is.desktop) this.$refs.calendarMonth.next();
+            else this.$refs.calendar.next();
+        },
+        onClickDate(data) {
+            console.log("onMoved", JSON.stringify(data));
+        },
+        async nextStep() {
+            if (!this.$refs.forms.validate()) {
+                return;
+            }
+            this.montarQrcode();
+
+            this.utilizarDocumentos && !this.user.hasDocs ? (this.parte += 1) : (this.parte += 2);
+        },
+        badgeClasses(event, type) {
+            const isHeader = type === "header";
+            return {
+                [`${event.textColor} bg-${event.bgcolor}`]: true,
+                "full-width": !isHeader && (!event.side || event.side === "full"),
+                "left-side": !isHeader && event.side === "left",
+                "right-side": !isHeader && event.side === "right",
+                "rounded-border": true,
+                borderDivCalendar: true,
+            };
+        },
+        badgeStyles(event, timeStartPos, timeDurationHeight) {
+            const s = {};
+            if (timeStartPos && timeDurationHeight) {
+                s.top = timeStartPos(event.time) + "px";
+                s.height = timeDurationHeight(event.duration) + "px";
+            }
+            s["align-items"] = "flex-start";
+            s["background-color"] = `${event.styledBg} !important`;
+            if (this.funcionamentoRotativo && event.quantidade !== this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho) s["pointer-events"] = "none";
+            return s;
+        },
+
+        getEvents(dt) {
+            const events = this.eventsMap[dt] || [];
+            if (events.length === 1) {
+                events[0].side = "full";
+            }
+            return events;
+        },
+        horarioMarco(horaCalendario) {
+            if (horaCalendario && horaCalendario != "") {
+                let horaMoment = moment(horaCalendario, "HH:mm");
+                return horaMoment.format("HH:mm");
+            } else {
+                return "";
+            }
+        },
+        qualEvento(informacao, minutos, hora, scope) {
+            let informacaoM = informacao.charAt(0).toUpperCase() + informacao.slice(1);
+            Dialog.create({
+                title: informacaoM,
+                message: `
+                  <div style="margin-bottom: 10px;">
+                    <textarea name="textarea" style="width:100%;height:150px; border: none; background-color: lightgrey;" id="texto" placeholder="Descreva aqui"></textarea>
+                  </div>
+                  <div>
+                    <input type="checkbox" id="checkbox"/>
+                    <label for="checkbox">Público externo</label>
+                  </div>`,
+                html: true,
+                cancel: true,
+                persistent: true,
+            }).onOk((data) => {
+                let texto = document.getElementById("texto").value;
+                this.publicoExterno = document.getElementById("checkbox").checked;
+                this.eventoOutros = { label: informacao, value: texto };
+                this.escolherHorario(minutos, hora, scope);
+            });
+        },
+        quantasPessoas() {
+            Dialog.create({
+                title: '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
+                message: `
+            <span>
+              Informe o número de pessoas externas a hotmilk que irão utilizar o espaço. <br/>
+              Insira 0 (zero) caso não haja participantes externos.
+            </span>
+          `,
+                prompt: {
+                    model: 0,
+                    type: "number",
+                },
+                ok: {
+                    label: "Continuar",
+                    color: "positive",
+                    flat: true,
+                },
+                cancel: {
+                    label: "Escolher outro horário",
+                    color: "primary",
+                    flat: true,
+                },
+                html: true,
+            })
+                .onOk((res) => {
+                    Loading.show();
+                    setTimeout(() => {
+                        if (res > this.maximoPessoas + 1) {
+                            Notify.create({
+                                message: "Mais pessoas que a capacidade da sala",
+                                type: "warning",
+                            });
+                        }
+                        this.inForms = true;
+                        if (res > this.$store.imovelAgeda) {
+                            this.numeroVisitantesExternos = res;
+                        }
+
+                        if (this.login && this.login.id && this.login.user) {
+                            this.entidadeUsuario = this.login.user.entidade.id;
+                            if (!this.utilizarEmail && !this.utilizarDocumentos && !this.utilizarCPF && (this.isCoworking ? this.user.empresa && this.user.empresa != "" : true)) {
+                                this.parte = 4;
+                            } else {
+                                this.user.empresa = this.getLogin.user.entidade.nome;
+                                this.parte = 4;
+                            }
+                        }
+                        Loading.hide();
+                    }, 1500);
+                })
+                .onCancel(() => {
+                    this.events.pop();
+                });
+        },
+
+        adicionaTempoPorExtenso(opcaoPasso) {
+            const delimitadorHora = 60;
+
+            if (opcaoPasso.value < delimitadorHora) {
+                opcaoPasso.label = `${opcaoPasso.label + " Minutos "}`;
+            } else if (opcaoPasso.value > delimitadorHora) {
+                opcaoPasso.label = `${opcaoPasso.label + " Horas "}`;
+            } else {
+                opcaoPasso.label = `${opcaoPasso.label + " Hora "}`;
+            }
+
+            return opcaoPasso;
+        },
+        calcularCusto(opcaoPasso, consumoCreditos, custoBase) {
+            return (Number(opcaoPasso) / 60) * Number(custoBase) * consumoCreditos;
+        },
+        adicionaCreditoExtenso(opcaoPasso, funcionamentoIndividual, custaCreditos, consumoCreditos, coworking, consomeHoras, custoBase) {
+            if (this.validaUsoCredito(funcionamentoIndividual, custaCreditos, coworking, consomeHoras)) {
+                let calculoCusto = this.calcularCusto(opcaoPasso.value, consumoCreditos, custoBase);
+
+                opcaoPasso.label += `(${calculoCusto.toFixed(2)} créditos)`;
+            }
+
+            return opcaoPasso;
+        },
+        escreveItemHorario(contadorTempoIntervalo) {
+            let opcao = this.criaItemListaHorarios(contadorTempoIntervalo);
+            return this.adicionaTempoPorExtenso(opcao);
+        },
+        criaItemListaHorarios(contadorTempoIntervalo) {
+            const tempoDelimitador = 60;
+
+            if (contadorTempoIntervalo < tempoDelimitador) {
+                return { label: contadorTempoIntervalo.toString(), value: contadorTempoIntervalo };
+            } else {
+                let timeHora = moment.duration(contadorTempoIntervalo, "minutes");
+                timeHora = moment.utc(timeHora.asMilliseconds()).format("HH:mm");
+                return { label: timeHora.toString(), value: contadorTempoIntervalo };
+            }
+        },
+
+        tempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao) {
+            if (itens.length == 0) {
+                return "";
+            }
+
+            let tempoMinimo;
+            itens.forEach((element) => {
+                if (element?.value <= tempoMinimoAprovacao) {
+                    tempoMinimo = element?.value;
+                }
+            });
+
+            return this.escreveItemHorario(tempoMinimo).label;
+        },
+        validacaoTempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao, aprovarVisita, necessitaAprovacao, funcionamentoIndividual) {
+            if (typeof tempoMinimoAprovacao === "undefined" || typeof aprovarVisita === "undefined" || typeof necessitaAprovacao === "undefined") {
+                return "";
+            }
+
+            if (funcionamentoIndividual && necessitaAprovacao && tempoMinimoAprovacao <= 0) {
+                return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
+            } else if (funcionamentoIndividual && necessitaAprovacao && tempoMinimoAprovacao > 0) {
+                return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
+            } else if (!funcionamentoIndividual && aprovarVisita && tempoMinimoAprovacao > 0) {
+                return `${`<br/> <span style='font-size: 0.8rem'> Acima de ${this.tempoMinimoAprovacaoLabel(itens, tempoMinimoAprovacao)}os agendamentos estão sugeitos a aprovação. </span>`}`;
+            } else if (!funcionamentoIndividual && !aprovarVisita) {
+                return "<br/> <span style='font-size: 0.8rem'> O agendamento está sujeito à ser aprovados. </span>";
+            } else {
+                return "";
+            }
+        },
+
+        construirOpcoesAgendamento(validadInicial, timeHoraFinal, timeStepMin, tempoMaximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos) {
+            if (timeStepMin <= 0 && tempoMaximo <= 0 && !timeHoraFinal && !validadInicial) {
+                return [];
+            }
+
+            let opcoes = [];
+            let contadorTempoIntervalo = timeStepMin;
+
+            const horaMomentInicial = moment(validadInicial);
+
+            let horaMomentFinal = moment(timeHoraFinal, "HH:mm");
+            horaMomentFinal.set("year", validadInicial.getFullYear());
+            horaMomentFinal.set("month", validadInicial.getMonth());
+            horaMomentFinal.set("date", validadInicial.getDate());
+
+            let horaIntervalo = horaMomentInicial.clone();
+            horaIntervalo.add(contadorTempoIntervalo, "minutes");
+
+            while (contadorTempoIntervalo <= tempoMaximo && (horaMomentFinal.isAfter(horaIntervalo) || horaMomentFinal.isSame(horaIntervalo))) {
+                let opcao = this.escreveItemHorario(contadorTempoIntervalo);
+                opcao = this.adicionaCreditoExtenso(opcao, funcionamentoIndividual, custaCreditos, consumoCreditos, coworking, consomeHoras, custoBase);
+                opcoes.push(opcao);
+
+                contadorTempoIntervalo += timeStepMin;
+                horaIntervalo.add(timeStepMin, "minutes");
+            }
+
+            return opcoes;
+        },
+
+        calcularTempoMaximoAgendamento(dataMarco, horaInicial, horaFinal, tempoTotalMaximo, horarios) {
+            const data = moment(dataMarco); // Obtém o momento atual
+
+            let horaMomentInicial = moment(horaInicial, "HH:mm");
+            let horaMomentFinal = moment(horaFinal, "HH:mm");
+
+            const momentInicial = horaMomentInicial.set({
+                date: data.date(),
+                month: data.month(),
+                year: data.year(),
+            });
+
+            const momentFinal = horaMomentFinal.set({
+                date: data.date(),
+                month: data.month(),
+                year: data.year(),
+            });
+
+            let agendamentosUsuario = horarios.filter((agendamento) => {
+                let usuarioValidado = agendamento.usuarioId == this.getLogin.user.id;
+
+                let timeStampInicial = parseInt(agendamento.timestampInicial);
+                let intervalo = agendamento.duration * 60000;
+                let timeStampFinal = timeStampInicial + intervalo;
+                let hora = moment(timeStampInicial);
+                let horaFinal = moment(timeStampFinal);
+                let validadepois = hora.isSameOrAfter(momentInicial);
+                let validaAntes = horaFinal.isBefore(momentFinal);
+                return validadepois && validaAntes && usuarioValidado;
+            });
+
+            let contador = 0;
+            for (let index = 0; index < agendamentosUsuario.length; index++) {
+                let timeStampInicial = parseInt(agendamentosUsuario[index].timestampInicial);
+                let intervaloSelect = agendamentosUsuario[index].duration * 60000;
+                let timeStampFinal = timeStampInicial + intervaloSelect;
+                let validaInicial = new Date(timeStampInicial);
+                let validaFinal = new Date(timeStampFinal);
+
+                let intervalo = validaInicial - validaFinal;
+
+                contador += Math.abs(intervalo);
+            }
+
+            let contadorMinutos = contador / 60000;
+
+            return contadorMinutos;
+        },
+
+        async escolherHorario(minutos, hora, scope) {
+            let gerenciamentoHoras = {};
+            if (this.entidadeUsuario) {
+                let request = {
+                    url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
+                    method: "get",
+                };
+
+                const response = await this.executeMethod(request, false);
+
+                if (response && response.status == 200) {
+                    gerenciamentoHoras = response.data;
+                }
+            }
+            //let gerenciamentoCreditos = {};
+            if (this.imovel) {
+                let request = {
+                    url: `entidades/gerenciamentoDeCreditos/${this.user.entidadeId}/${this.idImovel}`,
+                    method: "get",
+                };
+
+                const response = await this.executeMethod(request, false);
+
+                if (response && response.status == 200) {
+                    this.gerenciamentoCreditos = response.data;
+                }
+            }
+
+            if (this.timeStepMin == 15) {
+                if (minutos > 45) minutos = 60;
+                else if (minutos > 30) minutos = 45;
+                else if (minutos > 15) minutos = 30;
+                else minutos = 15;
+            }
+
+            if (this.timeStepMin == 30) {
+                if (minutos > 30) minutos = 60;
+                else minutos = 30;
+            }
+
+            if (this.timeStepMin == 60) minutos = 60;
+
+            const horario = hora.toString() + ":" + (minutos - this.timeStepMin == 0 ? "00" : minutos - this.timeStepMin).toString();
+
+            if (minutos == 60) hora = parseInt(hora) + 1;
+
+            const validadeInicial = new Date((scope.timestamp.date + " " + horario).replace(/\-/g, "/"));
+
+            this.user.validadeInicial = validadeInicial.getTime();
+
+            /* Dados da Entidade */
+            const coworking = this.gerenciamentoCreditos.coworking;
+            const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+            const custoBase = this.gerenciamentoCreditos.custoBase;
+            /* Dados do Imovel */
+            const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+            const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+            const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
+
+            const horaInicial = this.horaInicial;
+            const horaFinal = this.horaFinal;
+            const timeStepMin = this.timeStepMin;
+            const tempoMaximo = this.tempoMaximo;
+
+            this.validaNecessitaCredito = this.validaUsoCredito(funcionamentoIndividual, custaCreditos, coworking, consomeHoras);
+
+            let horariosOcupados = this.events;
+            let totalHorarioAgendamentos = this.tempoTotalMaximo;
+            let unico = this.agendamentoUnico;
+
+            if (unico && totalHorarioAgendamentos > 0) {
+                let maximoValidador = this.calcularTempoMaximoAgendamento(validadeInicial, horaInicial, horaFinal, totalHorarioAgendamentos, horariosOcupados);
+
+                let maximo = 0;
+                if (maximoValidador <= totalHorarioAgendamentos) {
+                    let restanteMaximo = Math.abs(maximoValidador - totalHorarioAgendamentos);
+
+                    if (tempoMaximo > restanteMaximo) {
+                        maximo = restanteMaximo;
+                    } else {
+                        maximo = tempoMaximo;
+                    }
+
+                    if (maximo > 0) {
+                        let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, maximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
+                        this.acionarModal(scope, horario, gerenciamentoHoras, options);
+                    } else {
+                        Dialog.create({
+                            title: '<span class="text-primary" style="font-size:1.2rem">Limite Atingido!</span>',
+                            message: '<span style="font-size:1.0rem"> ' + "<br/> Você não pode realizar mais agendamentos para esta sala. </span>",
+                            ok: "Entendido",
+                            html: true,
+                        });
+                    }
+                } else {
+                    Dialog.create({
+                        title: '<span class="text-primary" style="font-size:1.2rem">Limite Atingido!</span>',
+                        message: '<span style="font-size:1.0rem"> ' + "<br/> Você não pode realizar mais agendamentos para esta sala. </span>",
+                        ok: "Entendido",
+                        html: true,
+                    });
+                    // Notificar erro
+                }
+            } else {
+                let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, tempoMaximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
+                this.acionarModal(scope, horario, gerenciamentoHoras, options);
+            }
+        },
+        acionarModal(scope, horario, gerenciamentoHoras, options) {
+            /* Dados da Entidade */
+            const coworking = this.gerenciamentoCreditos.coworking;
+            const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+            const custoBase = this.gerenciamentoCreditos.custoBase;
+            /* Dados do Imovel */
+            const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+            const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+            const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
+
+            let message;
+            const date = scope.timestamp.date;
+            const dateTime = new Date((date + " " + horario).replace(/\-/g, "/")).getTime();
+
+            let itens = [];
+            let multiplicaMs = 60 * 1000;
+
+            for (const opt of options) {
+                const inteiro = Number(opt.value) % Number(this.timeStepMin) == 0;
+                const ms = Number(opt.value) * multiplicaMs;
+                let eventFilter;
+
+                if (this.funcionamentoRotativo) {
+                    eventFilter = this.events.filter((item) => {
+                        return item.quantidade == this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho;
+                    });
+                } else {
+                    eventFilter = this.events.find((item) => {
+                        return item.timestampInicial > dateTime;
+                    });
+                }
+
+                if (this.funcionamentoRotativo) {
+                    const dateTimeFinal = dateTime + ms;
+
+                    let haveBreakpoint = eventFilter.find((item) => {
+                        return item.timestampInicial == dateTimeFinal - this.imovel.opcoesAgendamentoIndividual.intervaloMin * 60 * 1000;
+                    });
+
+                    if (haveBreakpoint) {
+                        break;
+                    } else {
+                        if (inteiro) {
+                            itens.push(opt);
+                        }
+                    }
+                } else if (eventFilter) {
+                    const dateTimeFinal = dateTime + ms;
+
+                    if (eventFilter.timestampInicial >= dateTimeFinal && inteiro) {
+                        itens.push(opt);
+                    }
+                } else if (inteiro) {
+                    itens.push(opt);
+                }
+            }
+
+            if (this.validaNecessitaCredito) {
+                message = `<span class='text-black' style='font-size: 1rem'>
+          <center>Selecione a duração da sua utilização</center>`;
+
+                if (!isNaN(gerenciamentoHoras.horasMensaisDisponiveis) && !isNaN(gerenciamentoHoras.horasExtras)) {
+                    let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras;
+
+                    message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
+                      ${creditoUsuario.toFixed(2)}
+                      </strong></p>
+                    </span>`;
+                } else {
+                    message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos:
+                 <strong> 0 </strong></p>
+                </span>`;
+                }
+
+                message += "</span> <center>" + this.validacaoTempoMinimoAprovacaoLabel(itens, this.tempoMinimoAprovacao, this.aprovarVisita, this.necessitaAprovacao, funcionamentoIndividual) + "<center>";
+                message += `</span>`;
+            } else {
+                message = `<span class='text-black' style='font-size: 1rem'>
+          <center>Selecione a duração da sua utilização</center>`;
+                message += "<center>" + this.validacaoTempoMinimoAprovacaoLabel(itens, this.tempoMinimoAprovacao, this.aprovarVisita, this.necessitaAprovacao, funcionamentoIndividual) + "<center>";
+                message += `</span>`;
+            }
+            Dialog.create({
+                title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
+                message: message,
+                options: {
+                    type: "radio",
+                    model: this.duracao,
+                    items: itens,
+                },
+                ok: {
+                    flat: true,
+                    color: "positive",
+                    label: "Confirmar",
+                },
+                cancel: {
+                    flat: true,
+                    label: "Escolher outro",
+                },
+                html: true,
+                persistent: true,
+            }).onOk((data) => {
+                const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
+                const necessitaAprovacao = this.necessitaAprovacao;
+                const aprovarVisita = this.aprovarVisita;
+
+                const validadeFinal = this.user.validadeInicial + Number(data) * 60000;
+                this.user.validadeFinal = validadeFinal;
+                this.validaNecessitaAprovacao = this.validaAprovacao(necessitaAprovacao, aprovarVisita, this.user.validadeInicial, validadeFinal, tempoMinimoAprovacao, funcionamentoIndividual);
+
+                if (!this.verificarCreditos(gerenciamentoHoras.horasMensaisDisponiveis, gerenciamentoHoras.horasExtras, Number(data), coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos)) {
+                    return;
+                }
+
+                const visita = {
+                    title: "Horário Selecionado",
+                    date: scope.timestamp.date,
+                    time: horario,
+                    duration: Number(data),
+                    bgcolor: "green-10",
+                    textColor: "text-white",
+                };
+                this.events.push(visita);
+
+                this.montarQrcode();
+
+                if (this.habilitarPublicoExterno) {
+                    this.quantasPessoas();
+                } else {
+                    Loading.show();
+                    setTimeout(() => {
+                        this.inForms = true;
+                        if (this.login && this.login.id && this.login.user) {
+                            if (!this.utilizarEmail && !this.utilizarDocumentos && !this.utilizarCPF) this.parte = 4;
+                            else this.parte = 2;
+                        }
+                        Loading.hide();
+                    }, 1500);
+                }
+            });
+        },
+
+        //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
+        async onTimeClick({ event, scope }) {
+            let hora = scope.timestamp.hour;
+            let minutos = scope.timestamp.minute;
+            const dia = moment(scope.timestamp.date);
+            const now = moment();
+
+            this.entidadeUsuario = this.getLogin.user.entidadeId;
+
+            if (this.contador == 0) {
+                let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
+                const trueKeys = [];
+                for (const key in obj) {
+                    if (obj[key]) {
+                        let keyLabel = key.toString();
+                        keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
+                        if (keyLabel == "Reuniao") keyLabel = "Reunião";
+                        trueKeys.push({ label: keyLabel, value: `${key}` });
+                    }
+                }
+
+                //verifica se o horário esta certo para criar visita
+                const now_vector = now.format("MM DD HH mm").split(" ");
+                const minutes_base_ref = now.subtract(this.timeStepMin, "minutes").format("mm");
+                if (scope.timestamp.past) {
+                    if (!(dia == parseInt(now_vector[1]) && hora == parseInt(now_vector[2]) && minutos < parseInt(now_vector[3]) && minutos > parseInt(minutes_base_ref))) {
+                        Dialog.create({
+                            title: "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+                            message: "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
+                            html: true,
+                            ok: "Ok",
+                        });
+                        return;
+                    }
+                }
+
+                let diaFuturo = now.add(this.liberarAgendamento, "day");
+
+                if (this.liberarAgendamento > -1 && dia > diaFuturo) {
+                    Dialog.create({
+                        title: "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+                        message: "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
+                        html: true,
+                        ok: "Ok",
+                    });
+                    return;
+                }
+                //tipo de evento - outros chama outra modal que pede o que é
+                await new Promise((resolve, reject) => {
+                    Dialog.create({
+                        title: "Tipo de evento",
+                        message: "Escolha o tipo de evento:",
+                        options: {
+                            type: "radio",
+                            model: "",
+                            items: trueKeys,
+                        },
+                        cancel: true,
+                        persistent: true,
+                    })
+                        .onOk((data) => {
+                            const filtro = ["outros", "evento"];
+                            if (filtro.includes(data)) {
+                                this.qualEvento(data, minutos, hora, scope);
+                            } else {
+                                this.eventoOutros.label = data;
+                                this.escolherHorario(minutos, hora, scope);
+                            }
+                            resolve();
+                        })
+                        .onCancel(() => {
+                            this.contador = 0;
+                            reject();
+                        })
+                        .onDismiss(() => {
+                            reject();
+                        });
+                });
+            }
+        },
+        filtraValor(valorDaSala) {
+            if (valorDaSala) {
+                let filtroValorDaSala = valorDaSala.toString();
+                if (filtroValorDaSala.length == 1 || filtroValorDaSala.length == 2) {
+                    return `${valorDaSala}.00`;
+                }
+            }
+
+            let valor = this.valorDaSala * (this.diferencaEmMinutos(this.user.validadeInicial, this.user.validadeFinal) / 15);
+            let filtro = valor.toString();
+
+            if (filtro.length == 1 || filtro.length == 2) {
+                filtro = `${filtro}.00`;
+            }
+
+            if (filtro.length == 3 && filtro[2] !== ".") {
+                filtro = `${filtro}.00`;
+            }
+            return filtro;
+        },
+        validaAprovacao(necessitaAprovacao, aprovarVisita, validadeInicial, validadeFinal, tempoMinimoAprovacao, funcionamentoIndividual) {
+            let paraAprovarPorTempoMinimo = false;
+
+            if (funcionamentoIndividual == true && this.necessitaAprovacao == true && tempoMinimoAprovacao > 0) {
+                let duracao = (validadeInicial - validadeFinal) / 60000;
+
+                paraAprovarPorTempoMinimo = Math.abs(duracao) > tempoMinimoAprovacao;
+            } else if (funcionamentoIndividual == false && aprovarVisita && tempoMinimoAprovacao > 0) {
+                let duracao = (validadeInicial - validadeFinal) / 60000;
+                paraAprovarPorTempoMinimo = Math.abs(duracao) > tempoMinimoAprovacao;
+            }
+
+            if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao > 0 && paraAprovarPorTempoMinimo) {
+                this.user.paraAprovar = true;
+
+                return true;
+            } else if (funcionamentoIndividual == true && necessitaAprovacao && tempoMinimoAprovacao > 0 && !paraAprovarPorTempoMinimo) {
+                this.user.paraAprovar = false;
+
+                return false;
+            } else if (funcionamentoIndividual == true && necessitaAprovacao) {
+                this.user.paraAprovar = true;
+                return true;
+            } else if (funcionamentoIndividual == false && aprovarVisita && tempoMinimoAprovacao > 0 && paraAprovarPorTempoMinimo) {
+                this.user.paraAprovar = true;
+
+                return true;
+            } else if (funcionamentoIndividual == false && aprovarVisita && tempoMinimoAprovacao > 0 && !paraAprovarPorTempoMinimo) {
+                this.user.paraAprovar = false;
+
+                return false;
+            } else if (funcionamentoIndividual == true && necessitaAprovacao == false) {
+                this.user.paraAprovar = false;
+                return false;
+            } else if (funcionamentoIndividual == false && !aprovarVisita) {
+                this.user.paraAprovar = true;
+                return true;
+            }
+        },
+        async validaCriacaoVisitaPagamento() {
+            /* Dados da Entidade */
+            const coworking = this.gerenciamentoCreditos.coworking;
+            const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+            /* Dados do Imovel */
+            const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+            const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+
+            const necessitaPagamento = this.necessitaPagamento;
+
+            const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
+            const necessitaAprovacao = this.necessitaAprovacao;
+            const aprovarVisita = this.aprovarVisita;
+            const validadeInicial = this.user.validadeInicial;
+            const validadeFinal = this.user.validadeFinal;
+
+            let validaUsoCredito = this.validaUsoCredito(funcionamentoIndividual, custaCreditos, coworking, consomeHoras);
+            let validaAprovacao = this.validaAprovacao(necessitaAprovacao, aprovarVisita, validadeInicial, validadeFinal, tempoMinimoAprovacao, funcionamentoIndividual);
+
+            if (!validaAprovacao && !validaUsoCredito && necessitaPagamento) {
+                this.checkoutPagamentoConvite();
+            } else {
+                if (validaUsoCredito && !validaAprovacao && this.validarExtra()) {
+                    this.checkoutPagamentoConvite();
+                }
+            }
+        },
+
+        //não existe nescessita pagamento - Verficar se é pra tirar
+        async validaCriacaoVisita() {
+            /* Dados da Entidade */
+            const coworking = this.gerenciamentoCreditos.coworking;
+            const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
+            /* Dados do Imovel */
+            const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
+            const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
+
+            const necessitaPagamento = this.necessitaPagamento;
+
+            const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
+            const necessitaAprovacao = this.necessitaAprovacao;
+            const aprovarVisita = this.aprovarVisita;
+            const validadeInicial = this.user.validadeInicial;
+            const validadeFinal = this.user.validadeFinal;
+
+            let validaUsoCredito = this.validaUsoCredito(funcionamentoIndividual, custaCreditos, coworking, consomeHoras);
+            let validaAprovacao = this.validaAprovacao(necessitaAprovacao, aprovarVisita, validadeInicial, validadeFinal, tempoMinimoAprovacao, funcionamentoIndividual);
+
+            if (!validaAprovacao && !validaUsoCredito && necessitaPagamento) {
+                this.checkoutPagamentoConvite();
+            } else {
+                if (validaUsoCredito && !validaAprovacao && this.validarExtra()) {
+                    this.checkoutPagamentoConvite();
+                } else {
+                    this.criacaoVisita();
+                }
+            }
+        },
+        async onSubmit() {
+            this.validaCriacaoVisita();
+        },
+        async criacaoVisita() {
+            if (this.fotoFrente && this.fotoFrente.length && this.fotoFrente.length == 0) {
+                Notify.create({
+                    message: "Insira a foto da frente do seu documento",
+                    type: "warning",
+                });
+                return;
+            }
+
+            if (this.fotoVerso && this.fotoVerso.length && this.fotoVerso.length == 0) {
+                Notify.create({
+                    message: "Insira a foto do verso do seu documento",
+                    type: "warning",
+                });
+                return;
+            }
+
+            if (this.fotoSelfie && this.fotoSelfie.length && this.fotoSelfie.length == 0) {
+                Notify.create({ message: "Insira uma selfie sua", type: "warning" });
+                return;
+            }
+
+            if (!this.user.terms) {
+                Notify.create({
+                    message: "Para prosseguir, aceite os termos de uso e privacidade",
+                    type: "warning",
+                });
+                return;
+            }
+            if (!this.user.use) {
+                Notify.create({
+                    message: "Para prosseguir, aceite os termos de utilização da sala",
+                    type: "warning",
+                });
+                return;
+            }
+            Loading.show({ message: "Gerando a visita..." });
+            this.user.numeroVisitantesExternos = parseInt(this.numeroVisitantesExternos);
+
+            let user = {
+                ...this.user,
+            };
+
+            user.entidadeUsuario = this.getLogin.user.entidadeId;
+
+            if (this.necessitaAprovacao) {
+                user.necessitaAprovacao = true;
+            }
+
+            if (this.whatsappAvisoAgendamento) {
+                user.whatsappAvisoAgendamento = this.whatsappAvisoAgendamento;
+            }
+
+            if (this.emailAvisoAgendamento) {
+                user.emailAvisoAgendamento = this.emailAvisoAgendamento;
+            }
+
+            if (this.eventoOutros) {
+                user.eventoOutros = JSON.stringify(this.eventoOutros);
+                user.publicoExterno = this.publicoExterno;
+            }
+
+            let request = {
+                url: "Visitas/validarVisita",
+                method: "post",
+                data: user,
+            };
+
+            if (!this.user.hasDocs) {
+                this.user.fotoFrente = await this.compressImage(this.fotoFrente);
+                this.user.fotoAtras = await this.compressImage(this.fotoVerso);
+                this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
+
+                const blobFrente = {
+                    blob: new Blob([this.user.fotoFrente]),
+                    name: this.user.fotoFrente.name,
+                };
+                const blobAtras = {
+                    blob: new Blob([this.user.fotoAtras]),
+                    name: this.user.fotoAtras.name,
+                };
+                const blobSelfie = {
+                    blob: new Blob([this.user.fotoSelfie]),
+                    name: this.user.fotoSelfie.name,
+                };
+
+                let formData = new FormData();
+                Object.keys(user).forEach((key) => formData.append(key, user[key]));
+                formData.append("fotoFrente", blobFrente.blob, blobFrente.name);
+                formData.append("fotoAtras", blobAtras.blob, blobAtras.name);
+                formData.append("fotoSelfie", blobSelfie.blob, blobSelfie.name);
+
+                request.headers = { "Content-Type": "multipart/form-data" };
+                request.data = formData;
+            }
+            const response = await this.executeMethod(request, false);
+            Loading.hide();
+
+            if (response && response.status == 200) {
+                if (response.data.text) {
+                    this.messageFinal.push(response.data.text);
+                } else {
+                    this.messageFinal.push("Visita agendada Com sucesso");
+                }
+                if (response.data && response.data.url) {
+                    this.returnUrl = response.data.url;
+                }
+
+                if (response.data.responseWpp && response.data.responseWpp.statusCode && response.data.responseWpp.statusCode != 200) {
+                    Notify.create({
+                        message: "Algo inesperado aconteceu, não foi possível enviar mensagem via Whats App.",
+                    });
+                }
+                if (response.data.ics) {
+                    this.mensagemIcs = response.data.ics;
+                }
+                this.mensagemIcs = response.data.ics;
+                this.finalizacao = true;
+            } else if (response && response.status) {
+                const message = response.data ? response.data : response.message ? response.message : "";
+                Dialog.create({
+                    title: '<span class="text-primary" style="font-size:1.2rem">Aconteceu algo inesperado!</span>',
+                    message: '<span style="font-size:1.0rem"> ' + message + "<br/> Revise os dados e tente novamente. </span>",
+                    ok: "Entendido",
+                    html: true,
+                });
+            }
+        },
+
+        okMensagemFinal() {
+            this.$store.dispatch("setarDados", { key: "setParams", value: {} });
+            this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+            this.semImovel = true;
+            this.openURL(`https://agenda.chavi.com.br/${this.routeCoworking}`, "_self");
+            if (this.returnUrl) {
+                this.openURL(this.returnUrl, "_self");
+            }
+        },
+
+        async cancelMensagemFinal() {
+            window.open(`${process.env.VUE_APP_API_URL}/StorageContainers/ics/download/${this.mensagemIcs}`, "_system");
+            Dialog.create({
+                title: '<span class="text-primary" style="font-size:1.2rem">Download do agendamento sendo feito</span>',
+                message: '<span style="font-size:1.0rem">Após o download, abra o arquivo para marcar o agendamento em sua agenda</span>',
+                ok: "Abrir visita",
+                persistent: true,
+                html: true,
+            }).onOk(() => {
+                this.$store.dispatch("setarDados", {
+                    key: "setParams",
+                    value: {},
+                });
+                this.$store.dispatch("setarDados", { key: "setLogo", value: "" });
+                this.semImovel = true;
+                if (this.returnUrl) this.openURL(this.returnUrl, "_self");
+                else this.openURL("https://agenda.chavi.com.br/" + this.routeCoworking, "_self");
+            });
+        },
+
+        async gerarConvitePagamento(VisitaConvite) {
+            let request = {
+                url: "Convites/validarConvite",
+                method: "post",
+                data: VisitaConvite,
+                encaminharPagamento: true,
+            };
+
+            const response = await this.executeMethod(request, false);
+            return response;
+        },
+
+        async checkoutPagamento(convite) {
+            let data;
+            if (convite.convitePagamento) {
+                data = {
+                    id: convite.id,
+                    sala: "",
+                    tempoDeUso: this.diferencaEmMinutos(convite.dadosVisita.validadeInicial, convite.dadosVisita.validadeFinal),
+                    preco: convite.convitePagamento.custoFaltante,
+                    imovel: convite.dadosVisita.imovelId,
+                };
+            } else {
+                data = {
+                    id: convite.id,
+                    sala: "", //this.visita.imovelRef,
+                    tempoDeUso: this.diferencaEmMinutos(convite.dadosVisita.validadeInicial, convite.dadosVisita.validadeFinal),
+                    preco: this.valorDaSala * (this.diferencaEmMinutos(convite.dadosVisita.validadeInicial, convite.dadosVisita.validadeFinal) / 15),
+                    imovel: convite.dadosVisita.imovelId,
+                };
+            }
+
+            let request = {
+                url: "Entidades/checkoutPagamento",
+                method: "post",
+                data: data,
+            };
+
+            const response = await this.executeMethod(request, false);
+
+            const mp = new MercadoPago(this.chaveAgendamento, {
+                locale: "pt-BR",
+            });
+            mp.checkout({
+                preference: {
+                    id: response.data,
+                },
+                render: {
+                    container: ".cho-container",
+                    label: "Efetuar pagamento",
+                },
+                autoOpen: true,
+            });
+
+            return;
+        },
+        async checkoutPagamentoConvite() {
+            let visitaConvite = await this.criarVisita();
+            const response = await this.gerarConvitePagamento(visitaConvite);
+
+            if (response && response.status == 200) {
+                let idPreferencia = response.data.globalId;
+
+                this.user.entidadeUsuario = this.entidadeUsuario;
+                const mp = new MercadoPago(this.chaveAgendamento, {
+                    locale: "pt-BR",
+                });
+                mp.checkout({
+                    preference: {
+                        id: idPreferencia,
+                    },
+                    render: {
+                        container: ".cho-container",
+                        label: "Efetuar pagamento",
+                    },
+                    autoOpen: true,
+                });
+                return;
+            } else {
+                return;
+            }
+        },
+        diferencaEmMinutos(inicial, final) {
+            const dataInicio = moment(inicial);
+            const dataFim = moment(final);
+
+            const calcula = dataFim.diff(dataInicio, "minutes");
+
+            return calcula;
+        },
+
+        openURL(link, target) {
+            window.open(link, target);
+        },
+        onReset() {
+            this.user.name = "";
+            this.user.empresa = "";
+            this.user.cpf = "";
+            this.user.email = "";
+        },
+        onValError(ref) {
+            this.parte = 2;
+        },
+        verificarEmail(valor) {
+            const regexp = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?/i;
+            const regexp2 = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]/i;
+            return regexp.test(valor) || regexp2.test(valor) || !this.utilizarEmail;
+        },
+        verificarCPF(valor) {
+            if (valor) {
+                var soma;
+                var resto;
+                soma = 0;
+                const cpf = valor.toString().replace(/\.|\-/g, "");
+                if (cpf == "00000000000") return false;
+
+                for (let i = 1; i <= 9; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+                resto = (soma * 10) % 11;
+
+                if (resto == 10 || resto == 11) resto = 0;
+                if (resto != parseInt(cpf.substring(9, 10))) return false;
+
+                soma = 0;
+                for (let i = 1; i <= 10; i++) soma = soma + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+                resto = (soma * 10) % 11;
+
+                if (resto == 10 || resto == 11) resto = 0;
+                if (resto != parseInt(cpf.substring(10, 11))) return false;
+                return true;
+            }
+        },
+        async carregarHorarios() {
+            try {
+                Loading.show({
+                    message: "Carregando dados",
+                });
+                const cliente = this.user.entidadeId;
+                let requestH = {
+                    url: "Historicos/comprasCreditos",
+                    method: "post",
+                    data: { data: { coworkingId: this.$store.getters.getImovelAgendamento.entidadeId } },
+                };
+                const historico = await this.executeMethod(requestH, false);
+
+                const imovel = this.user.imovelRef;
+                if (cliente) {
+                    const response = await this.executeMethod({
+                        url: "Visitas/horariosOcupados",
+                        method: "GET",
+                        params: {
+                            clienteId: cliente,
+                            imovelRef: imovel,
+                        },
+                    });
+
+                    if (response && response.status == 200) {
+                        this.cliente = response.data.entidade;
+
+                        this.idImovel = response.data.idImovel;
+                        this.imovel = response.data.imovel;
+                        if (this.imovel.opcoesDeCredito.descritivo && this.imovel.opcoesDeCredito.descritivo.length > 0) {
+                            this.imovel.opcoesDeCredito.descritivo = this.imovel.opcoesDeCredito.descritivo.filter((e) => {
+                                if (typeof e == "string") {
+                                    let descricao = e.trim();
+                                    return descricao.length > 0;
+                                }
+                            });
+                        }
+                        this.$store.dispatch("setarDados", {
+                            key: "setLogo",
+                            value: this.cliente.logo,
+                        });
+                        //Verifica se a sala necessita aprovacao
+                        if (response.data.entidade.preferenciaVisita.necessitaAprovacao || response.data.imovel.opcoesAgendamentoIndividual.necessitaAprovacao) {
+                            this.necessitaAprovacao = true;
+                        } else {
+                            this.necessitaAprovacao = false;
+                        }
+
+                        //Verifica se a sala tem agendamentoUnico
+                        if (response.data.imovel.opcoesAgendamentoIndividual.agendamentoUnico) {
+                            this.agendamentoUnico = true;
+                            if (response.data.imovel.opcoesAgendamentoIndividual.tempoTotalMaximo > 0) {
+                                this.tempoTotalMaximo = response.data.imovel.opcoesAgendamentoIndividual.tempoTotalMaximo;
+                            } else {
+                                this.tempoTotalMaximo = 0;
+                            }
+                        } else {
+                            this.agendamentoUnico = false;
+                            this.tempoTotalMaximo = 0;
+                        }
+
+                        response.data.imovel.opcoesAgendamentoIndividual.necessitaPagamento ? (this.necessitaPagamento = true) : (this.necessitaPagamento = false);
+
+                        if (response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento || response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento) {
+                            if (response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento) {
+                                this.whatsappAvisoAgendamento = response.data.imovel.opcoesAgendamentoIndividual.whatsappAvisoAgendamento;
+                            } else {
+                                this.whatsappAvisoAgendamento = response.data.entidade.preferenciaVisita.whatsappAvisoAgendamento;
+                            }
+                        }
+
+                        if (response.data.entidade.preferenciaVisita.emailAvisoAgendamento || response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento) {
+                            if (response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento) {
+                                this.emailAvisoAgendamento = response.data.imovel.opcoesAgendamentoIndividual.emailAvisoAgendamento;
+                            } else {
+                                this.emailAvisoAgendamento = response.data.entidade.preferenciaVisita.emailAvisoAgendamento;
+                            }
+                        }
+
+                        if (response.data.imovel.opcoesAgendamentoIndividual.custaCreditos && response.data.entidade.preferenciaVisita.cobrarCreditoExtra && response.data.entidade.preferenciaVisita.chaveAgendamento != "") {
+                            response.data.entidade.preferenciaVisita.chaveAgendamento ? (this.chaveAgendamento = response.data.entidade.preferenciaVisita.chaveAgendamento) : (this.chaveAgendamento = "");
+                        } else {
+                            response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento ? (this.chaveAgendamento = response.data.imovel.opcoesAgendamentoIndividual.chaveAgendamento) : (this.chaveAgendamento = "");
+                        }
+
+                        response.data.imovel.opcoesAgendamentoIndividual.valorDaSala ? (this.valorDaSala = Number(response.data.imovel.opcoesAgendamentoIndividual.valorDaSala)) : (this.valorDaSala = 0);
+
+                        if (this.cliente) {
+                            this.custoBase = this.cliente.custoBase ? this.cliente.custoBase : 0;
+                        }
+
+                        if (this.cliente && this.cliente.preferenciaUsuario) {
+                            this.utilizarCPF = this.cliente.preferenciaUsuario.utilizarCPF;
+                            this.utilizarDocumentos = this.cliente.preferenciaUsuario.utilizarDocumentos;
+                            this.verificarDocumentos = this.cliente.preferenciaUsuario.verificarDocumentos;
+                            this.utilizarEmail = this.cliente.preferenciaUsuario.utilizarEmail;
+                            this.loginEmail = this.cliente.preferenciaUsuario.loginEmail;
+                            this.aprovarVisita = this.cliente.preferenciaUsuario.aprovarVisita;
+                        }
+                        if (this.cliente && this.cliente.preferenciaVisita) {
+                            this.tempoMinimoAprovacao = this.cliente.preferenciaVisita.tempoMinimoAprovacao ? this.cliente.preferenciaVisita.tempoMinimoAprovacao : 0;
+                            this.tempoMaximo = this.cliente.preferenciaVisita.tempoMaximo ? this.cliente.preferenciaVisita.tempoMaximo : 60;
+                            this.isCoworking = this.cliente.preferenciaVisita.coworking ? this.cliente.preferenciaVisita.coworking : false;
+                            this.sabado = this.cliente.preferenciaVisita.sabado ? true : false;
+                            this.liberarFeriado = this.cliente.preferenciaVisita.feriado;
+                            this.domingo = this.cliente.preferenciaVisita.domingo ? true : false;
+
+                            if (this.cliente.preferenciaVisita.intervaloMin) {
+                                this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin;
+                                this.duracao = this.cliente.preferenciaVisita.intervaloMin.toString();
+                            }
+                            if (this.cliente.preferenciaVisita.horaInicial) {
+                                this.horaInicial = this.cliente.preferenciaVisita.horaInicial.toString().split(":")[0];
+                            }
+                            if (this.cliente.preferenciaVisita.horaFinal) {
+                                this.horaFinal = this.cliente.preferenciaVisita.horaFinal.toString().split(":")[0];
+                            }
+                            if (this.cliente.preferenciaVisita.liberarAgendamento) {
+                                this.liberarAgendamento = this.cliente.preferenciaVisita.liberarAgendamento ? this.cliente.preferenciaVisita.liberarAgendamento : -1;
+                            }
+                            this.habilitarPublicoExterno = this.cliente.preferenciaVisita.habilitarPublicoExterno ? this.cliente.preferenciaVisita.habilitarPublicoExterno : false;
+                        }
+                        this.events = response.data.horarios;
+
+                        if (this.funcionamentoRotativo) {
+                            this.formatDataRotativo();
+                        } else {
+                            this.formatData();
+                        }
+                    } else {
+                        Notify.create({
+                            message: "Não foi possível localizar o imóvel ou sala em questão. Verifique o seu link de acesso e tente novamente",
+                            type: "warning",
+                        });
+                        this.semImovel = true;
+                    }
+                }
+            } catch (e) {
+                console.log(e);
+            } finally {
+                Loading.hide();
+            }
+        },
+        formatData() {
+            let optionsOff = [];
+
+            if (this.events && this.events.length > 0) {
+                this.events.sort((a, b) => {
+                    return a.timestampInicial < b.timestampInicial ? -1 : 1;
+                });
+                //verifica horário
+
+                for (let horario of this.events) {
+                    const inicio = parseTimestamp(moment(parseInt(horario.timestampInicial)).format("YYYY-MM-DD HH:mm"));
+
+                    let finalTemp = parseInt(horario.timestampInicial) + parseInt(horario.intervalo);
+
+                    const final = parseTimestamp(moment(parseInt(finalTemp)).format("YYYY-MM-DD HH:mm"));
+
+                    const duracao = horario.intervalo / 60000;
+
+                    let titleBusy = "Ocupado";
+
+                    if (horario.usuario) {
+                        titleBusy = `
+            <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
+                <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
+                        if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
+                            let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0];
+                            titleBusy += `${entidadeNomeCortado} <br/>`;
+                        }
+
+                        if (!horario.usuarioEntidade) {
+                            horario.usuarioEntidade = "";
+                        }
+                        if (!horario.usuario) {
+                            horario.usuario = "";
+                        }
+
+                        let usuarioNomeCortado = "";
+                        if (horario.usuario) {
+                            titleBusy = `
+            <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
+                <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
+                            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
+                                let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0];
+                                titleBusy += `${entidadeNomeCortado} <br/>`;
+                            }
+
+                            usuarioNomeCortado = horario.usuario.trim().split("-")[0];
+                            usuarioNomeCortado = usuarioNomeCortado.split(" ")[0];
+                            titleBusy += `${usuarioNomeCortado} <br/>`;
+
+                            titleBusy += `<div class="full-width text-center">${inicio.time} - ${final.time} </div> </div>`;
+                        }
+
+                        optionsOff.push({
+                            title: horario.paraAprovar ? (horario.usuarioId == this.getLogin.user.id && horario.esperaPagamento == true ? "PENDENTE<br>PAGAMENTO" : "PENDENTE") : titleBusy,
+                            date: inicio.date,
+                            time: inicio.time,
+                            duration: duracao,
+                            tooltip: { inicio: inicio.time, fim: final.time, empresa: horario.usuarioEntidade, usuario: usuarioNomeCortado },
+                            usuarioId: horario.usuarioId,
+                            bgcolor: horario.paraAprovar ? (horario.usuarioId == this.getLogin.user.id ? "blue-8" : "yellow-8") : horario.usuarioId == this.getLogin.user.id ? "blue-5" : "red-5",
+                            textColor: "text-white",
+                            timestampInicial: horario.timestampInicial,
+                            visitaCodigo: horario.visitaCodigo ? horario.visitaCodigo : "",
+                            styledBg: "",
+                            esperaPagamento: horario.esperaPagamento ? horario.esperaPagamento : false,
+                            codigo: horario.codigo ? horario.codigo : " ",
+                        });
+                    }
+                    this.events = optionsOff;
+                }
+            }
+        },
+        formatDataRotativo() {
+            let elementosParaRenderizar = []; // esse array divide cada visita conforme o intervaloMin para renderização
+            let quantidadeDeDivisoesQueEstaVisitaOcupa = 0;
+            let intervaloMinimoEmMilessegundos = this.imovel.opcoesAgendamentoIndividual.intervaloMin * 60 * 1000;
+            let optionsOff = [];
+
+            if (this.events && this.events.length > 0) {
+                this.events.sort((a, b) => {
+                    return a.timestampInicial < b.timestampInicial ? -1 : 1;
+                });
+
+                for (let horario of this.events) {
+                    horario.timestampInicial = Number(horario.timestampInicial);
+
+                    // esses dois if corrigems horarios quebrados para prosseguir com o sistema
+                    if (horario.timestampInicial % intervaloMinimoEmMilessegundos != 0) {
+                        horario.timestampInicial -= horario.timestampInicial % intervaloMinimoEmMilessegundos;
+                    }
+                    if (horario.intervalo % intervaloMinimoEmMilessegundos != 0) {
+                        horario.intervalo += (horario.intervalo % intervaloMinimoEmMilessegundos) - intervaloMinimoEmMilessegundos;
+                    }
+
+                    quantidadeDeDivisoesQueEstaVisitaOcupa = horario.intervalo / intervaloMinimoEmMilessegundos;
+                    if (elementosParaRenderizar.length == 0) {
+                        for (let i = 0; quantidadeDeDivisoesQueEstaVisitaOcupa > i; i++) {
+                            elementosParaRenderizar.push({
+                                InicioDaDivisao: horario.timestampInicial + intervaloMinimoEmMilessegundos * i,
+                                usuarioIds: [horario.usuarioId],
+                                quantidade: 1,
+                            });
+                        }
+                    } else {
+                        for (let i = 0; quantidadeDeDivisoesQueEstaVisitaOcupa > i; i++) {
+                            let inicioDessaDivisao = horario.timestampInicial + intervaloMinimoEmMilessegundos * i;
+                            let adicionou = false;
+
+                            for (let index = 0; elementosParaRenderizar.length > index; index++) {
+                                if (elementosParaRenderizar[index].InicioDaDivisao == inicioDessaDivisao) {
+                                    elementosParaRenderizar[index].quantidade++;
+                                    elementosParaRenderizar[index].usuarioIds.push(horario.usuarioId);
+                                    adicionou = true;
+                                }
+                            }
+                            if (adicionou) {
+                                continue;
+                            } else {
+                                elementosParaRenderizar.push({
+                                    InicioDaDivisao: inicioDessaDivisao,
+                                    usuarioIds: [horario.usuarioId],
+                                    quantidade: 1,
+                                });
+                            }
+                        }
+                    }
+                }
+
+                for (let index = 0; elementosParaRenderizar.length > index; index++) {
+                    // clonagem do formData original
+                    const inicio = parseTimestamp(moment(parseInt(elementosParaRenderizar[index].InicioDaDivisao)).format("YYYY-MM-DD HH:mm"));
+
+                    const duracao = intervaloMinimoEmMilessegundos / 60000;
+                    let titleBusy = "Ocupado";
+
+                    titleBusy = `
+          <div class="column justify-center text-center align-center" style="white-space: pre-wrap;">
+              <div class="full-width text-center row">`;
+
+                    titleBusy += `<div class="full-width text-center" style="color: #000;">${elementosParaRenderizar[index].quantidade} / ${this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho} </div> </div>`;
+
+                    let indexColor = Math.floor((elementosParaRenderizar[index].quantidade * this.quantidadeDeElementos) / this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho);
+
+                    optionsOff.push({
+                        title: titleBusy,
+                        date: inicio.date,
+                        time: inicio.time,
+                        duration: duracao,
+                        usuarioId: "",
+                        bgcolor: "",
+                        textColor: "text-white",
+                        timestampInicial: elementosParaRenderizar[index].InicioDaDivisao,
+                        visitaCodigo: "",
+                        styledBg: this.colors[indexColor],
+                        quantidade: elementosParaRenderizar[index].quantidade,
+                    });
+                }
+                this.events = optionsOff;
+            }
+        },
+
+        async sendCode() {
+            let response;
+            if (!this.user || (this.loginEmail && !this.user.email) || (!this.loginEmail && !this.user.phone)) {
+                return;
+            }
+            Loading.show({ message: "Verificando cadastro do usuário" });
+            if (this.loginEmail)
+                response = await this.executeMethod({
+                    url: "Usuarios/verificarEmail",
+                    method: "post",
+                    data: { email: this.user.email },
+                });
+            else
+                response = await this.executeMethod(
+                    {
+                        url: "Usuarios/loginTelefone",
+                        method: "post",
+                        data: { telefone: this.user.phone },
+                    },
+                    false
+                );
+            if (response.status == 200 || response.status == 201) {
+                Notify.create({
+                    message: "Código de Confirmação enviado com Sucesso.",
+                    type: "positive",
+                });
+                this.codeSent = true;
+                this.newUser = response.status == 200 ? false : true;
+                if (response.status === 201) {
+                    this.user.codigo = response.data;
+                }
+                if (this.newUser) {
+                    this.carregarClientes();
+                }
+            } else {
+                Notify.create({
+                    message: "Erro ao enviar Informações ao Servidor.",
+                    type: "negative",
+                });
+            }
+            Loading.hide();
+        },
+        async checkCode() {
+            let response;
+            const nome = this.user.name;
+            const coworkingId = this.$store.getters.getImovelAgendamento.entidadeId;
+            if (this.newUser) {
+                Loading.show({ delay: 400 });
+                if (this.loginEmail)
+                    response = await this.executeMethod(
+                        {
+                            url: "Usuarios/cadastroPorEmail",
+                            method: "post",
+                            data: {
+                                dados: {
+                                    email: this.user.email,
+                                    nome: nome.trim(),
+                                    codigo: this.user.codigo,
+                                    entidadeId: this.user.empresa,
+                                    coworkingId: coworkingId,
+                                },
+                            },
+                        },
+                        false
+                    );
+                else
+                    response = await this.executeMethod(
+                        {
+                            url: "Usuarios/cadastrar",
+                            method: "post",
+                            data: {
+                                telefone: this.user.phone,
+                                nomeCompleto: nome.trim(),
+                                loginCodigo: this.user.codigo,
+                                coworkingId: coworkingId,
+                            },
+                        },
+                        false
+                    );
+                Loading.hide();
+                if (response.status != 200) {
+                    Notify.create({
+                        message: "Não foi possível cadastrar o Usuário. Por favor, tente novamente.",
+                        type: "warning",
+                    });
+                    inForms = false;
+                    return;
+                } else if (response.status == 200) this.newUser = false;
+            }
+            Loading.show({ delay: 400 });
+            response = await this.executeMethod(
+                {
+                    url: "Usuarios/novoLogin",
+                    method: "post",
+                    data: {
+                        username: this.loginEmail ? this.user.email : this.user.phone,
+                        codigo: this.user.codigoInput,
+                    },
+                },
+                false
+            );
+            Loading.hide();
+            if (response.status == 200) {
+                await this.$store.dispatch("setarDados", {
+                    key: "setLogin",
+                    value: response.data,
+                });
+
+                this.user.empresa = this.getLogin.user.entidade.nome;
+                this.user.cpf = response.data.user.cpf;
+                this.user.email = response.data.user.email;
+                this.user.hasDocs = response.data.user.fotoFrente && response.data.user.fotoAtras && response.data.user.fotoSelfie;
+                if (this.user.email.includes("@chaviuser")) this.user.email = "";
+                if (this.user.validadeInicial) this.parte += 1;
+                else this.inForms = false;
+                if (!this.utilizarEmail && !this.utilizarDocumentos) this.nextStep();
+                if (this.isUsoDeCreditos) {
+                    this.usoDeCreditos = true;
+                }
+                this.user.name = this.getLogin.user.nome;
+                this.carregarHorarios();
+            } else {
+                Notify.create({
+                    message: "Número de Telefone inválido ou Código SMS incorreto.",
+                    type: "warning",
+                });
+            }
+        },
+        async criarVisita() {
+            this.user.numeroVisitantesExternos = parseInt(this.numeroVisitantesExternos);
+
+            let user = {
+                ...this.user,
+            };
+
+            user.entidadeUsuario = this.getLogin.user.entidadeId;
+
+            if (this.necessitaAprovacao) {
+                user.necessitaAprovacao = true;
+            }
+
+            if (this.whatsappAvisoAgendamento) {
+                user.whatsappAvisoAgendamento = this.whatsappAvisoAgendamento;
+            }
+
+            if (this.emailAvisoAgendamento) {
+                user.emailAvisoAgendamento = this.emailAvisoAgendamento;
+            }
+
+            if (this.eventoOutros) {
+                user.eventoOutros = JSON.stringify(this.eventoOutros);
+                user.publicoExterno = this.publicoExterno;
+            }
+
+            if (!this.user.hasDocs) {
+                this.user.fotoFrente = await this.compressImage(this.fotoFrente);
+                this.user.fotoAtras = await this.compressImage(this.fotoVerso);
+                this.user.fotoSelfie = await this.compressImage(this.fotoSelfie);
+
+                const blobFrente = {
+                    blob: new Blob([this.user.fotoFrente]),
+                    name: this.user.fotoFrente.name,
+                };
+                const blobAtras = {
+                    blob: new Blob([this.user.fotoAtras]),
+                    name: this.user.fotoAtras.name,
+                };
+                const blobSelfie = {
+                    blob: new Blob([this.user.fotoSelfie]),
+                    name: this.user.fotoSelfie.name,
+                };
+
+                user.fotos = { blobFrente, blobAtras, blobSelfie };
+            }
+
+            return user;
+        },
+
+        getDayOfWeek(dow) {
+            switch (dow) {
+                case 0:
+                    return "Domingo";
+                case 1:
+                    return "Segunda-Feira";
+                case 2:
+                    return "Terça-Feira";
+                case 3:
+                    return "Quarta-Feira";
+                case 4:
+                    return "Quinta-Feira";
+                case 5:
+                    return "Sexta-Feira";
+                case 6:
+                    return "Sábado";
+                default:
+                    return "";
+            }
+        },
+
+        setHoliday(y) {
+            function easterDay(y) {
+                var c = Math.floor(y / 100);
+                var n = y - 19 * Math.floor(y / 19);
+                var k = Math.floor((c - 17) / 25);
+                var i = c - Math.floor(c / 4) - Math.floor((c - k) / 3) + 19 * n + 15;
+                i = i - 30 * Math.floor(i / 30);
+                i = i - Math.floor(i / 28) * (1 - Math.floor(i / 28) * Math.floor(29 / (i + 1)) * Math.floor((21 - n) / 11));
+                var j = y + Math.floor(y / 4) + i + 2 - c + Math.floor(c / 4);
+                j = j - 7 * Math.floor(j / 7);
+                var l = i - j;
+                var m = 3 + Math.floor((l + 40) / 44);
+                var d = l + 28 - 31 * Math.floor(m / 4);
+                return moment([y, m - 1, d]);
+            }
+            var anoNovo = moment("01/01/" + y, "DD/MM/YYYY");
+            var carnaval1 = easterDay(y).add(-48, "d");
+            var carnaval2 = easterDay(y).add(-47, "d");
+            var paixaoCristo = easterDay(y).add(-2, "d");
+            var pascoa = easterDay(y);
+            var tiradentes = moment("21/04/" + y, "DD/MM/YYYY");
+            var corpusChristi = easterDay(y).add(60, "d");
+            var diaTrabalho = moment("01/05/" + y, "DD/MM/YYYY");
+            var diaIndependencia = moment("07/09/" + y, "DD/MM/YYYY");
+            var nossaSenhora = moment("12/10/" + y, "DD/MM/YYYY");
+            var finados = moment("02/11/" + y, "DD/MM/YYYY");
+            var proclamaRepublica = moment("15/11/" + y, "DD/MM/YYYY");
+            var natal = moment("25/12/" + y, "DD/MM/YYYY");
+            this.holidays = [
+                { m: anoNovo, dia: "Ano Novo", d: anoNovo.format("DD/MM/YYYY") },
+                { m: carnaval1, dia: "Carnaval", d: carnaval1.format("DD/MM/YYYY") },
+                { m: carnaval2, dia: "Carnaval", d: carnaval2.format("DD/MM/YYYY") },
+                {
+                    m: paixaoCristo,
+                    dia: "Paix\u00E3o de Cristo",
+                    d: paixaoCristo.format("DD/MM/YYYY"),
+                },
+                { m: pascoa, dia: "P\u00E1scoa", d: pascoa.format("DD/MM/YYYY") },
+                {
+                    m: tiradentes,
+                    dia: "Tiradentes",
+                    d: tiradentes.format("DD/MM/YYYY"),
+                },
+                {
+                    m: corpusChristi,
+                    dia: "Corpus Christi",
+                    d: corpusChristi.format("DD/MM/YYYY"),
+                },
+                {
+                    m: diaTrabalho,
+                    dia: "Dia do Trabalho",
+                    d: diaTrabalho.format("DD/MM/YYYY"),
+                },
+                {
+                    m: diaIndependencia,
+                    dia: "Dia da Independ\u00EAncia do Brasil",
+                    d: diaIndependencia.format("DD/MM/YYYY"),
+                },
+                {
+                    m: nossaSenhora,
+                    dia: "Nossa Senhora Aparecida",
+                    d: nossaSenhora.format("DD/MM/YYYY"),
+                },
+                { m: finados, dia: "Finados", d: finados.format("DD/MM/YYYY") },
+                {
+                    m: proclamaRepublica,
+                    dia: "Proclama\u00E7\u00E3o da Rep\u00FAblica",
+                    d: proclamaRepublica.format("DD/MM/YYYY"),
+                },
+                { m: natal, dia: "Natal", d: natal.format("DD/MM/YYYY") },
+            ];
+        },
+
+        getHoliday(date) {
+            date = moment(date).format("DD/MM/YYYY");
+            const filter = this.holidays.filter((holiday) => {
+                return holiday.d == date;
+            });
+            return filter;
+        },
+
+        termosDeUso() {
+            this.pathPdf = `${process.env.VUE_APP_API_URL}/StorageContainers/logoEntidade/download/${this.cliente.termosDeUso}`;
+        },
+
+        async carregarClientes() {
+            //TODO: Implementar filtro *
+            const request = {
+                url: "Entidades/clientesCoworking/" + this.$store.getters.getImovelAgendamento.entidadeId,
+                method: "get",
+            };
+            const response = await this.executeMethod(request);
+            if (response && response.status == 200) {
+                let options = response.data ? response.data : [];
+                options = options.filter((e) => {
+                    return e.id != "6064614dc7cddfdc2b65144d";
+                });
+                this.clenteOptions = [...options];
+                this.clenteOptions.push({ nome: "Outro", id: "6064614dc7cddfdc2b65144d" });
+            } else {
+                Notify.create({
+                    type: "warning",
+                    message: "Não foi possível carregar",
+                });
+            }
+        },
     },
-
-    getDayOfWeek(dow) {
-      switch (dow) {
-        case 0:
-          return "Domingo";
-        case 1:
-          return "Segunda-Feira";
-        case 2:
-          return "Terça-Feira";
-        case 3:
-          return "Quarta-Feira";
-        case 4:
-          return "Quinta-Feira";
-        case 5:
-          return "Sexta-Feira";
-        case 6:
-          return "Sábado";
-        default:
-          return "";
-      }
-    },
-
-    setHoliday(y) {
-      function easterDay(y) {
-        var c = Math.floor(y / 100);
-        var n = y - 19 * Math.floor(y / 19);
-        var k = Math.floor((c - 17) / 25);
-        var i = c - Math.floor(c / 4) - Math.floor((c - k) / 3) + 19 * n + 15;
-        i = i - 30 * Math.floor(i / 30);
-        i =
-          i -
-          Math.floor(i / 28) *
-            (1 -
-              Math.floor(i / 28) *
-                Math.floor(29 / (i + 1)) *
-                Math.floor((21 - n) / 11));
-        var j = y + Math.floor(y / 4) + i + 2 - c + Math.floor(c / 4);
-        j = j - 7 * Math.floor(j / 7);
-        var l = i - j;
-        var m = 3 + Math.floor((l + 40) / 44);
-        var d = l + 28 - 31 * Math.floor(m / 4);
-        return moment([y, m - 1, d]);
-      }
-      var anoNovo = moment("01/01/" + y, "DD/MM/YYYY");
-      var carnaval1 = easterDay(y).add(-48, "d");
-      var carnaval2 = easterDay(y).add(-47, "d");
-      var paixaoCristo = easterDay(y).add(-2, "d");
-      var pascoa = easterDay(y);
-      var tiradentes = moment("21/04/" + y, "DD/MM/YYYY");
-      var corpusChristi = easterDay(y).add(60, "d");
-      var diaTrabalho = moment("01/05/" + y, "DD/MM/YYYY");
-      var diaIndependencia = moment("07/09/" + y, "DD/MM/YYYY");
-      var nossaSenhora = moment("12/10/" + y, "DD/MM/YYYY");
-      var finados = moment("02/11/" + y, "DD/MM/YYYY");
-      var proclamaRepublica = moment("15/11/" + y, "DD/MM/YYYY");
-      var natal = moment("25/12/" + y, "DD/MM/YYYY");
-      this.holidays = [
-        { m: anoNovo, dia: "Ano Novo", d: anoNovo.format("DD/MM/YYYY") },
-        { m: carnaval1, dia: "Carnaval", d: carnaval1.format("DD/MM/YYYY") },
-        { m: carnaval2, dia: "Carnaval", d: carnaval2.format("DD/MM/YYYY") },
-        {
-          m: paixaoCristo,
-          dia: "Paix\u00E3o de Cristo",
-          d: paixaoCristo.format("DD/MM/YYYY"),
-        },
-        { m: pascoa, dia: "P\u00E1scoa", d: pascoa.format("DD/MM/YYYY") },
-        {
-          m: tiradentes,
-          dia: "Tiradentes",
-          d: tiradentes.format("DD/MM/YYYY"),
-        },
-        {
-          m: corpusChristi,
-          dia: "Corpus Christi",
-          d: corpusChristi.format("DD/MM/YYYY"),
-        },
-        {
-          m: diaTrabalho,
-          dia: "Dia do Trabalho",
-          d: diaTrabalho.format("DD/MM/YYYY"),
-        },
-        {
-          m: diaIndependencia,
-          dia: "Dia da Independ\u00EAncia do Brasil",
-          d: diaIndependencia.format("DD/MM/YYYY"),
-        },
-        {
-          m: nossaSenhora,
-          dia: "Nossa Senhora Aparecida",
-          d: nossaSenhora.format("DD/MM/YYYY"),
-        },
-        { m: finados, dia: "Finados", d: finados.format("DD/MM/YYYY") },
-        {
-          m: proclamaRepublica,
-          dia: "Proclama\u00E7\u00E3o da Rep\u00FAblica",
-          d: proclamaRepublica.format("DD/MM/YYYY"),
-        },
-        { m: natal, dia: "Natal", d: natal.format("DD/MM/YYYY") },
-      ];
-    },
-
-    getHoliday(date) {
-      date = moment(date).format("DD/MM/YYYY");
-      const filter = this.holidays.filter((holiday) => {
-        return holiday.d == date;
-      });
-      return filter;
-    },
-    formatarTexto(texto) {
-			// Substituir "- " no início da linha por <li>
-		  texto = texto.replace(/^- (?=.)/gm, "<li>");
-
-		  // Fechar tags <li> abertas no final do texto
-		  if (texto.endsWith("- ")) {
-			  texto += "</li>";
-		  }
-			// Substituir \n por <br>
-			texto = texto.replace(/\n/g, "<br>");
-			
-			// Envolver texto entre ** em <strong></strong>
-			texto = texto.replace(/\*(.*?)\*/g, "<strong>$1</strong>");
-
-
-			return texto;
-		},
-    termosDeUso() {
-      let message = this.termosDeUsoCustomizado ? this.termosDeUsoCustomizado: "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café."
-      
-      Dialog.create({
-        title: "Termos de uso da sala",
-        message:message,
-        html: true,
-        style: {width: "80%"},
-        ok: {
-          label: "Ok",
-          color: "positive",
-        },
-      });
-    },
-    async carregarClientes() {
-			//TODO: Implementar filtro *
-			const request = {
-				url: 'Entidades/clientesCoworking/' + this.$store.getters.getImovelAgendamento.entidadeId,
-				method: 'get',
-			}
-			const response = await this.executeMethod(request)
-			if (response && response.status == 200) {
-        let options = response.data ? response.data : []
-        options = options.filter(e=>{
-          return e.id != "6064614dc7cddfdc2b65144d"
-        })
-        this.clenteOptions = [...options]
-        this.clenteOptions.push({nome: "Outro", id:"6064614dc7cddfdc2b65144d"})
-			} else {
-				Notify.create({
-					type: 'warning',
-					message: 'Não foi possível carregar',
-				})
-			}
-		}
-  },
 });
 </script>
 
 <style scoped>
 .home-icon {
-  position: fixed;
-  transform: scale(1.6);
-  z-index: 9999999;
-  right: 20px;
-  top: 20px;
+    position: fixed;
+    transform: scale(1.6);
+    z-index: 9999999;
+    right: 20px;
+    top: 20px;
 }
 
-.borderDivCalendar{
-  border-color : white;
-  border-style : solid;
-  border-width: 0.1rem;
-  border-radius: 10px;
+.borderDivCalendar {
+    border-color: white;
+    border-style: solid;
+    border-width: 0.1rem;
+    border-radius: 10px;
 }
 
 .descritivo {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  width: 95%;
-  max-width: 500px;
-  margin: 0 auto;
-  max-height: 330px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
-    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-  color: #505050;
-  justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    width: 95%;
+    max-width: 500px;
+    margin: 0 auto;
+    max-height: 330px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    color: #505050;
+    justify-content: center;
 }
 
 .descritivo-title {
-  width: 100%;
-  padding-top: 4px;
-  padding-bottom: -4px;
-  height: 40px;
-  text-align: center;
-  align-items: center;
+    width: 100%;
+    padding-top: 4px;
+    padding-bottom: -4px;
+    height: 40px;
+    text-align: center;
+    align-items: center;
 }
 
 .descritivo-title > p {
-  margin: 0;
+    margin: 0;
 }
 .descritivo > div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-
 .descritivo > div > li {
-  padding-left: 10px;
-  max-width: 350px;
-  white-space: nowrap;
-  overflow: hidden;
-  margin-bottom: 4px;
+    padding-left: 10px;
+    max-width: 350px;
+    white-space: nowrap;
+    overflow: hidden;
+    margin-bottom: 4px;
 }
 
 .my-event {
-  position: absolute;
-  font-size: 12px;
-  justify-content: center;
-  margin: 0 1px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  cursor: pointer;
+    position: absolute;
+    font-size: 12px;
+    justify-content: center;
+    margin: 0 1px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    cursor: pointer;
 }
 .title {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  word-break: break-all;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    word-break: break-all;
 }
 .fakelink {
-  text-decoration: underline;
-  color: blue;
-  cursor: pointer;
+    text-decoration: underline;
+    color: blue;
+    cursor: pointer;
 }
 
 .bar {
-  height: 40px;
-  width: 2px;
-  margin: 5px;
-  background-color: black;
+    height: 40px;
+    width: 2px;
+    margin: 5px;
+    background-color: black;
 }
-.margin-bt{
-  margin-bottom: 10px;
+.margin-bt {
+    margin-bottom: 10px;
 }
 @media (max-width: 520px) {
-  .img-salas {
-    width: 100vw;
-  }
-
+    .img-salas {
+        width: 100vw;
+    }
 }
 .img-salas {
     margin-top: 15px;
@@ -3848,88 +2901,87 @@ export default defineComponent({
     height: 20vh;
     position: center;
     object-fit: contain;
-  }
+}
 
-.buttonsWrapper{
-  width: 100%;
+.buttonsWrapper {
+    width: 100%;
 }
 
 .buttonsWrapper > div {
-  display: flex;
-  align-items: center;
-  max-height: 35px;
-}
-
-.buttonsWrapper > div > button{
-  position: relative;
-  top: -10px;
-}
-
-@media (max-width: 580px){
-  .buttonsWrapper > div{
-    flex-direction: column;
-    max-height: none;
+    display: flex;
     align-items: center;
+    max-height: 35px;
+}
 
-  }
-  .buttonsWrapper > div > button{
-    margin: 5px auto;
-    top: 10px;
-    border-radius: 5px;
-  }
-  .descritivo {
-    max-width: 100vw;
-  }
+.buttonsWrapper > div > button {
+    position: relative;
+    top: -10px;
+}
 
-  .descritivo > div > li {
-    max-width: 80vw;
-  }
+@media (max-width: 580px) {
+    .buttonsWrapper > div {
+        flex-direction: column;
+        max-height: none;
+        align-items: center;
+    }
+    .buttonsWrapper > div > button {
+        margin: 5px auto;
+        top: 10px;
+        border-radius: 5px;
+    }
+    .descritivo {
+        max-width: 100vw;
+    }
+
+    .descritivo > div > li {
+        max-width: 80vw;
+    }
 }
 
 @font-face {
-  font-family: 'igualfina';
-  src: url('../../public/fonts/Igual/Igual-Regular.otf') format('truetype');
-  font-style: normal;
+    font-family: "igualfina";
+    src: url("../../public/fonts/Igual/Igual-Regular.otf") format("truetype");
+    font-style: normal;
 }
 @font-face {
-  font-family: 'igualnegrito';
-  src: url('../../public/fonts/Igual/Igual-ExtraBold.otf') format('truetype');
-  font-style: normal;
+    font-family: "igualnegrito";
+    src: url("../../public/fonts/Igual/Igual-ExtraBold.otf") format("truetype");
+    font-style: normal;
 }
 .container {
-  width: 70vw;
-  display: flex;
-  flex-direction: column;
-  margin: 20px auto;
+    width: 70vw;
+    display: flex;
+    flex-direction: column;
+    margin: 20px auto;
 }
 
-.container-title{
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
+.container-title {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
 }
 
-.container-title p,.container-title span {
-  margin: 0;
-  color: #505050;
-  font-size: 1.2rem;
+.container-title p,
+.container-title span {
+    margin: 0;
+    color: #505050;
+    font-size: 1.2rem;
 }
-.wrapper-bar{
-  display: flex;
-
+.wrapper-bar {
+    display: flex;
 }
-.container .wrapper-bar> div {
-  flex: 1;
-  height: 25px;
+.container .wrapper-bar > div {
+    flex: 1;
+    height: 25px;
 }
 
 @media (max-width: 450px) {
-  .home-icon {
-    transform: scale(0.8);
-  }
-  .container {
-    width: 95%;
-  }
+    .home-icon {
+        transform: scale(0.8);
+    }
+    .container {
+        width: 95%;
+    }
 }
 
 .ellipsis {
@@ -3943,5 +2995,4 @@ export default defineComponent({
     white-space: normal;
     background-color: rgba(255, 255, 255, 0.9); /* Para criar um fundo semi-transparente para melhor legibilidade */
 }
-
 </style>
