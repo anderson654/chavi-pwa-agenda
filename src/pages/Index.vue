@@ -324,11 +324,18 @@
                         </span>
                     </div>
                     <div class="text-h8 q-mt-md text-justify">
-                        <q-checkbox v-model="user.use" />
+                        
                         <span>
+                            <div v-if="termosCustomizados">
+                            <q-checkbox v-model="user.use" />
                             Declaro que li e concordo com os
-                            <!-- <a @click="termosDeUso" class="fakelink"> termos de utilização da sala</a>. -->
-                            <a @click="termosDeUso" :href="pathPdf" class="fakelink" target="_blank">termos de utilização da sala</a>.
+                                <a @click="termosDeUsoPdf" :href="pathPdf" class="fakelink" target="_blank">termos de utilização da sala</a>.
+                            </div>
+                            <div v-else>
+                            <q-checkbox v-model="user.use" />
+                            Declaro que li e concordo com os
+                                <a  @click="termosDeUso" class="fakelink" target="_blank">termos de utilização da sala</a>.                                
+                            </div>
                         </span>
                     </div>
                     <div class="buttonsWrapper">
@@ -586,6 +593,13 @@ export default defineComponent({
         };
     },
     computed: {
+        termosCustomizados(){
+            if(this.cliente.termosDeUso){
+                return true
+            }else{
+                return false
+            }
+        },
         quantidadeDeElementos() {
             if (this.imovel && this.imovel.opcoesAgendamentoIndividual && this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho > 10) {
                 return 10;
@@ -2773,6 +2787,21 @@ export default defineComponent({
         },
 
         termosDeUso() {
+            console.log("termos Customizados: ", this.cliente.termosDeUso)
+            let message = this.termosDeUsoCustomizado ? this.termosDeUsoCustomizado: "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café."
+    
+            Dialog.create({
+                title: "Termos de uso da sala",
+                message:message,
+                html: true,
+                style: {width: "80%"},
+                ok: {
+                    label: "Ok",
+                    color: "positive",
+                },
+            });
+        },
+        termosDeUsoPdf(){
             this.pathPdf = `${process.env.VUE_APP_API_URL}/StorageContainers/logoEntidade/download/${this.cliente.termosDeUso}`;
         },
 
