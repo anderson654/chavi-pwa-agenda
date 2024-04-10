@@ -124,6 +124,22 @@
           @click="$router.push('/celepar')"
         />
       </div>
+      <div class="pinhao">
+        <q-img
+          src="pinhaohub.png"
+          fit="contain"
+          height="100px"
+          width="150px"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+          class="q-my-sm"
+          @click="$router.push('/pinhaohub')"
+        />
+      </div>
     </div>
 
     <footer reveal elevated>
@@ -221,6 +237,10 @@ export default {
 
 .celepar {
   border-left: #F15A5B 3px solid;
+}
+
+.pinhao {
+  border-left: #F18776 3px solid;
 }
 
 @media (max-width: 600px) {

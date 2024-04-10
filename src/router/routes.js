@@ -61,6 +61,11 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/CeleparCoworking.vue") }]
   },
   {
+    path: "/PinhaoHub",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("src/pages/pinhao.vue") }]
+  },
+  {
     path: "/login",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("pages/Login.vue") }]
