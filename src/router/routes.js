@@ -63,7 +63,7 @@ const routes = [
   {
     path: "/PinhaoHub",
     component: () => import("layouts/MainLayout.vue"),
-    children: [{ path: "", component: () => import("src/pages/pinhao.vue") }]
+    children: [{ path: "", component: () => import("src/pages/pinhaohub.vue") }]
   },
   {
     path: "/login",

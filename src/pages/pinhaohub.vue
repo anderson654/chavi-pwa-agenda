@@ -37,7 +37,7 @@
           </div>
           <div v-if="blocoSelecionado && !selecionarAndar"
           class="igual-black-negrito q-mt-md"
-          style="color: rgb(150, 84, 255); font-size: 1.47rem;"
+          style="font-size: 1.47rem;"
           >{{ this.andarSelecionado }}</div>
           <div
             v-if="selecionarAndar"
@@ -49,17 +49,28 @@
             >
             <div class="container-andares" >
               <div v-for="andar in andares" :key="andar">
+              <div>
+                <q-img
+                :src="andar.img"
+                fit="contain"
+                style="
+                  max-width: 300px;
+                  border-radius: 16px;
+                  margin-bottom: 15px;
+                "
+              />
                 <q-btn
                   push
                   rounded
                   dense
                   class="purple-button q-pr-xl q-pl-xl igual-black-negrito "
-                  :label="andar"
+                  :label="andar.name"
                   style="width: 100%; max-width: 200px "
                   @click="
-                    escolherAndar(andar)
+                    escolherAndar(andar.name)
                   "
                 />
+              </div>
               </div>
             </div>
           </div>
@@ -70,7 +81,7 @@
           >
             <!-- Card de cada imóvel   -->
             <div
-              class="full-width shadow-3 row q-my-md q-px-md gradient-hotmilk"
+              class="full-width shadow-3 row q-my-md q-px-md"
               style="
                 border-radius: 20px;
                 min-height: 180px;
@@ -246,10 +257,10 @@ export default {
   },
   mounted() {
     let coworkingSecao = this.$store.getters.getCoworkingNome;
-    if(coworkingSecao && coworkingSecao != "pinhaohub"){
+    if(coworkingSecao && coworkingSecao != "pinhao"){
         this.$store.dispatch("setarDados", {
         key: "setCoworkingNome",
-        value: "pinhaohub",
+        value: "pinhao",
       });          
     }
     this.andarSelecionado = this.$store.getters.getAndarSelecionado
@@ -337,7 +348,7 @@ export default {
                   andar = 1
                   break;
               }
-              this.andares[andar] = label;
+              this.andares[andar] = {name: label, img: label + '.img.jpeg'};
             }
           } else console.log("Verificar complemento - ", imovel.nome);
           imovel.link = `/${imovel.entidadeId}/${imovel.nome}`;
@@ -363,6 +374,10 @@ export default {
   },
 };
 </script>
+
+.text-primari{
+  color: var(--base-primary)
+}
 
 <style scoped>
 .texto-bloco {

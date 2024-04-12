@@ -126,7 +126,7 @@
       </div>
       <div class="pinhao">
         <q-img
-          src="pinhaohub.png"
+          src="pinhao.png"
           fit="contain"
           height="100px"
           width="150px"
@@ -137,7 +137,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('/pinhaohub')"
+          @click="$router.push('/pinhao')"
         />
       </div>
     </div>
