@@ -137,7 +137,7 @@
           "
           no-spinner
           class="q-my-sm"
-          @click="$router.push('/pinhao')"
+          @click="$router.push('/PinhaoHub')"
         />
       </div>
     </div>
@@ -181,7 +181,7 @@ export default {
   },
   created() {
     //this.logoutForce()
-  }
+  },
 };
 </script>
 
@@ -236,11 +236,11 @@ export default {
 }
 
 .celepar {
-  border-left: #F15A5B 3px solid;
+  border-left: #f15a5b 3px solid;
 }
 
 .pinhao {
-  border-left: #F18776 3px solid;
+  border-left: #f18776 3px solid;
 }
 
 @media (max-width: 600px) {
