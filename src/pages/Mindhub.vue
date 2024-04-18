@@ -159,6 +159,7 @@ export default {
         key: "setCoworkingNome",
         value: "mindhub",
       });    
+    }else{
       this.andarSelecionado = this.$store.getters.getAndarSelecionado
     this.blocoSelecionado = this.$store.getters.getBlocoSelecionado
     if(this.blocoSelecionado == undefined){

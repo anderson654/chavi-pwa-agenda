@@ -2323,7 +2323,7 @@ export default defineComponent({
                             }
                             this.habilitarPublicoExterno = this.cliente.preferenciaVisita.habilitarPublicoExterno ? this.cliente.preferenciaVisita.habilitarPublicoExterno : false;
                         }
-                        this.events = response.data.horarios;
+                        this.events = response.data.horarios.filter(e => e != null);
 
                         if (this.funcionamentoRotativo) {
                             this.formatDataRotativo();

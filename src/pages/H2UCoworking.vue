@@ -116,20 +116,7 @@ export default {
         this.$store.dispatch("setarDados", {
         key: "setCoworkingNome",
         value: "h2u",
-      });    
-      this.andarSelecionado = this.$store.getters.getAndarSelecionado
-    this.blocoSelecionado = this.$store.getters.getBlocoSelecionado
-    if(this.blocoSelecionado == undefined){
-      this.andarSelecionado = undefined;
-      this.selecionarBloco = true;
-      this.selecionarAndar = true;
-    }else if(this.andarSelecionado == undefined){
-      this.selecionarBloco = false;
-      this.selecionarAndar = true;
-    }else{
-      this.selecionarBloco = false;
-      this.selecionarAndar = false;
-    }      
+      });       
     }
   },
   computed: {

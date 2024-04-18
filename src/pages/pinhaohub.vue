@@ -18,7 +18,7 @@
                         <div class="container-andares">
                             <div v-for="andar in andares" :key="andar">
                                 <div>
-                                    <q-img :src="andar.img" fit="contain" style="max-width: 300px; border-radius: 16px; margin-bottom: 15px" />
+                                    <q-img :src="andar.img" fit="cover" style="width: 300px; height: 250px; border-radius: 16px; margin-bottom: 15px" />
                                     <q-btn push rounded dense class="purple-button q-pr-xl q-pl-xl igual-black-negrito" :label="andar.name" style="width: 100%; max-width: 200px" @click="escolherAndar(andar.name)" />
                                 </div>
                             </div>
@@ -135,25 +135,21 @@ export default {
     },
     mounted() {
         let coworkingSecao = this.$store.getters.getCoworkingNome;
-        console.log("🚀 ~ mounted ~ coworkingSecao:", coworkingSecao);
         if (coworkingSecao == undefined || coworkingSecao != "pinhao") {
             this.$store.dispatch("setarDados", {
                 key: "setCoworkingNome",
                 value: "pinhao",
             });
-        }
-        this.andarSelecionado = this.$store.getters.getAndarSelecionado;
-        this.blocoSelecionado = this.$store.getters.getBlocoSelecionado;
-        if (this.blocoSelecionado == undefined) {
-            this.andarSelecionado = undefined;
-            this.selecionarBloco = true;
-            this.selecionarAndar = true;
-        } else if (this.andarSelecionado == undefined) {
-            this.selecionarBloco = false;
-            this.selecionarAndar = true;
-        } else {
-            this.selecionarBloco = false;
-            this.selecionarAndar = false;
+        }else{ 
+            this.andarSelecionado = this.$store.getters.getAndarSelecionado;
+            this.blocoSelecionado = this.$store.getters.getBlocoSelecionado;
+            if (this.andarSelecionado == undefined) {
+                this.selecionarBloco = false;
+                this.selecionarAndar = true;
+            } else {
+                this.selecionarBloco = false;
+                this.selecionarAndar = false;
+            }
         }
     },
     methods: {
