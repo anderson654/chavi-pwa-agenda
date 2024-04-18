@@ -219,19 +219,20 @@ export default {
         key: "setCoworkingNome",
         value: "agora",
       });          
-    }
-    this.andarSelecionado = this.$store.getters.getAndarSelecionado
-    this.blocoSelecionado = this.$store.getters.getBlocoSelecionado
-    if(this.blocoSelecionado == undefined){
-      this.andarSelecionado = undefined;
-      this.selecionarBloco = true;
-      this.selecionarAndar = true;
-    }else if(this.andarSelecionado == undefined){
-      this.selecionarBloco = false;
-      this.selecionarAndar = true;
     }else{
-      this.selecionarBloco = false;
-      this.selecionarAndar = false;
+      this.andarSelecionado = this.$store.getters.getAndarSelecionado
+      this.blocoSelecionado = this.$store.getters.getBlocoSelecionado
+      if(this.blocoSelecionado == undefined){
+        this.andarSelecionado = undefined;
+        this.selecionarBloco = true;
+        this.selecionarAndar = true;
+      }else if(this.andarSelecionado == undefined){
+        this.selecionarBloco = false;
+        this.selecionarAndar = true;
+      }else{
+        this.selecionarBloco = false;
+        this.selecionarAndar = false;
+      }
     }
   },
   computed: {
