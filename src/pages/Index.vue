@@ -971,7 +971,7 @@ export default defineComponent({
             return valida;
         },
         validarElementosValor() {
-            return (!this.validaNecessitaCredito && this.validaNecessitaAprovacao && this.necessitaPagamento) || (!this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.necessitaPagamento) || (this.validaNecessitaCredito && this.validaNecessitaAprovacao);
+            return (!this.validaNecessitaCredito && this.validaNecessitaAprovacao && this.necessitaPagamento) || (!this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.necessitaPagamento) || (this.validaNecessitaCredito && this.validaNecessitaAprovacao && this.necessitaPagamento);
         },
         validarExtra() {
             let extra = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra;
@@ -985,6 +985,9 @@ export default defineComponent({
             }
         },
         validarStatusProcesso() {
+            console.log("PIAZZETTA 🦝 ~ validarStatusProcesso ~ this.necessitaPagamento:", this.necessitaPagamento)
+            console.log("PIAZZETTA 🦝 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
+            console.log("PIAZZETTA 🦝 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
             if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito) {
                 return "Pagamento";
             } else if (!this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Enviar";
