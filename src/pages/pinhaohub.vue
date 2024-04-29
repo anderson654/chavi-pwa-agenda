@@ -40,6 +40,21 @@
                                 <q-img :src="getImage(imovel.foto)" style="border-radius: 20px; height: 150px; max-width: 100px" spinner-color="primary" />
                             </div>
                             <div class="col-7 column justify-evenly" style="padding-left: 15px; text-align: left">
+                            <q-tooltip class="descritivo" anchor="bottom start" self="center end" style="font-size: 0.9rem" hide-delay="1500">
+                                <div v-if="imovel.opcoesDeCredito.descritivo && imovel.opcoesDeCredito.descritivo.length > 0">
+                                            <div class="descritivo-title">
+                                                <p>Descritivo do imóvel:</p>
+                                            </div>
+
+                                            <div v-for="descritivo in imovel.opcoesDeCredito.descritivo" :key="descritivo" class="descritivo">
+                                                <li>
+                                                    <span>
+                                                        {{ descritivo }}
+                                                    </span>
+                                                </li>
+                                            </div>
+                                    </div>
+                                </q-tooltip>
                                 <span class="igual-black-negrito" style="font-size: 1.2rem; color: #505050">{{ imovel.nome.toUpperCase().split("-")[0] }} </span>
                                 <div style="font-size: 0.9rem; display: flex; flex-direction: column; align-items: flex-start; font-family: 'igualfina'; color: #505050">
                                     <span v-if="imovel.opcoesAgendamentoIndividual && imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas && imovel.opcoesAgendamentoIndividual.numeroMaximoPessoas > 0">
@@ -49,6 +64,9 @@
                                     <br />
                                     <span style="max-width: 250px; color: #505050">{{ imovel.endereco }}.</span>
                                     <span style="font-family: 'igual'; font-weight: bold">{{ imovel.complemento }}</span>
+                                    <span v-if="imovel.opcoesAgendamentoIndividual && imovel.opcoesAgendamentoIndividual.necessitaPagamento" style="font-family: 'igual'; font-weight: bold">
+                                        R$ {{ imovel.opcoesAgendamentoIndividual.valorDaSala }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -73,10 +91,13 @@
             <q-card-section style="max-width: 1920px; width: 900px; max-height: 100vh; height: fit-content">
                 <q-carousel animated v-model="slide" infinite>
                     <q-carousel-slide name="Terreo">
-                        <q-img src="Terreo.jpeg" />
+                        <q-img src="Terreo.png" />
                     </q-carousel-slide>
                     <q-carousel-slide name="1andar">
-                        <q-img src="1andar.jpeg" />
+                        <q-img src="1andar.png" />
+                    </q-carousel-slide>
+                    <q-carousel-slide name="Rooftop">
+                        <q-img src="Rooftop.png" />
                     </q-carousel-slide>
                 </q-carousel>
                 <div class="row justify-center">
@@ -86,6 +107,7 @@
                         :options="[
                             { label: 'Térreo', value: 'Terreo' },
                             { label: '1º Andar', value: '1andar' },
+                            { label: 'Rooftop', value: 'Rooftop' },
                         ]"
                     />
                 </div>
@@ -134,7 +156,7 @@ export default {
         },
     },
     mounted() {
-        let coworkingSecao = this.$store.getters.getCoworkingNome;
+        let coworkingSecao = this.$store.getters.getCoworkingNome ? this.$store.getters.getCoworkingNome: "";
         if (coworkingSecao == undefined || coworkingSecao != "pinhao") {
             this.$store.dispatch("setarDados", {
                 key: "setCoworkingNome",
@@ -324,5 +346,13 @@ export default {
     font-family: "igualfina";
     src: url("../../public/fonts/Igual/Igual-Regular.otf") format("truetype");
     font-style: normal;
+}
+.descritivo {
+    max-width: 100vw;
+}
+
+.descritivo > div > li {
+    max-width: 80vw;
+    font-size: 1.8rem;
 }
 </style>
