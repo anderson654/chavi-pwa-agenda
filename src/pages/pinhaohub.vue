@@ -40,8 +40,8 @@
                                 <q-img :src="getImage(imovel.foto)" style="border-radius: 20px; height: 150px; max-width: 100px" spinner-color="primary" />
                             </div>
                             <div class="col-7 column justify-evenly" style="padding-left: 15px; text-align: left">
-                            <q-tooltip class="descritivo" anchor="bottom start" self="center end" style="font-size: 0.9rem" hide-delay="1500">
-                                <div v-if="imovel.opcoesDeCredito.descritivo && imovel.opcoesDeCredito.descritivo.length > 0">
+                            <q-tooltip v-if="imovel.opcoesDeCredito.descritivo && imovel.opcoesDeCredito.descritivo.length > 0" class="descritivo" anchor="bottom start" self="center end" style="font-size: 0.9rem" hide-delay="1500">
+                                <div>
                                             <div class="descritivo-title">
                                                 <p>Descritivo do imóvel:</p>
                                             </div>
