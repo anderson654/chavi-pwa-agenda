@@ -985,9 +985,6 @@ export default defineComponent({
             }
         },
         validarStatusProcesso() {
-            console.log("PIAZZETTA 🦝 ~ validarStatusProcesso ~ this.necessitaPagamento:", this.necessitaPagamento)
-            console.log("PIAZZETTA 🦝 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
-            console.log("PIAZZETTA 🦝 ~ validarStatusProcesso ~ this.validaNecessitaAprovacao:", this.validaNecessitaAprovacao)
             if (this.necessitaPagamento && !this.validaNecessitaAprovacao && !this.validaNecessitaCredito) {
                 return "Pagamento";
             } else if (!this.validaNecessitaAprovacao && !this.validaNecessitaCredito && !this.necessitaPagamento) return "Enviar";
@@ -1466,31 +1463,7 @@ export default defineComponent({
 
         async escolherHorario(minutos, hora, scope) {
             let gerenciamentoHoras = {};
-            if (this.entidadeUsuario) {
-                let request = {
-                    url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
-                    method: "get",
-                };
-
-                const response = await this.executeMethod(request, false);
-
-                if (response && response.status == 200) {
-                    gerenciamentoHoras = response.data;
-                }
-            }
-            //let gerenciamentoCreditos = {};
-            if (this.imovel) {
-                let request = {
-                    url: `entidades/gerenciamentoDeCreditos/${this.user.entidadeId}/${this.idImovel}`,
-                    method: "get",
-                };
-
-                const response = await this.executeMethod(request, false);
-
-                if (response && response.status == 200) {
-                    this.gerenciamentoCreditos = response.data;
-                }
-            }
+            
 
             if (this.timeStepMin == 15) {
                 if (minutos > 45) minutos = 60;
@@ -1512,7 +1485,36 @@ export default defineComponent({
 
             const validadeInicial = new Date((scope.timestamp.date + " " + horario).replace(/\-/g, "/"));
 
+            const mes = validadeInicial.getMonth()
             this.user.validadeInicial = validadeInicial.getTime();
+            if (this.entidadeUsuario) {
+                let request = {
+                    url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}/${mes}`,
+                    method: "get",
+
+                };
+
+                const response = await this.executeMethod(request, false);
+
+                if (response && response.status == 200) {
+                    gerenciamentoHoras = response.data;
+                }
+            }
+            //let gerenciamentoCreditos = {};
+            if (this.imovel) {
+                let request = {
+                    url: `entidades/gerenciamentoDeCreditos/${this.user.entidadeId}/${this.idImovel}`,
+                    method: "get",
+                };
+
+                const response = await this.executeMethod(request, false);
+
+                if (response && response.status == 200) {
+                    this.gerenciamentoCreditos = response.data;
+
+                    console.log("🦝 ~ escolherHorario ~ this.gerenciamentoCreditos:", this.gerenciamentoCreditos)
+                }
+            }
 
             /* Dados da Entidade */
             const coworking = this.gerenciamentoCreditos.coworking;
@@ -1549,6 +1551,9 @@ export default defineComponent({
 
                     if (maximo > 0) {
                         let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, maximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
+
+                        console.log("🦝 ~ escolherHorario 1549 ~ options:", options)
+
                         this.acionarModal(scope, horario, gerenciamentoHoras, options);
                     } else {
                         Dialog.create({
@@ -1569,10 +1574,14 @@ export default defineComponent({
                 }
             } else {
                 let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, tempoMaximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
+
+                console.log("🦝 ~ escolherHorario ~ options:", options)
+                
                 this.acionarModal(scope, horario, gerenciamentoHoras, options);
             }
         },
         acionarModal(scope, horario, gerenciamentoHoras, options) {
+
             /* Dados da Entidade */
             const coworking = this.gerenciamentoCreditos.coworking;
             const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
