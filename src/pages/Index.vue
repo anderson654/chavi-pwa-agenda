@@ -324,17 +324,16 @@
                         </span>
                     </div>
                     <div class="text-h8 q-mt-md text-justify">
-                        
                         <span>
                             <div v-if="termosCustomizados">
-                            <q-checkbox v-model="user.use" />
-                            Declaro que li e concordo com os
+                                <q-checkbox v-model="user.use" />
+                                Declaro que li e concordo com os
                                 <a @click="termosDeUsoPdf" :href="pathPdf" class="fakelink" target="_blank">termos de utilização da sala</a>.
                             </div>
                             <div v-else>
-                            <q-checkbox v-model="user.use" />
-                            Declaro que li e concordo com os
-                                <a  @click="termosDeUso" class="fakelink" target="_blank">termos de utilização da sala</a>.                                
+                                <q-checkbox v-model="user.use" />
+                                Declaro que li e concordo com os
+                                <a @click="termosDeUso" class="fakelink" target="_blank">termos de utilização da sala</a>.
                             </div>
                         </span>
                     </div>
@@ -452,7 +451,7 @@
                     <p style="font-size: 1rem" v-html="messageFinal[0]"></p>
                 </q-card-section>
                 <q-card-actions align="center">
-                    <q-btn label="Salvar no calendáriorio" color="accent" @click="cancelMensagemFinal"></q-btn>
+                    <q-btn label="Salvar no calendário" color="accent" @click="cancelMensagemFinal"></q-btn>
                     <q-btn label="Novo agendamento" color="primary" @click="$router.push(`/${routeCoworking}`)"></q-btn>
                     <q-btn label="Ver agendamento" class="button-secondary" @click="okMensagemFinal"></q-btn>
                 </q-card-actions>
@@ -593,11 +592,11 @@ export default defineComponent({
         };
     },
     computed: {
-        termosCustomizados(){
-            if(this.cliente.termosDeUso){
-                return true
-            }else{
-                return false
+        termosCustomizados() {
+            if (this.cliente.termosDeUso) {
+                return true;
+            } else {
+                return false;
             }
         },
         quantidadeDeElementos() {
@@ -2335,7 +2334,7 @@ export default defineComponent({
                             }
                             this.habilitarPublicoExterno = this.cliente.preferenciaVisita.habilitarPublicoExterno ? this.cliente.preferenciaVisita.habilitarPublicoExterno : false;
                         }
-                        this.events = response.data.horarios.filter(e => e != null);
+                        this.events = response.data.horarios.filter((e) => e != null);
 
                         if (this.funcionamentoRotativo) {
                             this.formatDataRotativo();
@@ -2799,21 +2798,21 @@ export default defineComponent({
         },
 
         termosDeUso() {
-            console.log("termos Customizados: ", this.cliente.termosDeUso)
-            let message = this.termosDeUsoCustomizado ? this.termosDeUsoCustomizado: "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café."
-    
+            console.log("termos Customizados: ", this.cliente.termosDeUso);
+            let message = this.termosDeUsoCustomizado ? this.termosDeUsoCustomizado : "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.";
+
             Dialog.create({
                 title: "Termos de uso da sala",
-                message:message,
+                message: message,
                 html: true,
-                style: {width: "80%"},
+                style: { width: "80%" },
                 ok: {
                     label: "Ok",
                     color: "positive",
                 },
             });
         },
-        termosDeUsoPdf(){
+        termosDeUsoPdf() {
             this.pathPdf = `${process.env.VUE_APP_API_URL}/StorageContainers/logoEntidade/download/${this.cliente.termosDeUso}`;
         },
 
