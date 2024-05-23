@@ -699,6 +699,8 @@ export default defineComponent({
                 .split(" ")[0];
             if (nome == "hotmilk") {
                 return "hotmilk/agenda";
+            } else if(nome == "pinhao"){
+                return "pinhaohub"
             } else {
                 return nome;
             }
@@ -1399,6 +1401,25 @@ export default defineComponent({
             let horaIntervalo = horaMomentInicial.clone();
             horaIntervalo.add(contadorTempoIntervalo, "minutes");
 
+            if(this.cliente.preferenciaVisita.locacaoLonga){
+                let fim = new Date(validadInicial).setHours(this.horaFinal)
+                let inicio = new Date(validadInicial).setHours(this.horaInicial)
+                //pegar quantos dias falta para ? sexta : sábado
+                let quantidadeDeDias = this.sabado? 5 - new Date(validadInicial).getDay() : 6 - new Date(validadInicial).getDay()
+                //fazer um for para criar opções de dia inteiro
+                for(let i = 0; i < quantidadeDeDias; i++){
+                    let op = {}
+                    op.label = i == 0? `${i+1}Dia` : `${i+1}Dias`
+                    op.value = ((fim + i*86400000) - (inicio))/60000
+                    console.log("🦝 ~ construirOpcoesAgendamento ~ (",fim," + ",i*86400000,") - (",inicio,"):", (fim + i*86400000) - (inicio))
+                    opcoes.push(op)
+                }
+                //{label: "1 dia ",value:  fim - inicio do dia}
+                //{label: "n dias ",value: fim do dia + n dias - inicio do dia}
+
+                return opcoes
+            }
+
             while (contadorTempoIntervalo <= tempoMaximo && (horaMomentFinal.isAfter(horaIntervalo) || horaMomentFinal.isSame(horaIntervalo))) {
                 let opcao = this.escreveItemHorario(contadorTempoIntervalo);
                 opcao = this.adicionaCreditoExtenso(opcao, funcionamentoIndividual, custaCreditos, consumoCreditos, coworking, consomeHoras, custoBase);
@@ -1485,7 +1506,11 @@ export default defineComponent({
             const validadeInicial = new Date((scope.timestamp.date + " " + horario).replace(/\-/g, "/"));
 
             const mes = validadeInicial.getMonth()
-            this.user.validadeInicial = validadeInicial.getTime();
+            if(this.cliente.preferenciaVisita.locacaoLonga){
+                this.user.validadeInicial = validadeInicial.setHours(this.horaInicial);    
+            }else{
+                this.user.validadeInicial = validadeInicial.getTime();
+            }
             if (this.entidadeUsuario) {
                 let request = {
                     url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}/${mes}`,
@@ -1510,8 +1535,6 @@ export default defineComponent({
 
                 if (response && response.status == 200) {
                     this.gerenciamentoCreditos = response.data;
-
-                    console.log("🦝 ~ escolherHorario ~ this.gerenciamentoCreditos:", this.gerenciamentoCreditos)
                 }
             }
 
@@ -1523,6 +1546,7 @@ export default defineComponent({
             const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
             const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
             const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
+            const locacaoLonga = this.cliente.preferenciaVisita.locacaoLonga
 
             const horaInicial = this.horaInicial;
             const horaFinal = this.horaFinal;
@@ -1551,8 +1575,6 @@ export default defineComponent({
                     if (maximo > 0) {
                         let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, maximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
 
-                        console.log("🦝 ~ escolherHorario 1549 ~ options:", options)
-
                         this.acionarModal(scope, horario, gerenciamentoHoras, options);
                     } else {
                         Dialog.create({
@@ -1573,8 +1595,6 @@ export default defineComponent({
                 }
             } else {
                 let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, tempoMaximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
-
-                console.log("🦝 ~ escolherHorario ~ options:", options)
                 
                 this.acionarModal(scope, horario, gerenciamentoHoras, options);
             }
@@ -1597,6 +1617,7 @@ export default defineComponent({
             let itens = [];
             let multiplicaMs = 60 * 1000;
 
+            console.log("🦝 ~ acionarModal ~ options:", options)
             for (const opt of options) {
                 const inteiro = Number(opt.value) % Number(this.timeStepMin) == 0;
                 const ms = Number(opt.value) * multiplicaMs;
@@ -1637,6 +1658,7 @@ export default defineComponent({
                 }
             }
 
+                    console.log("🦝 ~ acionarModal ~ itens:", itens)
             if (this.validaNecessitaCredito) {
                 message = `<span class='text-black' style='font-size: 1rem'>
           <center>Selecione a duração da sua utilização</center>`;
@@ -1984,6 +2006,9 @@ export default defineComponent({
                 user.publicoExterno = this.publicoExterno;
             }
 
+            if(this.cliente.preferenciaVisita.locacaoLonga){
+                user.validadeInicial = new Date(user.validadeInicial).setHours(this.horaInicial)
+            }
             let request = {
                 url: "Visitas/validarVisita",
                 method: "post",
@@ -2334,7 +2359,56 @@ export default defineComponent({
                             }
                             this.habilitarPublicoExterno = this.cliente.preferenciaVisita.habilitarPublicoExterno ? this.cliente.preferenciaVisita.habilitarPublicoExterno : false;
                         }
-                        this.events = response.data.horarios.filter((e) => e != null);
+                        console.log("this: ", this)
+                        
+                        let tempoDoDia = (this.horaFinal - this.horaInicial)* 60 * 60 * 1000
+                        let horariosfiltrados = response.data.horarios.filter((e) => e != null)
+                        horariosfiltrados.forEach(element => {
+                            //separar aqueles que tem mais de um dia
+                            // {
+                            //     "timestampInicial": 1716235200000,
+                            //     "intervalo": 363600000,
+                            //     "visitaCodigo": "C1F6Y5T6",
+                            //     "usuarioId": "6044296dff17919c3953815c",
+                            //     "usuarioEntidade": "Chavi",
+                            //     "usuario": "Usuário_teste_1",
+                            //     "nomeConvidado": ""
+                            // }
+                            // 86400000 = 24 * 60 * 60 * 1000 => 24 horas
+                            // 
+                            if(element.intervalo < tempoDoDia){
+                               this.events.push(element)
+                            } else {
+                                //particionar em mais de um e colocar no filtrado
+                                let fim = element.timestampInicial + element.intervalo
+                                let contador = element.timestampInicial
+                                let proximoDia = new Date(element.timestampInicial+86400000).setHours(this.horaInicial)
+                                while(proximoDia < fim){
+                                    let intervaloWhile = new Date(contador).setHours(this.horaFinal) - contador
+
+                                    this.events.push({
+                                        timestampInicial: contador,
+                                        intervalo: intervaloWhile,
+                                        visitaCodigo: element.visitaCodigo,
+                                        usuarioId: element.usuarioId,
+                                        usuarioEntidade: element.usuarioEntidade,
+                                        usuario: element.usuario,
+                                        nomeConvidado: element.nomeConvidado
+                                    })
+                                    contador = proximoDia
+                                    proximoDia += 86400000
+                                }
+                                this.events.push({
+                                        timestampInicial: contador,
+                                        intervalo: fim - contador,
+                                        visitaCodigo: element.visitaCodigo,
+                                        usuarioId: element.usuarioId,
+                                        usuarioEntidade: element.usuarioEntidade,
+                                        usuario: element.usuario,
+                                        nomeConvidado: element.nomeConvidado
+                                    })
+                            }
+                        });
 
                         if (this.funcionamentoRotativo) {
                             this.formatDataRotativo();
