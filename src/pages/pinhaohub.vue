@@ -64,8 +64,8 @@
                                     <br />
                                     <span style="max-width: 250px; color: #505050">{{ imovel.endereco }}.</span>
                                     <span style="font-family: 'igual'; font-weight: bold">{{ imovel.complemento }}</span>
-                                    <span v-if="imovel.opcoesAgendamentoIndividual && imovel.opcoesAgendamentoIndividual.necessitaPagamento" style="font-family: 'igual'; font-weight: bold">
-                                        R$ {{ imovel.opcoesAgendamentoIndividual.valorDaSala }}
+                                    <span v-if="imovel.opcoesAgendamentoIndividual && imovel.opcoesDeCredito.infoAdicionais" style="font-family: 'igual'; font-weight: bold">
+                                        R$ {{ imovel.opcoesDeCredito.infoAdicionais }}
                                     </span>
                                 </div>
                             </div>
