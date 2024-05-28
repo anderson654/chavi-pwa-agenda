@@ -80,7 +80,7 @@
                         </div>
                         <!-- NAVEGAÇÃO (MESES) VERSÃO MOBILE -->
                         <div style="width: 80%" v-if="!$q.platform.is.desktop">
-                            <q-calendar-month ref="calendarMonth" v-model="selectedDate" bordered mini-mode locale="pt-br" :weekdays="getWeekDisplay" :disabled-before="disabledBefore" :disabled-after="disabledAfter" @click-date="onClickDate" />
+                            <q-calendar-month ref="calendarMonth" v-model="selectedDate" bordered mini-mode locale="pt-br" :weekdays="getWeekDisplay" :disabled-before="disabledBefore" :disabled-after="disabledAfter" />
                         </div>
                     </div>
                     <div class="q-mt-md" style="width: 90%" v-if="!$q.platform.is.desktop">
@@ -90,7 +90,7 @@
                 <!-- CALENDÁRIO PARA AGENDAMENTO -->
                 <div class="flex flex-center q-pa-md">
                     <div style="width: 80%">
-                        <q-calendar ref="calendar" weekday-align="left" :view="$q.platform.is.desktop ? 'week' : 'day'" locale="pt-br" style="width: 100%" :weekdays="getWeekDisplay" :hoverable="true" :interval-minutes="timeStepMin" :interval-start="intervalStart" :interval-count="intervalCount" :disabled-before="disabledBefore" :disabled-after="disabledAfter" bordered hour24-format v-model="selectedDate" @click-time="onTimeClick">
+                        <q-calendar ref="calendar" weekday-align="left" :view="$q.platform.is.desktop ? 'week' : 'day'" locale="pt-br" style="width: 100%" :weekdays="getWeekDisplay" :hoverable="true" :interval-minutes="timeStepMinVisualizar" :interval-start="intervalStart" :interval-count="intervalCount" :disabled-before="disabledBefore" :disabled-after="disabledAfter" bordered hour24-format v-model="selectedDate" @click-time="onTimeClick">
                             <template #head-intervals="{ scope }">
                                 <div style="display: flex; justify-content: flex-end; flex-direction: column; width: 100%; font-size: 10px; font-weight: 700; text-align: center">
                                     <span>{{ horarioMarco(horaInicial) }}</span>
@@ -324,17 +324,16 @@
                         </span>
                     </div>
                     <div class="text-h8 q-mt-md text-justify">
-                        
                         <span>
                             <div v-if="termosCustomizados">
-                            <q-checkbox v-model="user.use" />
-                            Declaro que li e concordo com os
+                                <q-checkbox v-model="user.use" />
+                                Declaro que li e concordo com os
                                 <a @click="termosDeUsoPdf" :href="pathPdf" class="fakelink" target="_blank">termos de utilização da sala</a>.
                             </div>
                             <div v-else>
-                            <q-checkbox v-model="user.use" />
-                            Declaro que li e concordo com os
-                                <a  @click="termosDeUso" class="fakelink" target="_blank">termos de utilização da sala</a>.                                
+                                <q-checkbox v-model="user.use" />
+                                Declaro que li e concordo com os
+                                <a @click="termosDeUso" class="fakelink" target="_blank">termos de utilização da sala</a>.
                             </div>
                         </span>
                     </div>
@@ -452,7 +451,7 @@
                     <p style="font-size: 1rem" v-html="messageFinal[0]"></p>
                 </q-card-section>
                 <q-card-actions align="center">
-                    <q-btn label="Salvar no calendáriorio" color="accent" @click="cancelMensagemFinal"></q-btn>
+                    <q-btn label="Salvar no calendário" color="accent" @click="cancelMensagemFinal"></q-btn>
                     <q-btn label="Novo agendamento" color="primary" @click="$router.push(`/${routeCoworking}`)"></q-btn>
                     <q-btn label="Ver agendamento" class="button-secondary" @click="okMensagemFinal"></q-btn>
                 </q-card-actions>
@@ -555,6 +554,7 @@ export default defineComponent({
             horaFinal: 24,
             horaInicial: 0,
             timeStepMin: 15,
+            timeStepMinVisualizar: 15,
             agendamentoUnico: false,
             tempoTotalMaximo: 0,
             necessitaAprovacao: false,
@@ -593,11 +593,11 @@ export default defineComponent({
         };
     },
     computed: {
-        termosCustomizados(){
-            if(this.cliente.termosDeUso){
-                return true
-            }else{
-                return false
+        termosCustomizados() {
+            if (this.cliente.termosDeUso) {
+                return true;
+            } else {
+                return false;
             }
         },
         quantidadeDeElementos() {
@@ -700,6 +700,8 @@ export default defineComponent({
                 .split(" ")[0];
             if (nome == "hotmilk") {
                 return "hotmilk/agenda";
+            } else if(nome == "pinhao"){
+                return "pinhaohub"
             } else {
                 return nome;
             }
@@ -764,13 +766,13 @@ export default defineComponent({
             return map;
         },
         intervalStart() {
-            let intervalo = 60 / this.timeStepMin;
+            let intervalo = 60 / this.timeStepMinVisualizar;
             return this.horaInicial * intervalo;
         },
 
         intervalCount() {
             let horas = this.horaFinal - this.horaInicial;
-            let intervalo = 60 / this.timeStepMin;
+            let intervalo = 60 / this.timeStepMinVisualizar;
             return horas * intervalo;
         },
         disabledBefore() {
@@ -971,7 +973,7 @@ export default defineComponent({
             return valida;
         },
         validarElementosValor() {
-            return (!this.validaNecessitaCredito && this.validaNecessitaAprovacao && this.necessitaPagamento) || (!this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.necessitaPagamento) || (this.validaNecessitaCredito && this.validaNecessitaAprovacao);
+            return (!this.validaNecessitaCredito && this.validaNecessitaAprovacao && this.necessitaPagamento) || (!this.validaNecessitaCredito && !this.validaNecessitaAprovacao && this.necessitaPagamento) || (this.validaNecessitaCredito && this.validaNecessitaAprovacao && this.necessitaPagamento);
         },
         validarExtra() {
             let extra = this.$store.getters.getImovelAgendamento.opcoesAgendamentoIndividual.cobrarCreditoExtra;
@@ -1400,6 +1402,24 @@ export default defineComponent({
             let horaIntervalo = horaMomentInicial.clone();
             horaIntervalo.add(contadorTempoIntervalo, "minutes");
 
+            if(this.cliente.preferenciaVisita.locacaoLonga){
+                let fim = new Date(validadInicial).setHours(this.horaFinal, 0, 0)
+                let inicio = new Date(validadInicial).setHours(this.horaInicial, 0, 0)
+                //pegar quantos dias falta para ? sexta : sábado
+                let quantidadeDeDias = this.sabado? 5 - new Date(validadInicial).getDay() : 6 - new Date(validadInicial).getDay()
+                //fazer um for para criar opções de dia inteiro
+                for(let i = 0; i < quantidadeDeDias; i++){
+                    let op = {}
+                    op.label = i == 0? `${i+1} Dia` : `${i+1} Dias`
+                    op.value = ((fim + i*86400000) - (inicio))/60000
+                    opcoes.push(op)
+                }
+                //{label: "1 dia ",value:  fim - inicio do dia}
+                //{label: "n dias ",value: fim do dia + n dias - inicio do dia}
+
+                return opcoes
+            }
+
             while (contadorTempoIntervalo <= tempoMaximo && (horaMomentFinal.isAfter(horaIntervalo) || horaMomentFinal.isSame(horaIntervalo))) {
                 let opcao = this.escreveItemHorario(contadorTempoIntervalo);
                 opcao = this.adicionaCreditoExtenso(opcao, funcionamentoIndividual, custaCreditos, consumoCreditos, coworking, consomeHoras, custoBase);
@@ -1463,10 +1483,39 @@ export default defineComponent({
 
         async escolherHorario(minutos, hora, scope) {
             let gerenciamentoHoras = {};
+            
+
+            if (this.timeStepMinVisualizar == 15) {
+                if (minutos > 45) minutos = 60;
+                else if (minutos > 30) minutos = 45;
+                else if (minutos > 15) minutos = 30;
+                else minutos = 15;
+            }
+
+            if (this.timeStepMinVisualizar == 30) {
+                if (minutos > 30) minutos = 60;
+                else minutos = 30;
+            }
+
+            if (this.timeStepMinVisualizar == 60) minutos = 60;
+
+            const horario = hora.toString() + ":" + (minutos - this.timeStepMinVisualizar == 0 ? "00" : minutos - this.timeStepMinVisualizar).toString();
+
+            if (minutos == 60) hora = parseInt(hora) + 1;
+
+            const validadeInicial = new Date((scope.timestamp.date + " " + horario).replace(/\-/g, "/"));
+
+            const mes = validadeInicial.getMonth()
+            if(this.cliente.preferenciaVisita.locacaoLonga){
+                this.user.validadeInicial = validadeInicial.setHours(this.horaInicial, 0, 0);    
+            }else{
+                this.user.validadeInicial = validadeInicial.getTime();
+            }
             if (this.entidadeUsuario) {
                 let request = {
-                    url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}`,
+                    url: `entidades/gerenciamentoDeHoras/${this.entidadeUsuario}/${this.idImovel}/${mes}`,
                     method: "get",
+
                 };
 
                 const response = await this.executeMethod(request, false);
@@ -1489,28 +1538,6 @@ export default defineComponent({
                 }
             }
 
-            if (this.timeStepMin == 15) {
-                if (minutos > 45) minutos = 60;
-                else if (minutos > 30) minutos = 45;
-                else if (minutos > 15) minutos = 30;
-                else minutos = 15;
-            }
-
-            if (this.timeStepMin == 30) {
-                if (minutos > 30) minutos = 60;
-                else minutos = 30;
-            }
-
-            if (this.timeStepMin == 60) minutos = 60;
-
-            const horario = hora.toString() + ":" + (minutos - this.timeStepMin == 0 ? "00" : minutos - this.timeStepMin).toString();
-
-            if (minutos == 60) hora = parseInt(hora) + 1;
-
-            const validadeInicial = new Date((scope.timestamp.date + " " + horario).replace(/\-/g, "/"));
-
-            this.user.validadeInicial = validadeInicial.getTime();
-
             /* Dados da Entidade */
             const coworking = this.gerenciamentoCreditos.coworking;
             const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
@@ -1519,6 +1546,7 @@ export default defineComponent({
             const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
             const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
             const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
+            const locacaoLonga = this.cliente.preferenciaVisita.locacaoLonga
 
             const horaInicial = this.horaInicial;
             const horaFinal = this.horaFinal;
@@ -1546,6 +1574,7 @@ export default defineComponent({
 
                     if (maximo > 0) {
                         let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, maximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
+
                         this.acionarModal(scope, horario, gerenciamentoHoras, options);
                     } else {
                         Dialog.create({
@@ -1566,10 +1595,12 @@ export default defineComponent({
                 }
             } else {
                 let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, tempoMaximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
+                
                 this.acionarModal(scope, horario, gerenciamentoHoras, options);
             }
         },
         acionarModal(scope, horario, gerenciamentoHoras, options) {
+
             /* Dados da Entidade */
             const coworking = this.gerenciamentoCreditos.coworking;
             const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
@@ -1973,6 +2004,9 @@ export default defineComponent({
                 user.publicoExterno = this.publicoExterno;
             }
 
+            if(this.cliente.preferenciaVisita.locacaoLonga){
+                user.validadeInicial = new Date(user.validadeInicial).setHours(this.horaInicial, 0, 0)
+            }
             let request = {
                 url: "Visitas/validarVisita",
                 method: "post",
@@ -2310,6 +2344,7 @@ export default defineComponent({
 
                             if (this.cliente.preferenciaVisita.intervaloMin) {
                                 this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin;
+                                this.timeStepMinVisualizar = this.cliente.preferenciaVisita.intervaloMin <= 30 ? this.cliente.preferenciaVisita.intervaloMin : 30;
                                 this.duracao = this.cliente.preferenciaVisita.intervaloMin.toString();
                             }
                             if (this.cliente.preferenciaVisita.horaInicial) {
@@ -2323,7 +2358,55 @@ export default defineComponent({
                             }
                             this.habilitarPublicoExterno = this.cliente.preferenciaVisita.habilitarPublicoExterno ? this.cliente.preferenciaVisita.habilitarPublicoExterno : false;
                         }
-                        this.events = response.data.horarios.filter(e => e != null);
+                        
+                        let tempoDoDia = (this.horaFinal - this.horaInicial)* 60 * 60 * 1000
+                        let horariosfiltrados = response.data.horarios.filter((e) => e != null)
+                        horariosfiltrados.forEach(element => {
+                            //separar aqueles que tem mais de um dia
+                            // {
+                            //     "timestampInicial": 1716235200000,
+                            //     "intervalo": 363600000,
+                            //     "visitaCodigo": "C1F6Y5T6",
+                            //     "usuarioId": "6044296dff17919c3953815c",
+                            //     "usuarioEntidade": "Chavi",
+                            //     "usuario": "Usuário_teste_1",
+                            //     "nomeConvidado": ""
+                            // }
+                            // 86400000 = 24 * 60 * 60 * 1000 => 24 horas
+                            // 
+                            if(element.intervalo < tempoDoDia){
+                               this.events.push(element)
+                            } else {
+                                //particionar em mais de um e colocar no filtrado
+                                let fim = element.timestampInicial + element.intervalo
+                                let contador = element.timestampInicial
+                                let proximoDia = new Date(element.timestampInicial+86400000).setHours(this.horaInicial, 0, 0)
+                                while(proximoDia < fim){
+                                    let intervaloWhile = new Date(contador).setHours(this.horaFinal, 0, 0) - contador
+
+                                    this.events.push({
+                                        timestampInicial: contador,
+                                        intervalo: intervaloWhile,
+                                        visitaCodigo: element.visitaCodigo,
+                                        usuarioId: element.usuarioId,
+                                        usuarioEntidade: element.usuarioEntidade,
+                                        usuario: element.usuario,
+                                        nomeConvidado: element.nomeConvidado
+                                    })
+                                    contador = proximoDia
+                                    proximoDia += 86400000
+                                }
+                                this.events.push({
+                                        timestampInicial: contador,
+                                        intervalo: fim - contador,
+                                        visitaCodigo: element.visitaCodigo,
+                                        usuarioId: element.usuarioId,
+                                        usuarioEntidade: element.usuarioEntidade,
+                                        usuario: element.usuario,
+                                        nomeConvidado: element.nomeConvidado
+                                    })
+                            }
+                        });
 
                         if (this.funcionamentoRotativo) {
                             this.formatDataRotativo();
@@ -2368,7 +2451,7 @@ export default defineComponent({
                         titleBusy = `
             <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
                 <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-                        if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
+                        if (horario.usuarioEntidade && horario.intervalo > this.timeStepMinVisualizar * 60000) {
                             let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0];
                             titleBusy += `${entidadeNomeCortado} <br/>`;
                         }
@@ -2385,7 +2468,7 @@ export default defineComponent({
                             titleBusy = `
             <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
                 <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-                            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
+                            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMinVisualizar * 60000) {
                                 let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0];
                                 titleBusy += `${entidadeNomeCortado} <br/>`;
                             }
@@ -2787,21 +2870,20 @@ export default defineComponent({
         },
 
         termosDeUso() {
-            console.log("termos Customizados: ", this.cliente.termosDeUso)
-            let message = this.termosDeUsoCustomizado ? this.termosDeUsoCustomizado: "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café."
-    
+            let message = this.termosDeUsoCustomizado ? this.termosDeUsoCustomizado : "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.";
+
             Dialog.create({
                 title: "Termos de uso da sala",
-                message:message,
+                message: message,
                 html: true,
-                style: {width: "80%"},
+                style: { width: "80%" },
                 ok: {
                     label: "Ok",
                     color: "positive",
                 },
             });
         },
-        termosDeUsoPdf(){
+        termosDeUsoPdf() {
             this.pathPdf = `${process.env.VUE_APP_API_URL}/StorageContainers/logoEntidade/download/${this.cliente.termosDeUso}`;
         },
 
