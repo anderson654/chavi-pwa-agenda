@@ -80,7 +80,7 @@
                         </div>
                         <!-- NAVEGAÇÃO (MESES) VERSÃO MOBILE -->
                         <div style="width: 80%" v-if="!$q.platform.is.desktop">
-                            <q-calendar-month ref="calendarMonth" v-model="selectedDate" bordered mini-mode locale="pt-br" :weekdays="getWeekDisplay" :disabled-before="disabledBefore" :disabled-after="disabledAfter" @click-date="onClickDate" />
+                            <q-calendar-month ref="calendarMonth" v-model="selectedDate" bordered mini-mode locale="pt-br" :weekdays="getWeekDisplay" :disabled-before="disabledBefore" :disabled-after="disabledAfter" />
                         </div>
                     </div>
                     <div class="q-mt-md" style="width: 90%" v-if="!$q.platform.is.desktop">
@@ -90,7 +90,7 @@
                 <!-- CALENDÁRIO PARA AGENDAMENTO -->
                 <div class="flex flex-center q-pa-md">
                     <div style="width: 80%">
-                        <q-calendar ref="calendar" weekday-align="left" :view="$q.platform.is.desktop ? 'week' : 'day'" locale="pt-br" style="width: 100%" :weekdays="getWeekDisplay" :hoverable="true" :interval-minutes="timeStepMin" :interval-start="intervalStart" :interval-count="intervalCount" :disabled-before="disabledBefore" :disabled-after="disabledAfter" bordered hour24-format v-model="selectedDate" @click-time="onTimeClick">
+                        <q-calendar ref="calendar" weekday-align="left" :view="$q.platform.is.desktop ? 'week' : 'day'" locale="pt-br" style="width: 100%" :weekdays="getWeekDisplay" :hoverable="true" :interval-minutes="timeStepMinVisualizar" :interval-start="intervalStart" :interval-count="intervalCount" :disabled-before="disabledBefore" :disabled-after="disabledAfter" bordered hour24-format v-model="selectedDate" @click-time="onTimeClick">
                             <template #head-intervals="{ scope }">
                                 <div style="display: flex; justify-content: flex-end; flex-direction: column; width: 100%; font-size: 10px; font-weight: 700; text-align: center">
                                     <span>{{ horarioMarco(horaInicial) }}</span>
@@ -554,6 +554,7 @@ export default defineComponent({
             horaFinal: 24,
             horaInicial: 0,
             timeStepMin: 15,
+            timeStepMinVisualizar: 15,
             agendamentoUnico: false,
             tempoTotalMaximo: 0,
             necessitaAprovacao: false,
@@ -765,13 +766,13 @@ export default defineComponent({
             return map;
         },
         intervalStart() {
-            let intervalo = 60 / this.timeStepMin;
+            let intervalo = 60 / this.timeStepMinVisualizar;
             return this.horaInicial * intervalo;
         },
 
         intervalCount() {
             let horas = this.horaFinal - this.horaInicial;
-            let intervalo = 60 / this.timeStepMin;
+            let intervalo = 60 / this.timeStepMinVisualizar;
             return horas * intervalo;
         },
         disabledBefore() {
@@ -1402,16 +1403,15 @@ export default defineComponent({
             horaIntervalo.add(contadorTempoIntervalo, "minutes");
 
             if(this.cliente.preferenciaVisita.locacaoLonga){
-                let fim = new Date(validadInicial).setHours(this.horaFinal)
-                let inicio = new Date(validadInicial).setHours(this.horaInicial)
+                let fim = new Date(validadInicial).setHours(this.horaFinal, 0, 0)
+                let inicio = new Date(validadInicial).setHours(this.horaInicial, 0, 0)
                 //pegar quantos dias falta para ? sexta : sábado
                 let quantidadeDeDias = this.sabado? 5 - new Date(validadInicial).getDay() : 6 - new Date(validadInicial).getDay()
                 //fazer um for para criar opções de dia inteiro
                 for(let i = 0; i < quantidadeDeDias; i++){
                     let op = {}
-                    op.label = i == 0? `${i+1}Dia` : `${i+1}Dias`
+                    op.label = i == 0? `${i+1} Dia` : `${i+1} Dias`
                     op.value = ((fim + i*86400000) - (inicio))/60000
-                    console.log("🦝 ~ construirOpcoesAgendamento ~ (",fim," + ",i*86400000,") - (",inicio,"):", (fim + i*86400000) - (inicio))
                     opcoes.push(op)
                 }
                 //{label: "1 dia ",value:  fim - inicio do dia}
@@ -1485,21 +1485,21 @@ export default defineComponent({
             let gerenciamentoHoras = {};
             
 
-            if (this.timeStepMin == 15) {
+            if (this.timeStepMinVisualizar == 15) {
                 if (minutos > 45) minutos = 60;
                 else if (minutos > 30) minutos = 45;
                 else if (minutos > 15) minutos = 30;
                 else minutos = 15;
             }
 
-            if (this.timeStepMin == 30) {
+            if (this.timeStepMinVisualizar == 30) {
                 if (minutos > 30) minutos = 60;
                 else minutos = 30;
             }
 
-            if (this.timeStepMin == 60) minutos = 60;
+            if (this.timeStepMinVisualizar == 60) minutos = 60;
 
-            const horario = hora.toString() + ":" + (minutos - this.timeStepMin == 0 ? "00" : minutos - this.timeStepMin).toString();
+            const horario = hora.toString() + ":" + (minutos - this.timeStepMinVisualizar == 0 ? "00" : minutos - this.timeStepMinVisualizar).toString();
 
             if (minutos == 60) hora = parseInt(hora) + 1;
 
@@ -1507,7 +1507,7 @@ export default defineComponent({
 
             const mes = validadeInicial.getMonth()
             if(this.cliente.preferenciaVisita.locacaoLonga){
-                this.user.validadeInicial = validadeInicial.setHours(this.horaInicial);    
+                this.user.validadeInicial = validadeInicial.setHours(this.horaInicial, 0, 0);    
             }else{
                 this.user.validadeInicial = validadeInicial.getTime();
             }
@@ -1617,7 +1617,6 @@ export default defineComponent({
             let itens = [];
             let multiplicaMs = 60 * 1000;
 
-            console.log("🦝 ~ acionarModal ~ options:", options)
             for (const opt of options) {
                 const inteiro = Number(opt.value) % Number(this.timeStepMin) == 0;
                 const ms = Number(opt.value) * multiplicaMs;
@@ -1658,7 +1657,6 @@ export default defineComponent({
                 }
             }
 
-                    console.log("🦝 ~ acionarModal ~ itens:", itens)
             if (this.validaNecessitaCredito) {
                 message = `<span class='text-black' style='font-size: 1rem'>
           <center>Selecione a duração da sua utilização</center>`;
@@ -2007,7 +2005,7 @@ export default defineComponent({
             }
 
             if(this.cliente.preferenciaVisita.locacaoLonga){
-                user.validadeInicial = new Date(user.validadeInicial).setHours(this.horaInicial)
+                user.validadeInicial = new Date(user.validadeInicial).setHours(this.horaInicial, 0, 0)
             }
             let request = {
                 url: "Visitas/validarVisita",
@@ -2346,6 +2344,7 @@ export default defineComponent({
 
                             if (this.cliente.preferenciaVisita.intervaloMin) {
                                 this.timeStepMin = this.cliente.preferenciaVisita.intervaloMin;
+                                this.timeStepMinVisualizar = this.cliente.preferenciaVisita.intervaloMin <= 30 ? this.cliente.preferenciaVisita.intervaloMin : 30;
                                 this.duracao = this.cliente.preferenciaVisita.intervaloMin.toString();
                             }
                             if (this.cliente.preferenciaVisita.horaInicial) {
@@ -2359,7 +2358,6 @@ export default defineComponent({
                             }
                             this.habilitarPublicoExterno = this.cliente.preferenciaVisita.habilitarPublicoExterno ? this.cliente.preferenciaVisita.habilitarPublicoExterno : false;
                         }
-                        console.log("this: ", this)
                         
                         let tempoDoDia = (this.horaFinal - this.horaInicial)* 60 * 60 * 1000
                         let horariosfiltrados = response.data.horarios.filter((e) => e != null)
@@ -2382,9 +2380,9 @@ export default defineComponent({
                                 //particionar em mais de um e colocar no filtrado
                                 let fim = element.timestampInicial + element.intervalo
                                 let contador = element.timestampInicial
-                                let proximoDia = new Date(element.timestampInicial+86400000).setHours(this.horaInicial)
+                                let proximoDia = new Date(element.timestampInicial+86400000).setHours(this.horaInicial, 0, 0)
                                 while(proximoDia < fim){
-                                    let intervaloWhile = new Date(contador).setHours(this.horaFinal) - contador
+                                    let intervaloWhile = new Date(contador).setHours(this.horaFinal, 0, 0) - contador
 
                                     this.events.push({
                                         timestampInicial: contador,
@@ -2453,7 +2451,7 @@ export default defineComponent({
                         titleBusy = `
             <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
                 <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-                        if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
+                        if (horario.usuarioEntidade && horario.intervalo > this.timeStepMinVisualizar * 60000) {
                             let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0];
                             titleBusy += `${entidadeNomeCortado} <br/>`;
                         }
@@ -2470,7 +2468,7 @@ export default defineComponent({
                             titleBusy = `
             <div class="column justify-center text-center align-center ellipsis" style="white-space: pre-wrap">
                 <div class="full-width text-center" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">`;
-                            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMin * 60000) {
+                            if (horario.usuarioEntidade && horario.intervalo > this.timeStepMinVisualizar * 60000) {
                                 let entidadeNomeCortado = horario.usuarioEntidade.split(" ")[0];
                                 titleBusy += `${entidadeNomeCortado} <br/>`;
                             }
@@ -2872,7 +2870,6 @@ export default defineComponent({
         },
 
         termosDeUso() {
-            console.log("termos Customizados: ", this.cliente.termosDeUso);
             let message = this.termosDeUsoCustomizado ? this.termosDeUsoCustomizado : "Agende as salas somente quando<strong> necessário</strong>, não utilize apenas para trabalhar em um ambiente isolado.<br> Reservou a sala e <strong>não vai mais utilizar?</strong> <strong>Cancele sua reserva</strong> dentro do link que você recebeu em seu telefone, pois outras pessoas podem estar precisando da reserva.<br><br>      • <strong>Não extrapole</strong> o seu horário de reserva; <br>      • <strong>Desligue</strong> os equipamentos e as luzes;<br>      • Mantenha o ambiente <strong>organizado</strong> da mesma forma que encontrou ao chegar;<br>      • Não se esqueça de <strong>jogar fora</strong> os copinhos de água ou café.";
 
             Dialog.create({
