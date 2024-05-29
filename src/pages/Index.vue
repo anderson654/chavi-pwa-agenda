@@ -80,7 +80,7 @@
                         </div>
                         <!-- NAVEGAÇÃO (MESES) VERSÃO MOBILE -->
                         <div style="width: 80%" v-if="!$q.platform.is.desktop">
-                            <q-calendar-month ref="calendarMonth" v-model="selectedDate" bordered mini-mode locale="pt-br" :weekdays="getWeekDisplay" :disabled-before="disabledBefore" :disabled-after="disabledAfter" />
+                            <q-calendar-month ref="calendarMonth" v-model="selectedDate" bordered mini-mode locale="pt-br" :weekdays="getWeekDisplay" :disabled-before="disabledBefore" :disabled-after="disabledAfter" @click-date="onClickDate"/>
                         </div>
                     </div>
                     <div class="q-mt-md" style="width: 90%" v-if="!$q.platform.is.desktop">
@@ -1185,7 +1185,7 @@ export default defineComponent({
             else this.$refs.calendar.next();
         },
         onClickDate(data) {
-            console.log("onMoved", JSON.stringify(data));
+            //console.log("onMoved", JSON.stringify(data));
         },
         async nextStep() {
             if (!this.$refs.forms.validate()) {
