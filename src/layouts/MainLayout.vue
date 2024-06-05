@@ -61,6 +61,8 @@ export default defineComponent({
       nome = nome.split(".")[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
       if(nome == "hotmilk"){
         return "hotmilk/agenda"
+      }else if(nome == "pinhao"){
+        return "pinhaohub"
       }else{
         return nome
       }

@@ -40,19 +40,19 @@
                                 <q-img :src="getImage(imovel.foto)" style="border-radius: 20px; height: 150px; max-width: 100px" spinner-color="primary" />
                             </div>
                             <div class="col-7 column justify-evenly" style="padding-left: 15px; text-align: left">
-                            <q-tooltip v-if="imovel.opcoesDeCredito.descritivo && imovel.opcoesDeCredito.descritivo.length > 0" class="descritivo" anchor="bottom start" self="center end" style="font-size: 0.9rem" hide-delay="1500">
-                                <div>
-                                            <div class="descritivo-title">
-                                                <p>Descritivo do imóvel:</p>
-                                            </div>
+                                <q-tooltip v-if="imovel.opcoesDeCredito.descritivo && imovel.opcoesDeCredito.descritivo.length > 0" class="descritivo" anchor="bottom start" self="center end" style="font-size: 0.9rem" hide-delay="1500">
+                                    <div>
+                                        <div class="descritivo-title">
+                                            <p>Descritivo do imóvel:</p>
+                                        </div>
 
-                                            <div v-for="descritivo in imovel.opcoesDeCredito.descritivo" :key="descritivo" class="descritivo">
-                                                <li>
-                                                    <span>
-                                                        {{ descritivo }}
-                                                    </span>
-                                                </li>
-                                            </div>
+                                        <div v-for="descritivo in imovel.opcoesDeCredito.descritivo" :key="descritivo" class="descritivo">
+                                            <li>
+                                                <span>
+                                                    {{ descritivo }}
+                                                </span>
+                                            </li>
+                                        </div>
                                     </div>
                                 </q-tooltip>
                                 <span class="igual-black-negrito" style="font-size: 1.2rem; color: #505050">{{ imovel.nome.toUpperCase().split("-")[0] }} </span>
@@ -96,8 +96,8 @@
                     <q-carousel-slide name="1andar">
                         <q-img src="1andar.png" />
                     </q-carousel-slide>
-                    <q-carousel-slide name="Rooftop">
-                        <q-img src="Rooftop.png" />
+                    <q-carousel-slide name="Terraço">
+                        <q-img src="Terraço.png" />
                     </q-carousel-slide>
                 </q-carousel>
                 <div class="row justify-center">
@@ -107,7 +107,7 @@
                         :options="[
                             { label: 'Térreo', value: 'Terreo' },
                             { label: '1º Andar', value: '1andar' },
-                            { label: 'Rooftop', value: 'Rooftop' },
+                            { label: 'Terraço', value: 'Terraço' },
                         ]"
                     />
                 </div>
@@ -156,13 +156,13 @@ export default {
         },
     },
     mounted() {
-        let coworkingSecao = this.$store.getters.getCoworkingNome ? this.$store.getters.getCoworkingNome: "";
-        if (coworkingSecao == undefined || coworkingSecao != "pinhao") {
+        let coworkingSecao = this.$store.getters.getCoworkingNome ? this.$store.getters.getCoworkingNome : "";
+        if (coworkingSecao == undefined || coworkingSecao != "pinhaohub") {
             this.$store.dispatch("setarDados", {
                 key: "setCoworkingNome",
                 value: "pinhao",
             });
-        }else{ 
+        } else {
             this.andarSelecionado = this.$store.getters.getAndarSelecionado;
             this.blocoSelecionado = this.$store.getters.getBlocoSelecionado;
             if (this.andarSelecionado == undefined) {
@@ -231,7 +231,7 @@ export default {
                                     label = andar;
                                     andar = 0;
                                     break;
-                                case "Rooftop":
+                                case "Terraço":
                                     label = andar;
                                     andar = 2;
                                     break;
