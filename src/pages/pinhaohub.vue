@@ -96,8 +96,8 @@
                     <q-carousel-slide name="1andar">
                         <q-img src="1andar.png" />
                     </q-carousel-slide>
-                    <q-carousel-slide name="Rooftop">
-                        <q-img src="Rooftop.png" />
+                    <q-carousel-slide name="Terraço">
+                        <q-img src="Terraço.png" />
                     </q-carousel-slide>
                 </q-carousel>
                 <div class="row justify-center">
@@ -157,7 +157,7 @@ export default {
     },
     mounted() {
         let coworkingSecao = this.$store.getters.getCoworkingNome ? this.$store.getters.getCoworkingNome : "";
-        if (coworkingSecao == undefined || coworkingSecao != "pinhao") {
+        if (coworkingSecao == undefined || coworkingSecao != "pinhaohub") {
             this.$store.dispatch("setarDados", {
                 key: "setCoworkingNome",
                 value: "pinhao",
