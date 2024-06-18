@@ -140,6 +140,22 @@
           @click="$router.push('/PinhaoHub')"
         />
       </div>
+      <div class="dinastia">
+        <q-img
+          src="dinastia.png"
+          fit="contain"
+          height="100px"
+          width="150px"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+          class="q-my-sm"
+          @click="$router.push('/dinastia')"
+        />
+      </div>
     </div>
 
     <footer reveal elevated>
@@ -241,6 +257,9 @@ export default {
 
 .pinhao {
   border-left: #f18776 3px solid;
+}
+.dinastia {
+  border-left: #131522 3px solid;
 }
 
 @media (max-width: 600px) {
