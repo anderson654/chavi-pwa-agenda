@@ -47,17 +47,17 @@ export default defineComponent({
   name: "MainLayout",
   data(){
     return{
-      coworkingNome: ""
+      coworkingNomeLocal: ""
     }
   },
   computed: {
     ...mapGetters(['coworkingNome']),
     nomeCoworkingLocal() {
       this.pegarCoworkingNome()
-      return this.coworkingNome;
+      return this.coworkingNomeLocal;
     },
     routeCoworking() {
-      let nome = this.coworkingNome
+      let nome = this.coworkingNomeLocal
       nome = nome.split(".")[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(" ")[0]
       if(nome == "hotmilk"){
         return "hotmilk/agenda"
@@ -110,14 +110,14 @@ export default defineComponent({
     pegarCoworkingNome(){
       let nome = this.$store.getters.getCoworkingNome
       if(nome && "home" == this.$route.path.split("/")[1]){
-        this.coworkingNome = nome + ".png";
+        this.coworkingNomeLocal = nome + ".png";
         this.alterarEstilo(nome);
       }else if(nome){
-        this.coworkingNome = nome + ".png";
+        this.coworkingNomeLocal = nome + ".png";
         this.alterarEstilo(nome);
       }else{
         let nomeCoworking = this.$route.path.split("/")[1];
-        this.coworkingNome = this.$route.path.split("/")[1] +".png"
+        this.coworkingNomeLocal = this.$route.path.split("/")[1] +".png"
         this.alterarEstilo(nomeCoworking);
       }
     },
