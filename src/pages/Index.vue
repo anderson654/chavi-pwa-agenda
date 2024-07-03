@@ -468,6 +468,73 @@
             </div>
         </div>
     </footer>
+    <template>
+        <div>
+            <q-dialog v-model="modalTerceiros">
+                <q-card>
+                    <q-card-section>
+                      <strong style="font-size: large; font-weight: 700">Preencha essas informações</strong>
+                    </q-card-section>
+                    <q-card-section>
+                      <div style="margin-bottom: 10px;">
+                        <q-input
+                          type="text"
+                          label="Nome"
+                          v-model="terceiro.nome"
+                        />
+                      </div>
+                      <div style="margin-bottom: 10px;">
+                        <q-input
+                          type="text"
+                          label="e-mail"
+                          v-model="terceiro.email"
+                          :rules="[emailRule]"
+                        />
+                      </div>
+                      <div style="margin-bottom: 10px;">
+                        <q-input
+                          type="text"
+                          label="Telefone"
+                          v-model="terceiro.telefone"
+                          :mask="phoneMask"
+                        />
+                      </div>
+                      <div style="margin-bottom: 10px;">
+                        <q-input
+                          type="text"
+                          label="Área"
+                          v-model="terceiro.area"
+                        />
+                      </div>
+                      <div style="margin-bottom: 10px;">
+                        <q-input
+                          type="text"
+                          label="Cargo"
+                          v-model="terceiro.cargo"
+                        />
+                      </div>
+                      <div style="margin-bottom: 10px;">
+                        <q-input
+                          type="text"
+                          label="Pessoas Externas"
+                          v-model="terceiro.pessoasExternas"
+                          mask="####"
+                        />
+                      </div>
+                    </q-card-section>
+                    <q-card-actions align="center">
+                      <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
+                      <q-btn
+                        label="Confirmar"
+                        color="positive"
+                        @click="publicoExternoFunc"
+                        :disable="!formValid"
+                      ></q-btn>
+                    </q-card-actions>
+                  </q-card>
+            </q-dialog>
+        </div>
+    </template>
 </template>
 
 <script>
@@ -590,9 +657,29 @@ export default defineComponent({
             mensagemIcs: "",
             clenteOptions: [],
             colors: ["#EDD9A3", "#F1C18E", "#F79C79", "#F98477", "#F2637F", "#EA4F88", "#CA3C97", "#B1339E", "#872CA2", "#5A2995"],
+            terceiro: {
+                nome: "",
+                telefone: "",
+                email: "",
+                area: "",
+                cargo: "",
+                pessoasExternas: "",
+            },
+            modalTerceiros: false,
+            emailRule: (val) => !!val && /[^@ \t\r\n]+@[^@ \\t\\r\\n]+\.[^@ \t\n]+/.test(val) || 'Ex: email@exemplo.com'
         };
     },
     computed: {
+        formValid() {
+      return this.terceiro.nome &&
+             this.terceiro.email &&
+             /[^@ \t\r\n]+@[^@ \\t\\r\\n]+\.[^@ \t\n]+/.test(this.terceiro.email) &&
+             this.terceiro.telefone &&
+             this.terceiro.telefone.length > 14 &&
+             this.terceiro.area &&
+             this.terceiro.cargo &&
+             this.terceiro.pessoasExternas;
+    },
         termosCustomizados() {
             if (this.cliente.termosDeUso) {
                 return true;
@@ -1255,6 +1342,23 @@ export default defineComponent({
                 this.escolherHorario(minutos, hora, scope);
             });
         },
+        publicoExternoFunc() {
+                let emailTratado = this.terceiro.email.trim()
+                if(emailTratado.includes(" ")){
+                    emailTratado = emailTratado.split(" ")
+                    for(let palavra of emailTratado){
+                        if(/[^@ \t\r\n]+@[^@ \\t\\r\\n]+\.[^@ \t\n]+/.test(palavra)){
+                            this.terceiro.email = palavra
+                            break
+                        }
+                    }
+                }
+                const {minutos, hora, scope} = this.terceiro.scope
+                delete this.terceiro.scope
+                this.modalTerceiros = false
+                this.eventoOutros = { label: "Reserva para Terceiros", value: this.terceiro };
+                this.escolherHorario(minutos, hora, scope);
+        },
         quantasPessoas() {
             Dialog.create({
                 title: '<span style="font-size: 1.2rem" class="text-primary">Aviso</span>',
@@ -1789,7 +1893,7 @@ export default defineComponent({
                     });
                     return;
                 }
-                //tipo de evento - outros chama outra modal que pede o que é
+                //tipo de evento - 'outros' chama outra modal que pede o que é
                 await new Promise((resolve, reject) => {
                     Dialog.create({
                         title: "Tipo de evento",
@@ -1806,6 +1910,9 @@ export default defineComponent({
                             const filtro = ["outros", "evento"];
                             if (filtro.includes(data)) {
                                 this.qualEvento(data, minutos, hora, scope);
+                            } else if(data == "reserva"){
+                                this.terceiro.scope = {minutos, hora, scope}
+                                this.modalTerceiros = true
                             } else {
                                 this.eventoOutros.label = data;
                                 this.escolherHorario(minutos, hora, scope);
