@@ -1494,6 +1494,7 @@ export default defineComponent({
             }
 
             let opcoes = [];
+            let stepLimit = timeStepMin <= 30? timeStepMin : 30;
             let contadorTempoIntervalo = timeStepMin;
 
             const horaMomentInicial = moment(validadInicial);
@@ -1529,10 +1530,9 @@ export default defineComponent({
                 opcao = this.adicionaCreditoExtenso(opcao, funcionamentoIndividual, custaCreditos, consumoCreditos, coworking, consomeHoras, custoBase);
                 opcoes.push(opcao);
 
-                contadorTempoIntervalo += timeStepMin;
-                horaIntervalo.add(timeStepMin, "minutes");
+                contadorTempoIntervalo += stepLimit;
+                horaIntervalo.add(stepLimit, "minutes");
             }
-
             return opcoes;
         },
 
@@ -1698,6 +1698,7 @@ export default defineComponent({
                     // Notificar erro
                 }
             } else {
+                
                 let options = this.construirOpcoesAgendamento(validadeInicial, horaFinal, timeStepMin, tempoMaximo, coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos);
                 
                 this.acionarModal(scope, horario, gerenciamentoHoras, options);
@@ -1720,9 +1721,10 @@ export default defineComponent({
 
             let itens = [];
             let multiplicaMs = 60 * 1000;
+            let stepLimit = this.timeStepMin <= 30? this.timeStepMin : 30
 
             for (const opt of options) {
-                const inteiro = Number(opt.value) % Number(this.timeStepMin) == 0;
+                const inteiro = Number(opt.value) % Number(stepLimit) == 0;
                 const ms = Number(opt.value) * multiplicaMs;
                 let eventFilter;
 
@@ -1735,7 +1737,7 @@ export default defineComponent({
                         return item.timestampInicial > dateTime;
                     });
                 }
-
+                
                 if (this.funcionamentoRotativo) {
                     const dateTimeFinal = dateTime + ms;
 
