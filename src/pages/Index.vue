@@ -473,7 +473,7 @@
             <q-dialog v-model="modalTerceiros">
                 <q-card>
                     <q-card-section>
-                      <strong style="font-size: large; font-weight: 700">Preencha essas informações</strong>
+                      <strong style="font-size: large; font-weight: 700">Preencha as informações do Terceiro</strong>
                     </q-card-section>
                     <q-card-section>
                       <div style="margin-bottom: 10px;">
@@ -516,14 +516,14 @@
                       <div style="margin-bottom: 10px;">
                         <q-input
                           type="text"
-                          label="Pessoas Externas"
+                          label="Quantidade de Pessoas Externas"
                           v-model="terceiro.pessoasExternas"
                           mask="####"
                         />
                       </div>
                     </q-card-section>
                     <q-card-actions align="center">
-                      <q-btn label="Cancelar" color="negative" @click="fecharDialogo"></q-btn>
+                      <q-btn label="Cancelar" color="negative" @click="fecharDialogoTerceiro"></q-btn>
                       <q-btn
                         label="Confirmar"
                         color="positive"
@@ -1169,6 +1169,17 @@ export default defineComponent({
         fecharDialogo() {
             this.modalComprarCreditos.dialogAtivo = false;
             this.utilizarDocumentos && !this.user.hasDocs ? (this.parte -= 1) : this.$router.back();
+        },
+        fecharDialogoTerceiro() {
+            this.modalTerceiros = false
+            this.terceiro = {
+                nome: "",
+                telefone: "",
+                email: "",
+                area: "",
+                cargo: "",
+                pessoasExternas: "",
+            }
         },
         confirmarDialogo() {
             this.modalComprarCreditos.dialogAtivo = false;
@@ -2021,6 +2032,7 @@ export default defineComponent({
                         let keyLabel = key.toString();
                         keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
                         if (keyLabel == "Reuniao") keyLabel = "Reunião";
+                        if (keyLabel == "Reserva") keyLabel = "Reserva para terciros";
                         trueKeys.push({ label: keyLabel, value: `${key}` });
                     }
                 }
