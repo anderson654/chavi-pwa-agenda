@@ -51,6 +51,11 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/blazeCoworking.vue") }]
   },
   {
+    path: "/dinastia",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("src/pages/Dinastia.vue") }]
+  },
+  {
     path: "/h2u",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/H2UCoworking.vue") }]
