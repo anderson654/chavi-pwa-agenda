@@ -500,17 +500,19 @@
                         />
                       </div>
                       <div style="margin-bottom: 10px;">
-                        <q-input
-                          type="text"
-                          label="Área"
-                          v-model="terceiro.area"
+                        <q-select 
+                            data-cy="select-area"
+                            label="Área"
+                            v-model="terceiro.area"
+                            :options="areaOptions"
                         />
                       </div>
                       <div style="margin-bottom: 10px;">
-                        <q-input
-                          type="text"
+                        <q-select
                           label="Cargo"
+                          data-cy="select-cargo"
                           v-model="terceiro.cargo"
+                          :options="cargoOptions"
                         />
                       </div>
                       <div style="margin-bottom: 10px;">
@@ -701,7 +703,31 @@ export default defineComponent({
             horario: null,
             gerenciamentoHoras: null,
             options: null,
-            isRecorrente: false
+            isRecorrente: false,
+            areaOptions:[
+                "Recursos Humanos","Inovação",
+                "Tecnologia da Informação",
+                "Comunicação",
+                "Saúde",
+                "Marketing",
+                "Administrativo",
+                "Engenharia",
+                "Outra"
+            ],
+            cargoOptions:[
+                "CEO",
+                "Diretor (a)",
+                "Gerente",
+                "Coordenador (a)",
+                "Especialista",
+                "Analista",
+                "Estagiário (a)",
+                "Autônomo (a)",
+                "Técnico",
+                "Assistente",
+                "Supervisor (a)",
+                "Outro"
+            ]
         };
     },
     computed: {
