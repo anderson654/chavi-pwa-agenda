@@ -156,6 +156,22 @@
           @click="$router.push('/dinastia')"
         />
       </div>
+      <div class="haus">
+        <q-img
+          src="haus.png"
+          fit="contain"
+          height="100px"
+          width="150px"
+          :style="
+            $q.platform.is.desktop
+              ? 'min-width: 50px; max-width: 150px'
+              : 'min-width: 70px; max-width: 130px'
+          "
+          no-spinner
+          class="q-my-sm"
+          @click="$router.push('/haus')"
+        />
+      </div>
     </div>
 
     <footer reveal elevated>
@@ -260,6 +276,9 @@ export default {
 }
 .dinastia {
   border-left: #131522 3px solid;
+}
+.haus {
+  border-left: #D3930B 3px solid;
 }
 
 @media (max-width: 600px) {

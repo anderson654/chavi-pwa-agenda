@@ -84,12 +84,26 @@
   --base-button : #009640;
   --base-button-style : linear-gradient(267deg,#009640 50%,#A1C614);
 } 
-#131522
 
 :root.dinastia
 {
   --base-primary: #131522;
   --base-secondary : #C1A06C;
+  --base-accent : #87888F;
+  --base-background : rgb(240, 240, 240);
+  --base-background-color : linear-gradient(
+    202deg,
+    rgba(240, 240, 240, 1) 50%,
+    #C1A06C 100%
+  );
+  --base-button : #009640;
+  --base-button-style : linear-gradient(267deg,#131522 50%,#C1A06C);
+} 
+
+:root.haus
+{
+  --base-primary: #131522;
+  --base-secondary : #D3930B;
   --base-accent : #87888F;
   --base-background : rgb(240, 240, 240);
   --base-background-color : linear-gradient(
