@@ -473,9 +473,22 @@
             <q-dialog v-model="modalTerceiros">
                 <q-card>
                     <q-card-section>
-                      <strong style="font-size: large; font-weight: 700">Preencha as informações do Terceiro</strong>
+                        <strong class="text-h6 q-mb-md text-center">Preencha as informações do Terceiro</strong>
+                        <p class="q-mt-none q-mb-none">
+                            Em alguns casos, o responsável pela reserva no sistema não é o organizador direto do evento.
+                            Por isso, pedimos que os campos abaixo sejam preenchidos com as informações corretas.
+                            A equipe entrará em contato com o responsável indicado no formulário para alinhar todos os detalhes do evento.
+                        </p>
                     </q-card-section>
                     <q-card-section>
+                    <div style="margin-bottom: 10px;">
+                        <q-select 
+                            data-cy="select-area"
+                            label="Área"
+                            v-model="terceiro.tipo"
+                            :options="terceiroTipoOptions"
+                        />
+                      </div>
                       <div style="margin-bottom: 10px;">
                         <q-input
                           type="text"
@@ -686,6 +699,7 @@ export default defineComponent({
             clenteOptions: [],
             colors: ["#EDD9A3", "#F1C18E", "#F79C79", "#F98477", "#F2637F", "#EA4F88", "#CA3C97", "#B1339E", "#872CA2", "#5A2995"],
             terceiro: {
+                tipo: "",
                 nome: "",
                 telefone: "",
                 email: "",
@@ -727,6 +741,11 @@ export default defineComponent({
                 "Assistente",
                 "Supervisor (a)",
                 "Outro"
+            ],
+            terceiroTipoOptions:[
+                 "Clientes", 
+                 "Colaboradores", 
+                 "Fornecedores"
             ]
         };
     },
@@ -1896,152 +1915,7 @@ export default defineComponent({
       // Fechar o diálogo
       this.dialogVisible = false;
     },
-        // acionarModal(scope, horario, gerenciamentoHoras, options) {
-
-        //     /* Dados da Entidade */
-        //     const coworking = this.gerenciamentoCreditos.coworking;
-        //     const consomeHoras = this.gerenciamentoCreditos.consomeHoras;
-        //     const custoBase = this.gerenciamentoCreditos.custoBase;
-        //     /* Dados do Imovel */
-        //     const funcionamentoIndividual = this.gerenciamentoCreditos.funcionamentoIndividual;
-        //     const custaCreditos = this.gerenciamentoCreditos.custaCreditos;
-        //     const consumoCreditos = this.gerenciamentoCreditos.consumoCreditos;
-
-        //     let message;
-        //     const date = scope.timestamp.date;
-        //     const dateTime = new Date((date + " " + horario).replace(/\-/g, "/")).getTime();
-
-        //     let itens = [];
-        //     let multiplicaMs = 60 * 1000;
-        //     let stepLimit = this.timeStepMin <= 30? this.timeStepMin : 30
-
-        //     for (const opt of options) {
-        //         const inteiro = Number(opt.value) % Number(stepLimit) == 0;
-        //         const ms = Number(opt.value) * multiplicaMs;
-        //         let eventFilter;
-
-        //         if (this.funcionamentoRotativo) {
-        //             eventFilter = this.events.filter((item) => {
-        //                 return item.quantidade == this.imovel.opcoesAgendamentoIndividual.maximoDePosicoesDeTrabalho;
-        //             });
-        //         } else {
-        //             eventFilter = this.events.find((item) => {
-        //                 return item.timestampInicial > dateTime;
-        //             });
-        //         }
-                
-        //         if (this.funcionamentoRotativo) {
-        //             const dateTimeFinal = dateTime + ms;
-
-        //             let haveBreakpoint = eventFilter.find((item) => {
-        //                 return item.timestampInicial == dateTimeFinal - this.imovel.opcoesAgendamentoIndividual.intervaloMin * 60 * 1000;
-        //             });
-
-        //             if (haveBreakpoint) {
-        //                 break;
-        //             } else {
-        //                 if (inteiro) {
-        //                     itens.push(opt);
-        //                 }
-        //             }
-        //         } else if (eventFilter) {
-        //             const dateTimeFinal = dateTime + ms;
-
-        //             if (eventFilter.timestampInicial >= dateTimeFinal && inteiro) {
-        //                 itens.push(opt);
-        //             }
-        //         } else if (inteiro) {
-        //             itens.push(opt);
-        //         }
-        //     }
-
-        //     if (this.validaNecessitaCredito) {
-        //         message = `<span class='text-black' style='font-size: 1rem'>
-        //   <center>Selecione a duração da sua utilização</center>`;
-
-        //         if (!isNaN(gerenciamentoHoras.horasMensaisDisponiveis) && !isNaN(gerenciamentoHoras.horasExtras)) {
-        //             let creditoUsuario = gerenciamentoHoras.horasMensaisDisponiveis + gerenciamentoHoras.horasExtras;
-
-        //             message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos: <strong>
-        //               ${creditoUsuario.toFixed(2)}
-        //               </strong></p>
-        //             </span>`;
-        //         } else {
-        //             message += ` <p style="margin-top: 10px; text-align: center">Seu saldo de créditos:
-        //          <strong> 0 </strong></p>
-        //         </span>`;
-        //         }
-
-        //         message += "</span> <center>" + this.validacaoTempoMinimoAprovacaoLabel(itens, this.tempoMinimoAprovacao, this.aprovarVisita, this.necessitaAprovacao, funcionamentoIndividual) + "<center>";
-        //         message += `</span>`;
-        //     } else {
-        //     console.log("Else")
-        //         message = `<span class='text-black' style='font-size: 1rem'>
-        //   <center>Selecione a duração da sua utilização</center>`;
-        //         message += "<center>" + this.validacaoTempoMinimoAprovacaoLabel(itens, this.tempoMinimoAprovacao, this.aprovarVisita, this.necessitaAprovacao, funcionamentoIndividual) + "<center>";
-        //         message += `</span>`;
-        //     }
-        //     Dialog.create({
-        //         title: `<center><span class='text-primary text-bold'>Agendamento</span></center>`,
-        //         message: message,
-        //         options: {
-        //             type: "radio",
-        //             model: this.duracao,
-        //             items: itens,
-        //         },
-        //         ok: {
-        //             flat: true,
-        //             color: "positive",
-        //             label: "Confirmar",
-        //         },
-        //         cancel: {
-        //             flat: true,
-        //             label: "Escolher outro",
-        //         },
-        //         html: true,
-        //         persistent: true,
-        //     }).onOk((data) => {
-        //         const tempoMinimoAprovacao = this.tempoMinimoAprovacao;
-        //         const necessitaAprovacao = this.necessitaAprovacao;
-        //         const aprovarVisita = this.aprovarVisita;
-
-        //         const validadeFinal = this.user.validadeInicial + Number(data) * 60000;
-        //         this.user.validadeFinal = validadeFinal;
-        //         this.validaNecessitaAprovacao = this.validaAprovacao(necessitaAprovacao, aprovarVisita, this.user.validadeInicial, validadeFinal, tempoMinimoAprovacao, funcionamentoIndividual);
-
-        //         if (!this.verificarCreditos(gerenciamentoHoras.horasMensaisDisponiveis, gerenciamentoHoras.horasExtras, Number(data), coworking, consomeHoras, custoBase, funcionamentoIndividual, custaCreditos, consumoCreditos)) {
-        //             return;
-        //         }
-
-        //         const visita = {
-        //             title: "Horário Selecionado",
-        //             date: scope.timestamp.date,
-        //             time: horario,
-        //             duration: Number(data),
-        //             bgcolor: "green-10",
-        //             textColor: "text-white",
-        //         };
-        //         this.events.push(visita);
-
-        //         this.montarQrcode();
-
-        //         if (this.habilitarPublicoExterno) {
-        //             this.quantasPessoas();
-        //         } else {
-        //             Loading.show();
-        //             setTimeout(() => {
-        //                 this.inForms = true;
-        //                 if (this.login && this.login.id && this.login.user) {
-        //                     if (!this.utilizarEmail && !this.utilizarDocumentos && !this.utilizarCPF) this.parte = 4;
-        //                     else this.parte = 2;
-        //                 }
-        //                 Loading.hide();
-        //             }, 1500);
-        //         }
-        //     });
-        // },
-
-        //Modal gigante que chama outras modais - verifica tipo de evento, tempo de uso, pessoas externas
+        
         async onTimeClick({ event, scope }) {
             let hora = scope.timestamp.hour;
             let minutos = scope.timestamp.minute;
@@ -2050,81 +1924,122 @@ export default defineComponent({
 
             this.entidadeUsuario = this.getLogin.user.entidadeId;
 
-            if (this.contador == 0) {
-                let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
-                const trueKeys = [];
-                for (const key in obj) {
-                    if (obj[key]) {
-                        let keyLabel = key.toString();
-                        keyLabel = keyLabel.charAt(0).toUpperCase() + keyLabel.slice(1);
-                        if (keyLabel == "Reuniao") keyLabel = "Reunião";
-                        if (keyLabel == "Reserva") keyLabel = "Reserva para terciros";
-                        trueKeys.push({ label: keyLabel, value: `${key}` });
-                    }
-                }
+            if (this.contador === 0) {
+            let obj = { ...this.imovel.opcoesDeCredito.tipoEvento };
+            const trueKeys = this.getTrueKeys(obj);
 
-                //verifica se o horário esta certo para criar visita
-                const now_vector = now.format("MM DD HH mm").split(" ");
-                const minutes_base_ref = now.subtract(this.timeStepMin, "minutes").format("mm");
-                if (scope.timestamp.past) {
-                    if (!(dia == parseInt(now_vector[1]) && hora == parseInt(now_vector[2]) && minutos < parseInt(now_vector[3]) && minutos > parseInt(minutes_base_ref))) {
-                        Dialog.create({
-                            title: "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-                            message: "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
-                            html: true,
-                            ok: "Ok",
-                        });
-                        return;
-                    }
-                }
+            if (!this.isFutureTime(scope, now, dia, hora, minutos)) {
+                return;
+            }
 
-                let diaFuturo = now.add(this.liberarAgendamento, "day");
+            let diaFuturo = now.add(this.liberarAgendamento, "day");
 
-                if (this.liberarAgendamento > -1 && dia > diaFuturo) {
-                    Dialog.create({
-                        title: "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
-                        message: "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
-                        html: true,
-                        ok: "Ok",
-                    });
-                    return;
+            if (!this.isValidScheduling(dia, diaFuturo)) {
+                return;
+            }
+
+            if(this.imovel.opcoesDeCredito.tipoEvento && this.imovel.opcoesDeCredito.tipoEvento.reserva){
+                this.terceiro.scope = { minutos, hora, scope };
+                this.modalTerceiros = true;
+            }else { 
+                await this.showEventTypeDialog(trueKeys, minutos, hora, scope);
                 }
-                //tipo de evento - 'outros' chama outra modal que pede o que é
-                await new Promise((resolve, reject) => {
-                    Dialog.create({
-                        title: "Tipo de evento",
-                        message: "Escolha o tipo de evento:",
-                        options: {
-                            type: "radio",
-                            model: "",
-                            items: trueKeys,
-                        },
-                        cancel: true,
-                        persistent: true,
-                    })
-                        .onOk((data) => {
-                            const filtro = ["outros", "evento"];
-                            if (filtro.includes(data)) {
-                                this.qualEvento(data, minutos, hora, scope);
-                            } else if(data == "reserva"){
-                                this.terceiro.scope = {minutos, hora, scope}
-                                this.modalTerceiros = true
-                            } else {
-                                this.eventoOutros.label = data;
-                                this.escolherHorario(minutos, hora, scope);
-                            }
-                            resolve();
-                        })
-                        .onCancel(() => {
-                            this.contador = 0;
-                            reject();
-                        })
-                        .onDismiss(() => {
-                            reject();
-                        });
+            }
+
+        },
+
+        getTrueKeys(obj) {
+            const trueKeys = [];
+            for (const key in obj) {
+            if (obj[key]) {
+                let keyLabel = key.charAt(0).toUpperCase() + key.slice(1);
+                if (keyLabel === "Reuniao") keyLabel = "Reunião";
+                if (keyLabel === "Reserva") keyLabel = "Reserva para terceiros";
+                trueKeys.push({ label: keyLabel, value: key });
+            }
+            }
+            return trueKeys;
+        },
+
+        isFutureTime(scope, now, dia, hora, minutos) {
+            const now_vector = now.format("MM DD HH mm").split(" ");
+            const minutes_base_ref = now.subtract(this.timeStepMin, "minutes").format("mm");
+
+            if (scope.timestamp.past) {
+            if (!(dia == parseInt(now_vector[1]) && hora == parseInt(now_vector[2]) && minutos < parseInt(now_vector[3]) && minutos > parseInt(minutes_base_ref))) {
+                this.showFutureTimeError();
+                return false;
+            }
+            }
+            return true;
+        },
+
+        isValidScheduling(dia, diaFuturo) {
+            if (this.liberarAgendamento > -1 && dia > diaFuturo) {
+            this.showInvalidScheduleError();
+            return false;
+            }
+            return true;
+        },
+
+        showFutureTimeError() {
+            Dialog.create({
+            title: "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+            message: "<span style='font-size: 1.0rem' class='text-black'>Por favor, selecione um horário futuro.</span>",
+            html: true,
+            ok: "Ok",
+            });
+        },
+
+        showInvalidScheduleError() {
+            Dialog.create({
+            title: "<span class='text-primary' style='font-size: 1.4rem'>Aviso</span>",
+            message: "<span style='font-size: 1.0rem' class='text-black'>Horário não liberado para agendamento. Por gentileza, selecione outro horário.</span>",
+            html: true,
+            ok: "Ok",
+            });
+        },
+
+        showEventTypeDialog(trueKeys, minutos, hora, scope) {
+            return new Promise((resolve, reject) => {
+            Dialog.create({
+                title: "Tipo de evento",
+                message: "Escolha o tipo de evento:",
+                options: {
+                type: "radio",
+                model: "",
+                items: trueKeys,
+                },
+                cancel: true,
+                persistent: true,
+            })
+                .onOk((data) => {
+                this.handleEventTypeSelection(data, minutos, hora, scope);
+                resolve();
+                })
+                .onCancel(() => {
+                this.contador = 0;
+                reject();
+                })
+                .onDismiss(() => {
+                reject();
                 });
+            });
+        },
+
+        handleEventTypeSelection(data, minutos, hora, scope) {
+            const filtro = ["outros", "evento"];
+            if (filtro.includes(data)) {
+                this.qualEvento(data, minutos, hora, scope);
+            } else if (data === "reserva") {
+                this.terceiro.scope = { minutos, hora, scope };
+                this.modalTerceiros = true;
+            } else {
+                this.eventoOutros.label = data;
+                this.escolherHorario(minutos, hora, scope);
             }
         },
+        
         filtraValor(valorDaSala) {
             if (valorDaSala) {
                 let filtroValorDaSala = valorDaSala.toString();
