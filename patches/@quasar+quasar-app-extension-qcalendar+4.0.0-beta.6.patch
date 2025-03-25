@@ -1,5 +1,5 @@
 diff --git a/node_modules/@quasar/quasar-app-extension-qcalendar/src/index.js b/node_modules/@quasar/quasar-app-extension-qcalendar/src/index.js
-index c3ce000..fdadced 100644
+index c3ce000..11d815f 100644
 --- a/node_modules/@quasar/quasar-app-extension-qcalendar/src/index.js
 +++ b/node_modules/@quasar/quasar-app-extension-qcalendar/src/index.js
 @@ -6,7 +6,7 @@
@@ -16,7 +16,7 @@ index c3ce000..fdadced 100644
  
    // make sure the stylesheet goes through webpack to avoid SSR issues
 -  conf.css.push('~@quasar/quasar-ui-qcalendar/src/index.sass')
-+  // conf.css.push('~@quasar/quasar-ui-qcalendar/src/index.sass')
++  conf.css.push('~@quasar/quasar-ui-qcalendar/src/index.scss')
  }
  
  module.exports = function (api) {
